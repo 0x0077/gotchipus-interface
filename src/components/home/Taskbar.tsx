@@ -82,7 +82,7 @@ export default function Taskbar({
         </button>
 
         <div
-          className="h-10 px-3 text-sm flex items-center justify-center bg-[#c0c0c0] border border-[#808080] shadow-win98-outer active:shadow-inner"
+          className="h-10 text-sm flex items-center justify-center bg-[#c0c0c0] border border-[#808080] shadow-win98-outer active:shadow-inner"
         >
           <CustomConnectButton />
         </div>

@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 import { streamText, LanguageModelV1 } from "ai";
 import { createXai } from "@ai-sdk/xai";
 
-const xaiApiKey = process.env.XAI_API_KEY;
+const xaiApiKey = process.env.NEXT_PUBLIC_XAI_API_KEY;
 if (!xaiApiKey) {
-  throw new Error("XAI_API_KEY is not defined in .env");
+  throw new Error("NEXT_PUBLIC_XAI_API_KEY is not defined in .env");
 }
 const xai = createXai({ apiKey: xaiApiKey });
 
