@@ -12,6 +12,7 @@ import FarmContent from "@/src/components/window-content/FarmContent"
 import HookContent from "@/src/components/window-content/HookContent"
 import DesktopPet from "@/components/home/DesktopPet"
 import DNAAnalyzerContent from "@/components/window-content/DNAAnalyzerContent"
+import MintContent from "@/components/window-content/MintContent" 
 
 interface DesktopProps {
   onOpenWindow: (id: string, title: string, content: JSX.Element) => void
@@ -26,24 +27,19 @@ const icons = [
     icon: "/ai-pus.png",
   },
   {
+    id: "mint",
+    title: "Mint",
+    icon: "/mint.png",
+  },
+  {
     id: "pharos",
     title: "Pharos",
     icon: "/pharos.png",
   },
   {
-    id: "marketplace",
-    title: "Marketplace",
-    icon: "/marketplace.png",
-  },
-  {
     id: "dashboard",
     title: "Dashboard",
     icon: "/dashboard.png",
-  },
-  {
-    id: "farm",
-    title: "Farm",
-    icon: "/farm.png",
   },
   {
     id: "hooks",
@@ -54,7 +50,7 @@ const icons = [
     id: "dna",
     title: "DNA Analyzer",
     icon: "/dna.png",
-  }
+  },
 ]
 
 export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
@@ -80,17 +76,14 @@ export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
       case "ai":
         onOpenWindow("ai", "AI", <AIContent />)
         break
+      case "mint":
+        onOpenWindow("mint", "Mint", <MintContent />)
+        break
       case "pharos":
         onOpenWindow("pharos", "Pharos", <MyPharosContent />)
         break
-      case "marketplace":
-        onOpenWindow("marketplace", "Marketplace", <ComingSoonContent />)
-        break
       case "dashboard":
         onOpenWindow("dashboard", "Dashboard", <DashboardContent />)
-        break
-      case "farm":
-        onOpenWindow("farm", "Farm", <FarmContent />)
         break
       case "hooks":
         onOpenWindow("hooks", "Hooks", <HookContent />)

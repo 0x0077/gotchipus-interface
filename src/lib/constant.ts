@@ -13,16 +13,16 @@ export const WINDOW_SIZE = {
     "height": 400
   },
   "ai": {
-    "width": 900,
-    "height": 700
+    "width": 1200,
+    "height": 800
   },
   "dashboard": {
     "width": 1200,
     "height": 800
   },
   "about": {
-    "width": 500,
-    "height": 400
+    "width": 800,
+    "height": 800
   },
   "farm": {
     "width": 1200,
@@ -33,6 +33,10 @@ export const WINDOW_SIZE = {
     "height": 600
   },
   "dna": {
+    "width": 1200,
+    "height": 800
+  },
+  "mint": {
     "width": 1200,
     "height": 800
   }
@@ -47,8 +51,9 @@ export const WINDOW_BG_COLOR = {
   "dashboard": "#ffddee",
   "farm": "#ffddee",
   "hooks": "#ffddee",
-  "dna": "#ffddee"
+  "dna": "#ffddee",
+  "mint": "#ffddee"
 };
 
-export const CHAIN_ID = 50002;
+export const CHAIN_ID = 688688;
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

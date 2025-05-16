@@ -9,16 +9,16 @@ import { connectors } from './walletConfig'
 // const supportedChains: Chain[] = [mainnet, sepolia, base, optimism]
 
 const pharosDevnetCustomChain = {
-  id: 50002,
-  name: 'Pharos Devnet',
+  id: 688688,
+  name: 'Pharos Testnet',
   iconUrl: '',
   iconBackground: '#fff',
-  nativeCurrency: { name: 'Pharos', symbol: 'PTT', decimals: 18 },
+  nativeCurrency: { name: 'Pharos', symbol: 'PHRS', decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://devnet.dplabs-internal.com'] },
+    default: { http: ['/api/testnet'] },
   },
   blockExplorers: {
-    default: { name: 'Pharosscan', url: 'https://pharosscan.xyz/' },
+    default: { name: 'Pharosscan', url: 'https://testnet.pharosscan.xyz/' },
   },
 } as const satisfies Chain;
 

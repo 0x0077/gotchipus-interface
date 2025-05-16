@@ -26,4 +26,4 @@ export const PUS_ABI = [
   ...diamondAbi,
 ];
 
-export const PUS_ADDRESS = '0x034e5b8F4675D8b21177a2bCa3dd2cAC9b927465'; 
+export const PUS_ADDRESS = '0x0000000038f050528452D6Da1E7AACFA7B3Ec0a8'; 
