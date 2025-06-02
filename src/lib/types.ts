@@ -93,14 +93,12 @@ export function parseGotchipusInfo(rawData: any): GotchipusInfo | undefined {
   
   try {
     if (!rawData.result) {
-      console.warn("parseGotchipusInfo: rawData has no result property", rawData);
       return undefined;
     }
     
     const result = rawData.result;
     
     if (result.name === undefined || result.status === undefined) {
-      console.warn("parseGotchipusInfo: missing required properties", result);
       return undefined;
     }
 

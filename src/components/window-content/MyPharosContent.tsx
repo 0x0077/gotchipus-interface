@@ -140,10 +140,9 @@ const MyPharosContent = observer(() => {
         setIds(newIds);
       } catch (error) {
         console.error("Error processing token infos:", error);
-        // 保持原有ids不变，避免清空
       }
     }
-  }, [tokenInfos, ids]);
+  }, [tokenInfos]);
 
   const processStories = useCallback(async (content: string) => {
     try {
@@ -330,7 +329,6 @@ const MyPharosContent = observer(() => {
         setIds(newIds);
       } catch (error) {
         console.error("Error processing token infos:", error);
-        // 保持原有ids不变，避免清空
       }
     }
   }, [tokenInfos, ids]);
