@@ -377,7 +377,7 @@ const MyPharosContent = observer(() => {
             )
           ) : (
             <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
-              No Pharos NFTs found in your wallet
+              No Pharos NFTs found in your wallet.
             </div>
           )}
         </div>
