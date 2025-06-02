@@ -30,16 +30,16 @@ const icons = [
     title: "Mint",
     icon: "/mint.png",
   },
-  // {
-  //   id: "pharos",
-  //   title: "Pharos",
-  //   icon: "/pharos.png",
-  // },
-  // {
-  //   id: "dashboard",
-  //   title: "Dashboard",
-  //   icon: "/dashboard.png",
-  // },
+  {
+    id: "pharos",
+    title: "My Pharos",
+    icon: "/pharos.png",
+  },
+  {
+    id: "dashboard",
+    title: "My Gotchipus",
+    icon: "/dashboard.png",
+  },
   // {
   //   id: "hooks",
   //   title: "Hooks",
@@ -73,14 +73,14 @@ export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
       //   onOpenWindow("ai", "AI", <AIContent />)
       //   break
       case "mint":
-        onOpenWindow("mint", "Mint", <ComingSoonContent />)
+        onOpenWindow("mint", "Mint", <MintContent />)
         break
-      // case "pharos":
-      //   onOpenWindow("pharos", "Pharos", <MyPharosContent />)
-      //   break
-      // case "dashboard":
-      //   onOpenWindow("dashboard", "Dashboard", <DashboardContent />)
-      //   break
+      case "pharos":
+        onOpenWindow("pharos", "My Pharos", <MyPharosContent />)
+        break
+      case "dashboard":
+        onOpenWindow("dashboard", "My Gotchipus", <DashboardContent />)
+        break
       // case "hooks":
       //   onOpenWindow("hooks", "Hooks", <HookContent />)
       //   break
