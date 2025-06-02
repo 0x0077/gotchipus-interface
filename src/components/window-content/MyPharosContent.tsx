@@ -117,21 +117,33 @@ const MyPharosContent = observer(() => {
 
   useEffect(() => {
     if (tokenInfos) {
-      const parseResults = tokenInfos.map(info => parseGotchipusInfo(info))
-        .filter(Boolean);
+      try {
+        const parseResults = tokenInfos.map(info => {
+          try {
+            return parseGotchipusInfo(info);
+          } catch (error) {
+            console.error("Error parsing token info:", error);
+            return null;
+          }
+        }).filter(Boolean);
 
-      const newIds: string[] = [];
-      parseResults.forEach((gotchi, index) => {
-        const id = ids[index];
-        
-        if (gotchi?.status === 0) {
-          newIds.push(id);
-        }
-      });
+        const newIds: string[] = [];
+        parseResults.forEach((gotchi, index) => {
+          if (gotchi && typeof gotchi === 'object' && 'status' in gotchi && gotchi.status === 0 && index < ids.length) {
+            const id = ids[index];
+            if (id) {
+              newIds.push(id);
+            }
+          }
+        });
 
-      setIds(newIds);
+        setIds(newIds);
+      } catch (error) {
+        console.error("Error processing token infos:", error);
+        // 保持原有ids不变，避免清空
+      }
     }
-  }, [tokenInfos]);
+  }, [tokenInfos, ids]);
 
   const processStories = useCallback(async (content: string) => {
     try {
@@ -295,19 +307,31 @@ const MyPharosContent = observer(() => {
     setViewState("list");
     
     if (tokenInfos) {
-      const parseResults = tokenInfos.map(info => parseGotchipusInfo(info))
-        .filter(Boolean);
+      try {
+        const parseResults = tokenInfos.map(info => {
+          try {
+            return parseGotchipusInfo(info);
+          } catch (error) {
+            console.error("Error parsing token info:", error);
+            return null;
+          }
+        }).filter(Boolean);
 
-      const newIds: string[] = [];
-      parseResults.forEach((gotchi, index) => {
-        const id = ids[index];
-        
-        if (gotchi?.status === 0) {
-          newIds.push(id);
-        }
-      });
+        const newIds: string[] = [];
+        parseResults.forEach((gotchi, index) => {
+          if (gotchi && typeof gotchi === 'object' && 'status' in gotchi && gotchi.status === 0 && index < ids.length) {
+            const id = ids[index];
+            if (id) {
+              newIds.push(id);
+            }
+          }
+        });
 
-      setIds(newIds);
+        setIds(newIds);
+      } catch (error) {
+        console.error("Error processing token infos:", error);
+        // 保持原有ids不变，避免清空
+      }
     }
   }, [tokenInfos, ids]);
 
@@ -325,21 +349,34 @@ const MyPharosContent = observer(() => {
       {viewState === "list" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 scrollbar-none">
           {balances > 0 || walletStore.isConnected ? (
-            ids.map((id) => (
-              <div
-                key={id}
-                className="bg-[#d4d0c8] flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-3 hover:bg-[#c0c0c0]"
-                onClick={() => handlePharoClick(id.toString())}
-              >
-                <motion.div
-                  className="w-48 h-48 relative flex items-center justify-center"
-                  animate={floatAnimation}
+            ids && ids.length > 0 ? (
+              ids.map((id) => (
+                <div
+                  key={id}
+                  className="bg-[#d4d0c8] flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-3 hover:bg-[#c0c0c0]"
+                  onClick={() => handlePharoClick(id.toString())}
                 >
-                  <Image src="/pharos.png" alt="Pharo" width={150} height={150} />
-                </motion.div>
-                <div className="text-center mt-4 font-bold">Pharos #{id.toString()}</div>
+                  <motion.div
+                    className="w-48 h-48 relative flex items-center justify-center"
+                    animate={floatAnimation}
+                  >
+                    <Image src="/pharos.png" alt="Pharo" width={150} height={150} />
+                  </motion.div>
+                  <div className="text-center mt-4 font-bold">Pharos #{id.toString()}</div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
+                {isGeneratingPreviews ? (
+                  <div className="text-center">
+                    <Win98Loading />
+                    <p className="mt-4 text-sm">Loading your Pharos NFTs...</p>
+                  </div>
+                ) : (
+                  "No Pharos NFTs found in your wallet"
+                )}
               </div>
-            ))
+            )
           ) : (
             <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
               No Pharos NFTs found in your wallet
