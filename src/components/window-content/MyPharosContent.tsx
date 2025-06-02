@@ -25,12 +25,16 @@ const MyPharosContent = observer(() => {
   const [selectedPharos, setSelectedPharos] = useState<string | null>(null);
   const [balances, setBalances] = useState<number>(0);
   const [ids, setIds] = useState<string[]>([]);
+  const [queryIds, setQueryIds] = useState<string[]>([]);
+  const [accValidIds, setAccValidIds] = useState<string[]>([]);
+
   const [displayedStory, setDisplayedStory] = useState<string>("");
   const [isStoryComplete, setIsStoryComplete] = useState<boolean>(false);
   const [pharoName, setPharoName] = useState<string>("");
   const [gotchipusPreviews, setGotchipusPreviews] = useState<GotchipusPreview[]>([]);
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState<number>(-1);
   const [isGeneratingPreviews, setIsGeneratingPreviews] = useState<boolean>(false);
+  const [oneCheckInfo, setOneCheckInfo] = useState<boolean>(false);
   const { walletStore } = useStores();
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,8 +103,8 @@ const MyPharosContent = observer(() => {
 
   const tokenInfos = useContractReads(
     "ownedTokenInfo",
-    ids.map(id => [walletStore.address, id]),
-    { enabled: ids.length > 0 }
+    queryIds.map(id => [walletStore.address, id]),
+    { enabled: queryIds.length > 0 && !oneCheckInfo }
   );
 
   useEffect(() => {
@@ -111,40 +115,62 @@ const MyPharosContent = observer(() => {
 
   useEffect(() => {
     if (allIds) {
-      setIds(allIds as string[]);
+      const fetchedIds = allIds as string[];
+      setIds(fetchedIds);
+      setQueryIds(fetchedIds);
+
+      setAccValidIds([]);
+      setOneCheckInfo(false);
     }
   }, [allIds]);
 
   useEffect(() => {
-    if (tokenInfos) {
-      try {
-        const parseResults = tokenInfos.map(info => {
-          try {
-            return parseGotchipusInfo(info);
-          } catch (error) {
-            console.error("Error parsing token info:", error);
-            return null;
-          }
-        }).filter(Boolean);
+    if (!oneCheckInfo && tokenInfos) {
 
-        const newIds: string[] = [];
-        parseResults.forEach((gotchi, index) => {
-          if (gotchi && typeof gotchi === 'object' && 'status' in gotchi && gotchi.status === 0 && index < ids.length) {
-            const id = ids[index];
-            if (id) {
-              newIds.push(id);
-            }
-          }
-        });
+      const failedIds: string[] = [];
+      const updatedAcc: string[] = [...accValidIds];
 
-        if (newIds.length > 0) {
-          setIds(newIds);
+      for (let idx = 0; idx < tokenInfos.length; idx++) {
+        const raw = tokenInfos[idx];
+        const thisId = queryIds[idx];
+
+        if (!raw || raw.result === undefined) {
+          failedIds.push(thisId);
+          continue;
         }
-      } catch (error) {
-        console.error("Error processing token infos:", error);
+
+        let parsed;
+        try {
+          parsed = parseGotchipusInfo(raw);
+        } catch (err) {
+          failedIds.push(thisId);
+          continue;
+        }
+
+        if (!parsed) {
+          failedIds.push(thisId);
+          continue;
+        }
+
+        if (parsed.status === 0) {
+          if (!updatedAcc.includes(thisId)) {
+            updatedAcc.push(thisId);
+          }
+        }
       }
+
+      setAccValidIds(updatedAcc);
+
+      if (failedIds.length > 0) {
+        setQueryIds(failedIds);
+        return;
+      }
+
+      setIds(updatedAcc);
+      setOneCheckInfo(true);
     }
-  }, [tokenInfos]);
+  }, [tokenInfos, queryIds, oneCheckInfo, accValidIds]);
+
 
   const processStories = useCallback(async (content: string) => {
     try {
@@ -306,36 +332,9 @@ const MyPharosContent = observer(() => {
 
   const handleBack = useCallback(() => {
     setViewState("list");
-    
-    if (tokenInfos) {
-      try {
-        const parseResults = tokenInfos.map(info => {
-          try {
-            return parseGotchipusInfo(info);
-          } catch (error) {
-            console.error("Error parsing token info:", error);
-            return null;
-          }
-        }).filter(Boolean);
-
-        const newIds: string[] = [];
-        parseResults.forEach((gotchi, index) => {
-          if (gotchi && typeof gotchi === 'object' && 'status' in gotchi && gotchi.status === 0 && index < ids.length) {
-            const id = ids[index];
-            if (id) {
-              newIds.push(id);
-            }
-          }
-        });
-
-        if (newIds.length > 0) {
-          setIds(newIds);
-        }
-      } catch (error) {
-        console.error("Error processing token infos:", error);
-      }
-    }
-  }, [tokenInfos, ids]);
+    setOneCheckInfo(false);
+    setQueryIds(ids);
+  }, []);
 
   const floatAnimation = {
     y: [0, -3, 0],
