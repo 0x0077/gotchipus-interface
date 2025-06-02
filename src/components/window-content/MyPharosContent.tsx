@@ -137,7 +137,9 @@ const MyPharosContent = observer(() => {
           }
         });
 
-        setIds(newIds);
+        if (newIds.length > 0) {
+          setIds(newIds);
+        }
       } catch (error) {
         console.error("Error processing token infos:", error);
       }
@@ -326,7 +328,9 @@ const MyPharosContent = observer(() => {
           }
         });
 
-        setIds(newIds);
+        if (newIds.length > 0) {
+          setIds(newIds);
+        }
       } catch (error) {
         console.error("Error processing token infos:", error);
       }
