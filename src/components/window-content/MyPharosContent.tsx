@@ -27,6 +27,13 @@ const MyPharosContent = observer(() => {
   const [ids, setIds] = useState<string[]>([]);
   const [queryIds, setQueryIds] = useState<string[]>([]);
   const [accValidIds, setAccValidIds] = useState<string[]>([]);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(12);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   const [displayedStory, setDisplayedStory] = useState<string>("");
   const [isStoryComplete, setIsStoryComplete] = useState<boolean>(false);
@@ -171,6 +178,59 @@ const MyPharosContent = observer(() => {
     }
   }, [tokenInfos, queryIds, oneCheckInfo, accValidIds]);
 
+  // Calculate the current page items
+  const getCurrentPageItems = useCallback(() => {
+    const startIndex = 0;
+    const endIndex = currentPage * itemsPerPage;
+    return ids.slice(startIndex, endIndex);
+  }, [ids, currentPage, itemsPerPage]);
+
+  // Load more items when scrolling
+  const loadMoreItems = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    
+    // Simulate loading delay
+    setTimeout(() => {
+      const nextPage = currentPage + 1;
+      const totalPages = Math.ceil(ids.length / itemsPerPage);
+      
+      setCurrentPage(nextPage);
+      setHasMore(nextPage < totalPages);
+      setIsLoadingMore(false);
+    }, 500);
+  }, [currentPage, hasMore, ids.length, itemsPerPage, isLoadingMore]);
+
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMoreItems();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, isLoadingMore, loadMoreItems]);
+
+  // Reset pagination when ids change
+  useEffect(() => {
+    if (ids.length > 0) {
+      setCurrentPage(1);
+      setHasMore(ids.length > itemsPerPage);
+    }
+  }, [ids, itemsPerPage]);
 
   const processStories = useCallback(async (content: string) => {
     try {
@@ -348,39 +408,58 @@ const MyPharosContent = observer(() => {
   return (
     <div className="p-4 h-full scrollbar-none">
       {viewState === "list" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 scrollbar-none">
-          {balances > 0 || walletStore.isConnected ? (
-            ids && ids.length > 0 ? (
-              ids.map((id) => (
-                <div
-                  key={id}
-                  className="bg-[#d4d0c8] flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-3 hover:bg-[#c0c0c0]"
-                  onClick={() => handlePharoClick(id.toString())}
-                >
-                  <motion.div
-                    className="w-48 h-48 relative flex items-center justify-center"
-                    animate={floatAnimation}
+        <div className="flex flex-col h-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 scrollbar-none">
+            {balances > 0 || walletStore.isConnected ? (
+              getCurrentPageItems().length > 0 ? (
+                getCurrentPageItems().map((id) => (
+                  <div
+                    key={id}
+                    className="bg-[#d4d0c8] flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-3 hover:bg-[#c0c0c0]"
+                    onClick={() => handlePharoClick(id.toString())}
                   >
-                    <Image src="/pharos.png" alt="Pharo" width={150} height={150} />
-                  </motion.div>
-                  <div className="text-center mt-4 font-bold">Pharos #{id.toString()}</div>
+                    <motion.div
+                      className="w-48 h-48 relative flex items-center justify-center"
+                      animate={floatAnimation}
+                    >
+                      <Image src="/pharos.png" alt="Pharo" width={150} height={150} />
+                    </motion.div>
+                    <div className="text-center mt-4 font-bold">Pharos #{id.toString()}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
+                  {isGeneratingPreviews ? (
+                    <div className="text-center">
+                      <Win98Loading />
+                      <p className="mt-4 text-sm">Loading your Pharos NFTs...</p>
+                    </div>
+                  ) : (
+                    "No Pharos NFTs found in your wallet"
+                  )}
                 </div>
-              ))
+              )
             ) : (
               <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
-                {isGeneratingPreviews ? (
-                  <div className="text-center">
-                    <Win98Loading />
-                    <p className="mt-4 text-sm">Loading your Pharos NFTs...</p>
-                  </div>
-                ) : (
-                  "No Pharos NFTs found in your wallet"
-                )}
+                No Pharos NFTs found in your wallet.
               </div>
-            )
-          ) : (
-            <div className="col-span-4 flex justify-center items-center p-8 bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-outer">
-              No Pharos NFTs found in your wallet.
+            )}
+          </div>
+          
+          {/* Loading indicator and observer target */}
+          {hasMore && getCurrentPageItems().length > 0 && (
+            <div 
+              ref={observerTarget} 
+              className="flex justify-center items-center p-4 mt-4"
+            >
+              {isLoadingMore ? (
+                <div className="text-center">
+                  <Win98Loading />
+                  <p className="mt-2 text-sm">Loading more Pharos NFTs...</p>
+                </div>
+              ) : (
+                <div className="h-8"></div> // Invisible element for observer
+              )}
             </div>
           )}
         </div>
