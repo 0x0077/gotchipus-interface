@@ -1,7 +1,8 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import DesktopIcon from "@/components/home/DesktopIcon"
 import AIContent from "@/src/components/window-content/AIContent"
 import ComingSoonContent from "@/components/window-content/SoonContent"
@@ -13,6 +14,7 @@ import HookContent from "@/src/components/window-content/HookContent"
 import DNAAnalyzerContent from "@/components/window-content/DNAAnalyzerContent"
 import MintContent from "@/components/window-content/MintContent" 
 import ClaimWearableContent from "@/src/components/window-content/ClaimWearableContent"
+import DailyTaskHallContent from "@/src/components/window-content/DailyTaskHallContent"
 
 interface DesktopProps {
   onOpenWindow: (id: string, title: string, content: JSX.Element) => void
@@ -46,6 +48,11 @@ const icons = [
     title: "Claim Wearable",
     icon: "/claim-wearable.svg",
   },
+  {
+    id: "daily-task-hall",
+    title: "Daily Task Hall",
+    icon: "/icons/pharos-proof.png",
+  },
 
   // {
   //   id: "hooks",
@@ -61,6 +68,8 @@ const icons = [
 
 export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
   const [activeIcon, setActiveIcon] = useState<string | null>(null)
+  const router = useRouter()
+  const searchParams = useSearchParams()
   
   const MAX_ICONS_PER_COLUMN = 6
   
@@ -72,13 +81,18 @@ export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
     return icons.slice(columnStart, columnEnd)
   })
 
-  const handleIconClick = (iconId: string) => {
-    setActiveIcon(iconId)
+  useEffect(() => {
+    const viewParam = searchParams.get('view')
+    if (viewParam) {
+      const views = viewParam.split(',')
+      views.forEach(view => {
+        openWindowByView(view)
+      })
+    }
+  }, [searchParams])
 
-    switch (iconId) {
-      // case "ai":
-      //   onOpenWindow("ai", "AI", <AIContent />)
-      //   break
+  const openWindowByView = (view: string) => {
+    switch (view) {
       case "mint":
         onOpenWindow("mint", "Mint", <MintContent />)
         break
@@ -91,15 +105,20 @@ export default function Desktop({ onOpenWindow, activeWindow }: DesktopProps) {
       case "wearable":
         onOpenWindow("wearable", "Claim Wearable", <ClaimWearableContent />)
         break
-      // case "hooks":
-      //   onOpenWindow("hooks", "Hooks", <HookContent />)
-      //   break
-      // case "dna":
-      //   onOpenWindow("dna", "DNA Analyzer", <DNAAnalyzerContent />)
-      //   break
+      case "daily-task-hall":
+        onOpenWindow("daily-task-hall", "Daily Task Hall", <DailyTaskHallContent openWindow={handleIconClick} />)
+        break
       default:
         break
     }
+  }
+
+  const handleIconClick = (iconId: string) => {
+    setActiveIcon(iconId)
+    
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('view', iconId)
+    router.push(`/?${params.toString()}`)
   }
 
   return (

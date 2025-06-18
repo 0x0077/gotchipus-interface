@@ -8,6 +8,7 @@ export async function GET() {
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -17,9 +18,9 @@ export async function GET() {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching images:', error);
+    console.error('Error fetching story:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch images' },
+      { error: 'Failed to fetch story' },
       { status: 500 }
     );
   }

@@ -1,17 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    const body = await request.json();
     
-    const response = await fetch('https://api.gotchipus.com/images/update', {
-      method: 'POST',
+    const response = await fetch('https://api.gotchipus.com/task/active', {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      cache: 'no-store'
     });
 
     if (!response.ok) {
@@ -21,9 +20,9 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error updating image:', error);
+    console.error('Error getting all tasks:', error);
     return NextResponse.json(
-      { error: 'Failed to update image' },
+      { error: 'Failed to get all tasks' },
       { status: 500 }
     );
   }
