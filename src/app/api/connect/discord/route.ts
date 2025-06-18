@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
+export const runtime = 'edge';
+
 export function GET(request: Request) {
   const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/connect/discord/callback`;
   const discordAuthUrl = new URL('https://discord.com/api/oauth2/authorize');

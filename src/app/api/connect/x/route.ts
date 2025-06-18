@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
+export const runtime = 'edge';
+
 export function GET(request: Request) {
   const state = crypto.randomBytes(32).toString('hex');
   const codeVerifier = crypto.randomBytes(32).toString('base64url');
