@@ -51,7 +51,7 @@ const DailyTaskHallContent = ({ openWindow }: DailyTaskHallContentProps) => {
     }, 1500)
     
     return () => clearTimeout(timer)
-  }, []);
+  }, [])
 
   const fetchAllData = React.useCallback(async () => {
     if (!walletStore.address) {
