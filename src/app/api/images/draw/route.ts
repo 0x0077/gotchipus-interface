@@ -4,7 +4,7 @@ export const runtime = 'edge';
 
 export async function GET() {
   try {
-    const response = await fetch('https://api.gotchipus.com/images/draw', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/images/draw`, {
       headers: {
         'Content-Type': 'application/json',
       },

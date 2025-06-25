@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch('https://api.gotchipus.com/images/upload', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/images/upload`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
