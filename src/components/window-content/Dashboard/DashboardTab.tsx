@@ -161,7 +161,7 @@ const DashboardTab = observer(({
           {attributes.map((attr, index) => (
             <div key={index} className="bg-[#c0c0c0] border border-[#808080] shadow-win98-inner p-3 rounded-sm">
               <div className="flex items-center mb-1">
-                <Image src={`/icons/${attr.name}.png`} alt={attr.name} width={18} height={18} className="mr-2"/>
+                <Image src={`/icons/${attr.icon}.png`} alt={attr.name} width={18} height={18} className="mr-2"/>
                 <span className="font-medium text-sm">{attr.name}</span>
               </div>
               <div className="text-xl font-bold">
