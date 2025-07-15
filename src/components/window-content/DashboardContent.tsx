@@ -21,7 +21,8 @@ import useResponsive from "@/hooks/useResponsive"
 
 interface ListApiData {
   balance: string;
-  filteredIds: string[];
+  ids: string[];
+  filteredIds?: string[];
 }
 
 interface DetailsApiData {
@@ -85,7 +86,9 @@ const DashboardContent = observer(() => {
     dedupingInterval: 2000,
   });
 
-  const ids = listData?.filteredIds || [];
+  console.log(listData);
+  
+  const ids = listData?.ids || [];
   const balances = parseInt(listData?.balance || '0');
 
   const detailsApiUrl = selectedTokenId && walletAddress 
@@ -329,7 +332,7 @@ const DashboardContent = observer(() => {
       <div className={`bg-[#c0c0c0] h-full overflow-auto ${isMobile ? 'p-3' : 'p-6'}`}>
         <div className="flex flex-col h-full">
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'}`}>
-            {getCurrentPageItems().map((id) => (
+            {getCurrentPageItems().map((id: string) => (
               <NftCard 
                 key={id} 
                 id={id} 
