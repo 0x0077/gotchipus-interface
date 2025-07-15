@@ -111,9 +111,9 @@ export const ChatInterface = memo(({
     <div className="h-full flex flex-col" ref={chatContainerRef}>
       <ChatHeader onBackClick={onBackClick} />
       
-      <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="flex flex-col gap-6 pb-4">
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="max-w-2xl mx-auto px-4 py-4">
+          <div className="flex flex-col gap-6">
             {visibleMessages.map((msg) => (
               <div key={msg.id}>
                 {msg.isCallTools && msg.agentIndex === 0 && (
@@ -226,23 +226,10 @@ export const ChatInterface = memo(({
             {status === "streaming" && !visibleMessages.some(msg => msg.isLoading) && (
               <LoadingIndicator />
             )}
-            <div ref={messagesEndRef} className="h-32" />
+            <div ref={messagesEndRef} className="pb-32" />
           </div>
         </div>
       </div>
-
-      <footer className="py-4 px-4">
-        <div className="max-w-2xl mx-auto">
-          <InputArea
-            value={input}
-            onChange={onInputChange}
-            onKeyDown={onKeyDown}
-            onSendMessage={onSendMessage}
-            inputRef={inputRef}
-            isDisabled={isDisabled}
-          />
-        </div>
-      </footer>
     </div>
   );
 });
