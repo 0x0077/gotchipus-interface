@@ -20,6 +20,7 @@ import useResponsive from "@/hooks/useResponsive"
 
 interface PharosGenesisPageProps {
   tokenId: string,
+  name: string,
   story: string,
   previewImage: any,
   onClose?: () => void
@@ -39,8 +40,8 @@ function getStableAether(amount: number = 0) {
   }
 }
 
-const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: PharosGenesisPageProps) => {
-  const [pusName, setPusName] = useState("")
+const PharosGenesisPage = observer(({ tokenId, name, story, previewImage, onClose }: PharosGenesisPageProps) => {
+  const [pusName, setPusName] = useState(name)
   const [stakeAmount, setStakeAmount] = useState("")
   const [selectedToken, setSelectedToken] = useState<number | null>(0)
   const [isSummoning, setIsSummoning] = useState(false)
@@ -60,7 +61,6 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
   const isMobile = useResponsive()
 
   const salt = getERC6551AccountSalt(CHAIN_ID, parseInt(tokenId));
-
   const accountData = useERC6551Read("account", [PUS_ADDRESS, salt, CHAIN_ID, PUS_ADDRESS, tokenId]);
 
   useEffect(() => {
@@ -70,14 +70,13 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
     }
   }, [accountData, salt]);
 
-  const {contractWrite, isConfirmed, isConfirming, isPending, error, receipt} = useContractWrite();
+  const {contractWrite, isConfirmed, error, receipt} = useContractWrite();
 
   const handleSummon = () => {
     if (!pusName || !stakeAmount || selectedToken === null) return;
     setIsSummoning(true);
 
     const newTimezone = selectedTimezone + 12;
-
     const args = [
       Number(tokenId),
       pusName,
@@ -91,7 +90,7 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
     contractWrite("summonGotchipus", [args], value);
     
     toast({
-      title: "Submited Transaction",
+      title: "Transaction Submitted",
       description: "Transaction submitted successfully",
     })
   };
@@ -208,11 +207,9 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
   };
 
   const handleStakeAmountChange = (value: string) => {
-    // Only allow numbers and decimal point
     if (/^[0-9]*\.?[0-9]*$/.test(value)) {
       setStakeAmount(value)
       
-      // Check if amount exceeds balance
       const userBalance = Number(walletStore.formattedPharos(18))
       const inputAmount = Number(value)
       
@@ -235,7 +232,6 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
     }
   };
 
-  // Mobile layout
   if (isMobile) {
     return (
       <div className="flex flex-col gap-4 p-4 scrollbar-none">
@@ -264,7 +260,7 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
               />
               {pusName && !isSummoning && (
                 <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] px-2 py-1 text-xs"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-win98-innerpx-2 py-1 text-xs"
                   onClick={() => setPusName("")}
                 >
                   Clear
@@ -325,7 +321,7 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
               />
               {!isSummoning && (
                 <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] px-2 py-1 text-xs"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-win98-innerpx-2 py-1 text-xs"
                   onClick={() => {
                     const maxAmount = walletStore.formattedPharos(18)
                     setStakeAmount(maxAmount)
@@ -570,7 +566,7 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
               />
               {pusName && !isSummoning && (
                 <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] px-2 py-1 text-xs"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-win98-innerpx-2 py-1 text-xs"
                   onClick={() => setPusName("")}
                 >
                   Clear
@@ -631,7 +627,7 @@ const PharosGenesisPage = observer(({ tokenId, story, previewImage, onClose }: P
               />
               {!isSummoning && (
                 <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] px-2 py-1 text-xs"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#d4d0c8] border border-[#808080] shadow-win98-innerpx-2 py-1 text-xs"
                   onClick={() => {
                     const maxAmount = walletStore.formattedPharos(18)
                     setStakeAmount(maxAmount)

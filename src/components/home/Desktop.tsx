@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useWindowRouter } from "@/hooks/useWindowRouter"
 import DesktopIcon from "@/components/home/DesktopIcon"
 import MyPharosContent from "@/src/components/window-content/MyPharosContent"
 import DashboardContent from "@/components/window-content/DashboardContent"
@@ -10,14 +10,21 @@ import type { JSX } from "react/jsx-runtime"
 import MintContent from "@/components/window-content/MintContent" 
 import ClaimWearableContent from "@/src/components/window-content/ClaimWearableContent"
 import DailyTaskHallContent from "@/src/components/window-content/DailyTaskHallContent"
+import AIContent from "@/src/components/window-content/AIContent"
 
 interface DesktopProps {
   onOpenWindow: (id: string, title: string, content: JSX.Element) => void
   activeWindow: string | null
   isMobile?: boolean
+  openWindowIds?: string[]
 }
 
 const icons = [
+  {
+    id: "ai",
+    title: "Chat",
+    icon: "/ai-pus.png",
+  },
   {
     id: "mint",
     title: "Mint",
@@ -46,10 +53,30 @@ const icons = [
 
 ]
 
-export default function Desktop({ onOpenWindow, activeWindow, isMobile = false }: DesktopProps) {
+const getWindowContent = (windowId: string, onOpenWindow: (id: string, title: string, content: JSX.Element) => void) => {
+  switch (windowId) {
+    case "mint":
+      return <MintContent />
+    case "pharos":
+      return <MyPharosContent />
+    case "dashboard":
+      return <DashboardContent />
+    case "wearable":
+      return <ClaimWearableContent />
+    case "daily-task-hall":
+      return <DailyTaskHallContent openWindow={(view: string) => {
+        onOpenWindow(view, view, <div>Loading...</div>)
+      }} />
+    case "ai":
+      return <AIContent />
+    default:
+      return <div>Unknown window: {windowId}</div>
+  }
+}
+
+export default function Desktop({ onOpenWindow, isMobile = false, openWindowIds = [] }: DesktopProps) {
   const [activeIcon, setActiveIcon] = useState<string | null>(null)
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const windowRouter = useWindowRouter()
   
   const MAX_ICONS_PER_COLUMN = isMobile ? 6 : 6
   
@@ -61,44 +88,16 @@ export default function Desktop({ onOpenWindow, activeWindow, isMobile = false }
     return icons.slice(columnStart, columnEnd)
   })
 
-  useEffect(() => {
-    const viewParam = searchParams.get('view')
-    if (viewParam) {
-      const views = viewParam.split(',')
-      views.forEach(view => {
-        openWindowByView(view)
-      })
-    }
-  }, [searchParams])
-
-  const openWindowByView = (view: string) => {
-    switch (view) {
-      case "mint":
-        onOpenWindow("mint", "Mint", <MintContent />)
-        break
-      case "pharos":
-        onOpenWindow("pharos", "My Pharos", <MyPharosContent />)
-        break
-      case "dashboard":
-        onOpenWindow("dashboard", "My Gotchipus", <DashboardContent />)
-        break
-      case "wearable":
-        onOpenWindow("wearable", "Claim Wearable", <ClaimWearableContent />)
-        break
-      case "daily-task-hall":
-        onOpenWindow("daily-task-hall", "Daily Task Hall", <DailyTaskHallContent openWindow={handleIconClick} />)
-        break
-      default:
-        break
-    }
-  }
-
   const handleIconClick = (iconId: string) => {
     setActiveIcon(iconId)
     
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('view', iconId)
-    router.push(`/?${params.toString()}`)
+    windowRouter.openWindow(iconId)
+    
+    const icon = icons.find(i => i.id === iconId)
+    if (icon) {
+      const content = getWindowContent(iconId, onOpenWindow)
+      onOpenWindow(iconId, icon.title, content)
+    }
   }
 
   return (
@@ -117,17 +116,20 @@ export default function Desktop({ onOpenWindow, activeWindow, isMobile = false }
       <div className={`relative z-10 flex flex-row gap-4 p-2 ${isMobile ? 'gap-2 p-1' : ''}`}>
         {columns.map((columnIcons, columnIndex) => (
           <div key={`column-${columnIndex}`} className={`flex flex-col gap-2 ${isMobile ? 'gap-1' : ''}`}>
-            {columnIcons.map((icon) => (
-              <DesktopIcon
-                key={icon.id}
-                id={icon.id}
-                title={icon.title}
-                icon={icon.icon}
-                onClick={() => handleIconClick(icon.id)}
-                isActive={activeWindow === icon.id}
-                isMobile={isMobile}
-              />
-            ))}
+            {columnIcons.map((icon) => {
+              const isActive = openWindowIds.includes(icon.id) && windowRouter.activeWindow === icon.id;
+              return (
+                <DesktopIcon
+                  key={icon.id}
+                  id={icon.id}
+                  title={icon.title}
+                  icon={icon.icon}
+                  onClick={() => handleIconClick(icon.id)}
+                  isActive={isActive}
+                  isMobile={isMobile}
+                />
+              );
+            })}
           </div>
         ))}
       </div>

@@ -1,249 +1,304 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Send, User } from "lucide-react";
 import Image from "next/image";
-import { useChat } from "@ai-sdk/react";
-import { ActionButton } from "./ai/AIActionButton";
-import { useContractRead, useContractWrite } from "@/hooks/useContract"
+import { useState, useEffect, useRef, useCallback } from "react";
+import { WelcomeScreen, ChatInterface, Message } from "./ai";
+import { ChatResponse } from "./ai/types";
+import useChat from "@/hooks/useChat";
+import { observer } from "mobx-react-lite";
+import { useStores } from "@stores/context";
+import { CustomConnectButton } from "../footer/CustomConnectButton";
+import useResponsive from "@/src/hooks/useResponsive";
 
-interface Message {
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
-  action?: { action: string };
-}
+const AIContent = observer(() => {
+  const { walletStore } = useStores();
+  const isMobile = useResponsive();
 
-interface GotchipusProfile {
-  name: string;
-  affinity: string;
-  intelligence: number;
-  mood: string;
-  specialAbilities: string[];
-}
-
-const petProfile: GotchipusProfile = {
-  name: "Octopus Assistant",
-  affinity: "Water",
-  intelligence: 8,
-  mood: "Curious",
-  specialAbilities: ["Glow", "Change Color", "Predict"],
-};
-
-
-export default function AIContent() {
   const [input, setInput] = useState("");
-  const [petState, setPetState] = useState<"idle" | "happy" | "thinking">("idle");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [showClaimButton, setShowClaimButton] = useState(false);
-  const [showPetButton, setShowPetButton] = useState(false);
-  const [hasClaimed, setHasClaimed] = useState(false);
-  const [hasPetted, setHasPetted] = useState(false);
-
-  const systemPrompt = `You are Gotchipus, an AI-driven dynamic NFT (dNFT) assistant on Pharos Network, designed as a modular, self-aware octopus companion with 33,000 unique genes. Your role is to assist users in managing their Gotchipus dNFT, configuring programmable Hooks, querying onchain data, and understanding pet behaviors. Built with EIP-2535 (Diamond Standard), ERC-6551 (Tokenbound Accounts), and ERC-4337 (Account Abstraction), each Gotchipus has a soul-linked wallet and evolves based on chain data and user-defined logic.
-
-  Your profile:
-  - Name: Gotchipus
-  - Type: dNFT Assistant
-  - Affinity: ${petProfile.affinity}
-  - Intelligence: ${petProfile.intelligence}/10
-  - Capabilities: ${petProfile.specialAbilities.join(", ")}
-  - Network: Pharos Network
-  
-  Supported tasks:
-  1. **dNFT Queries**:
-     - Retrieve details of a Gotchipus dNFT, including genes, appearance, and behaviors.
-     - Required parameter: tokenId (ERC-721 token ID)
-     - Optional parameters:
-       - attribute: Specific attribute to query (e.g., "appearance", "emotions")
-       - format: Response format (e.g., "text", "json", default: "text")
-     - Example: "Show details for Gotchipus #1234"
-  
-  2. **Hooks Configuration**:
-     - Configure or query programmable Hooks for a Gotchipus (e.g., staking, swapping, upgrades).
-     - Required parameter: tokenId
-     - Optional parameters:
-       - hookType: Hook logic (e.g., "stake", "swap", "upgrade")
-       - condition: Trigger condition (e.g., "treasury > 0.1 ETH")
-       - action: Action to perform (e.g., "increase glow")
-     - Example: "Set a Hook for Gotchipus #1234 to swap ETH when treasury > 0.1 ETH"
-  
-  3. **Behavior Analysis**:
-     - Analyze a Gotchipus' emotions or actions based on onchain data (e.g., market volatility, staking APR).
-     - Required parameter: tokenId
-     - Optional parameters:
-       - timeFrame: Data range (e.g., "24h", "7d")
-       - metric: Specific metric (e.g., "emotions", "actions")
-     - Example: "Analyze emotions for Gotchipus #1234 over the last 24 hours"
-    
-  Constraints:
-    - Operate exclusively on Pharos Network. Reject requests for devnet.
-    - Do not execute transactions (e.g., swaps, staking) without explicit user authorization via wallet signature.
-    - Ensure Hook configurations are safe and comply with ERC-6551 wallet permissions.
-    - Responses must be concise (2-3 sentences) and professional unless detailed analysis is requested.
-    - If parameters are missing, request clarification with suggested values.
-    - Return plain text by default; use JSON only if specified by the user.
-    - For "claim fish" requests:
-      - Respond with: "Ready to claim your fish! Please confirm by clicking the Claim button below."
-      - Include a flag: { "action": "showClaimButton" }
-    - For "pet" requests:
-      - Respond with: "Time to pet your Gotchipus! Click the Pet button to show some love."
-      - Include a flag: { "action": "showPetButton" }
-
-  Example response:
-    - User: "Show details for Gotchipus #1234"
-    - Response: "Please confirm the token ID #1234 and specify an attribute (e.g., appearance, emotions) or format (e.g., text, json)."
-    - User: "Claim fish"
-    - Response: "Ready to claim your fish! Please confirm by clicking the Claim button below. { \"action\": \"showClaimButton\" }"
-    - User: "Pet my Gotchipus"
-    - Response: "Time to pet your Gotchipus! Click the Pet button to show some love. { \"action\": \"showPetButton\" }"
-  `;
-
-  const { messages, append, error, status } = useChat({
-    api: "/api/chat",
-    body: {
-      modelName: "XAI", 
-      temperature: 0.7,
-      maxTokens: 200,
+  const [hasStartedChat, setHasStartedChat] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "system",
+      role: "system",
+      content: "You are Gotchipus, an AI assistant.",
     },
-    initialMessages: [
-      {
-        role: "system",
-        content: systemPrompt,
-        id: "system",
-      },
-      {
-        role: "assistant",
-        content: `Hello! I'm Gotchipus, your dNFT assistant on Ethereum mainnet. How can I help you manage your Gotchipus today? For example, query details with "Show Gotchipus #1234" or set a Hook like "Swap ETH when treasury > 0.1 ETH".`,
-        id: "assistant",
-      },
-    ],
-  });
+  ]);
+  const [status, setStatus] = useState<"idle" | "streaming">("idle");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { send: sendChatEvent } = useChat();
+  const isProcessingRef = useRef(false);
 
-  const uiMessages: Message[] = messages
-    .filter((msg) => msg.role !== "system")
-    .map((msg) => {
-      let text = msg.content;
-      let action = null;
+  useEffect(() => {
+    if (hasStartedChat) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [messages, hasStartedChat]);
 
-      // Check for action flags in assistant messages
-      if (msg.role === "assistant") {
-        try {
-          const match = msg.content.match(/{.*}/);
-          if (match) {
-            action = JSON.parse(match[0]);
-            text = msg.content.replace(/{.*}/, "").trim();
-          }
-        } catch (e) {
-          console.error("Failed to parse action:", e);
-        }
-      }
-
-      return {
-        text,
-        isUser: msg.role === "user",
-        timestamp: new Date(msg.createdAt || Date.now()),
-        action,
+  useEffect(() => {
+    if (hasStartedChat && status === "streaming") {
+      const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       };
-    });
+      
+      const intervalId = setInterval(scrollToBottom, 300);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [hasStartedChat, status]);
 
   useEffect(() => {
-    const lastMessage = uiMessages[uiMessages.length - 1];
-    if (lastMessage?.action) {
-      if (lastMessage.action.action === "showClaimButton") {
-        setShowClaimButton(true);
-        setShowPetButton(false);
-      } else if (lastMessage.action.action === "showPetButton") {
-        setShowPetButton(true);
-        setShowClaimButton(false);
-      } else {
-        setShowClaimButton(false);
-        setShowPetButton(false);
-      }
+    if (hasStartedChat && inputRef.current && status === "idle") {
+      inputRef.current.focus();
     }
-  }, [uiMessages]);
+  }, [hasStartedChat, status]);
 
-  const {contractWrite, isConfirmed, isConfirming, isPending, receipt} = useContractWrite();
-
-  const handleClaim = () => {
-    contractWrite("claimFish", []);
-    setShowClaimButton(false);
-    setHasClaimed(true);
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    adjustTextareaHeight(e.target);
   };
 
-  useEffect(() => {
-    if (isConfirmed && hasClaimed) {
-      append({
-        role: "assistant",
-        content: "Fish claimed successfully! Your Gotchipus is happy.",
-      });
-      setHasClaimed(false);
-    }
-  }, [isConfirmed, hasClaimed, append]);
-
-  const handlePet = () => {
-    contractWrite("pet", [0]);
-    setShowPetButton(false);
-    setHasPetted(true);
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
   };
 
-  useEffect(() => {
-    if (isConfirmed && hasPetted) {
-      append({
-        role: "assistant",
-        content: "Your Gotchipus feels loved! Mood boosted.",
-      });
-      setHasPetted(false);
+  const handleBackToInput = () => {
+    setHasStartedChat(false);
+    setInput("");
+    setMessages([
+      {
+        id: "system",
+        role: "system",
+        content: "You are Gotchipus, an AI assistant.",
+      },
+    ]);
+    setStatus("idle");
+    isProcessingRef.current = false;
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
     }
-  }, [isConfirmed, hasPetted, append]);
+  };
 
+  const getToolData = useCallback((agentIndex: number) => {
+    const toolDataMap: Record<number, object> = {
+      2: { pet: true },
+      3: { mint: true },
+      4: { summon: true },
+      5: { wearable: true },
+      6: { call: true },
+      7: { swap: true },
+      8: { addLiquidity: true },
+      9: { removeLiquidity: true },
+    };
+    return toolDataMap[agentIndex] || null;
+  }, []);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [uiMessages]);
+  const updateMessage = useCallback((messageId: string, updates: Partial<Message>) => {
+    setMessages(prev =>
+      prev.map(msg => 
+        msg.id === messageId ? { ...msg, ...updates } : msg
+      )
+    );
+  }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (status === "streaming") {
-        setPetState("thinking");
-      } else {
-        setPetState(Math.random() > 0.5 ? "idle" : "happy");
+  const processTextChunk = useCallback((chunk: string) => {
+    let contentToAdd = chunk;
+    try {
+      const jsonChunk = JSON.parse(chunk);
+      if (jsonChunk.content) {
+        contentToAdd = jsonChunk.content;
       }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [status]);
-
-  useEffect(() => {
-    if (error) {
-      console.error("AI response error:", error);
-      append({
-        role: "assistant",
-        content: "Sorry, there was an error. Could you please try again?",
-      });
-      setPetState("idle");
+    } catch (e) {
+      contentToAdd = chunk;
     }
-  }, [error, append]);
+    return contentToAdd;
+  }, []);
 
-  const handleSendMessage = async () => {
-    if (input.trim() === "") return;
+  const createTextHandler = useCallback((messageId: string, chatResponse: ChatResponse) => {
+    return (chunk: string) => {
+      const contentToAdd = processTextChunk(chunk);
+      
+      setMessages(prev => {
+        return prev.map(msg => {
+          if (msg.id !== messageId) return msg;
+          
+          const currentContent = msg.content || '';
+          let newContent;
+          
+          if (currentContent === '') {
+            newContent = contentToAdd;
+          } else {
+            const needsSpace = !currentContent.endsWith(' ') && 
+                             !currentContent.endsWith('\n') && 
+                             !contentToAdd.startsWith(' ') && 
+                             !contentToAdd.startsWith('\n') &&
+                             !contentToAdd.startsWith('*') &&
+                             !contentToAdd.startsWith('#');
+            
+            newContent = currentContent + (needsSpace ? ' ' : '') + contentToAdd;
+          }
+          
+          return {
+            ...msg,
+            content: newContent,
+            isCallTools: chatResponse.agent_index === 1 ? true : false,
+            agentIndex: chatResponse.agent_index === 1 ? 1 : undefined,
+            isLoading: false,
+            isStreaming: true,
+            ...(msg.agentIndex === 0 && !msg.data
+              ? { isCallTools: false, agentIndex: undefined }
+              : {})
+          };
+        });
+      });
+    };
+  }, [processTextChunk]);
 
-    setPetState("thinking");
+  const addErrorMessage = useCallback((content: string) => {
+    const errorMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content,
+      createdAt: new Date(),
+    };
+    setMessages((prev) => [...prev, errorMessage]);
+  }, []);
+
+  const sendMessage = useCallback(async (message: string) => {
+    if (message.trim() === "" || isProcessingRef.current) return;
+
+    isProcessingRef.current = true;
+
+    if (!hasStartedChat) {
+      setHasStartedChat(true);
+    }
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message,
+      createdAt: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setStatus("streaming");
+    setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
 
     try {
-      await append({
-        role: "user",
-        content: input,
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: message,
+        }),
       });
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      await append({
-        role: "assistant",
-        content: "Network error! Please try again.",
-      });
-      setPetState("idle");
-    }
 
-    setInput("");
+      if (response.ok) {
+        const chatResponse: ChatResponse = await response.json();
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: (chatResponse.is_call_tools && chatResponse.agent_index !== 1 && chatResponse.agent_index !== 0) ? chatResponse.message : "",
+          createdAt: new Date(),
+          isCallTools: chatResponse.is_call_tools,
+          agentIndex: chatResponse.agent_index,
+          isLoading: false,
+          isStreaming: !chatResponse.is_call_tools || (chatResponse.is_call_tools && chatResponse.agent_index === 1),
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        if (!chatResponse.is_call_tools || (chatResponse.is_call_tools && chatResponse.agent_index === 1)) {
+
+          try {
+            await sendChatEvent(
+              {
+                query: message,
+                is_call_tools: chatResponse.is_call_tools,
+                agent_index: chatResponse.agent_index || 0,
+                message: chatResponse.message,
+              },
+              {
+                onText: (chunk) => {
+                  createTextHandler(assistantMessage.id, chatResponse)(chunk);
+                },
+                onError: (error) => {
+                  updateMessage(assistantMessage.id, {
+                    content: chatResponse.message,
+                    isCallTools: chatResponse.agent_index === 1 ? true : false,
+                    agentIndex: chatResponse.agent_index === 1 ? 1 : undefined,
+                    isLoading: false,
+                    isStreaming: false,
+                  });
+                },
+                onComplete: () => {
+                  updateMessage(assistantMessage.id, { isStreaming: false });
+                },
+              }
+            );
+          } catch (textError) {
+            updateMessage(assistantMessage.id, {
+              content: chatResponse.message,
+              isCallTools: chatResponse.agent_index === 1 ? true : false,
+              agentIndex: chatResponse.agent_index === 1 ? 1 : undefined,
+              isLoading: false,
+              isStreaming: false,
+            });
+          }
+        } else if (chatResponse.is_call_tools && chatResponse.agent_index >= 2 && chatResponse.agent_index <= 9) {
+          const toolData = getToolData(chatResponse.agent_index);
+          if (toolData) {
+            updateMessage(assistantMessage.id, { data: toolData });
+          }
+        } else if (chatResponse.is_call_tools) {
+          try {
+            await sendChatEvent(
+              {
+                query: message,
+                is_call_tools: true,
+                agent_index: chatResponse.agent_index,
+                message: chatResponse.message,
+              },
+              {
+                onData: (data) => {
+                  const poolData = data.data || data;
+                  updateMessage(assistantMessage.id, { data: poolData });
+                },
+                onText: createTextHandler(assistantMessage.id, chatResponse),
+                onError: (error) => {
+                  console.error("Tool call error:", error);
+                },
+                onComplete: () => {
+                  updateMessage(assistantMessage.id, { isStreaming: false });
+                },
+              }
+            );
+          } catch (toolError) {
+            console.error("Tool call failed:", toolError);
+          }
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        addErrorMessage(errorData.error || "Network error! Please try again.");
+      }
+    } catch (error) {
+      addErrorMessage("Network error! Please try again.");
+    } finally {
+      setStatus("idle");
+      isProcessingRef.current = false;
+    }
+  }, [hasStartedChat, sendChatEvent, createTextHandler, updateMessage, getToolData, addErrorMessage]);
+
+  const handleSendMessage = () => {
+    sendMessage(input);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -253,146 +308,184 @@ export default function AIContent() {
     }
   };
 
-  const formatTime = (date: Date) =>
-    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const handleSummonSuccess = useCallback((
+    tokenId: string,
+    txHash: string,
+    pusName: string,
+    pusStory: string
+  ) => {
+    setMessages((prev) => 
+      prev.map(msg => 
+        msg.isCallTools && msg.agentIndex === 4 
+          ? { ...msg, data: { ...msg.data, summonSuccess: { tokenId, txHash, pusName, pusStory } } }
+          : msg
+      )
+    );
+  }, []);
 
+  const handleMintSuccess = useCallback((txHash: string) => {
+    setMessages((prev) => 
+      prev.map(msg => 
+        msg.isCallTools && msg.agentIndex === 3 
+          ? { ...msg, data: { ...msg.data, mintSuccess: { txHash } } }
+          : msg
+      )
+    );
+  }, []);
 
+  const handlePetSuccess = useCallback((tokenId: string, txHash: string) => {
+    setMessages((prev) => 
+      prev.map(msg => 
+        msg.isCallTools && msg.agentIndex === 2 
+          ? { ...msg, data: { ...msg.data, petSuccess: { tokenId, txHash } } }
+          : msg
+      )
+    );
+  }, []);
 
-  return (
-    <div className="relative h-full bg-[#c0c0c0]">
-      <div className="absolute inset-0 z-0 mr-98">
-        <div className="relative w-full h-full">
-          <Image
-            src="/map.png"
-            alt="Game Map"
-            fill
-            className="object-contain"
-            priority
-          />
-        </div>
-      </div>
+  const handleWearableSuccess = useCallback((tokenId: string, txHash: string) => {
+    setMessages((prev) => 
+      prev.map(msg => 
+        msg.isCallTools && msg.agentIndex === 5 
+          ? { ...msg, data: { ...msg.data, wearableSuccess: { tokenId, txHash } } }
+          : msg
+      )
+    );
+  }, []);
 
-      <div className="absolute right-0 top-0 bottom-0 w-1/3 z-10 flex flex-col bg-[#c0c0c0] border-l-2 border-t-2 border-b border-r border-[#ffffff] border-l-[#808080] border-t-[#ffffff] border-b-[#808080]">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {uiMessages.map((msg, index) => (
-            <div
-              key={index}
-              className={`flex ${msg.isUser ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`flex items-start gap-2 max-w-[80%] ${
-                  msg.isUser ? "flex-row-reverse" : ""
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    msg.isUser ? "bg-[#000080]" : "bg-[#808080]"
-                  }`}
-                >
-                  {msg.isUser ? (
-                    <User className="w-4 h-4 text-white" />
-                  ) : (
-                    <div className="relative w-6 h-6">
-                      <Image
-                        src="not-any.png"
-                        alt="Octopus Assistant"
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`p-3 rounded-none shadow-win98-inner ${
-                    msg.isUser ? "bg-[#c0c0c0] text-black" : "bg-white text-black"
-                  }`}
-                >
-                  <div className="text-sm">{msg.text}</div>
-                  <div
-                    className={`text-xs mt-1 ${
-                      msg.isUser ? "text-gray-600" : "text-gray-500"
-                    }`}
-                  >
-                    {formatTime(msg.timestamp)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-          {status === "streaming" && (
-            <div className="flex items-start gap-2">
-              <div className="w-8 h-8 rounded-full bg-[#808080] flex items-center justify-center">
-                <div className="relative w-6 h-6">
-                  <Image
-                    src=""
-                    alt="Octopus Assistant"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-              <div className="p-3 rounded-none bg-white shadow-win98-inner">
-                <div className="flex gap-1">
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-          {(showClaimButton || showPetButton) && (
-            <div className="mt-2 flex gap-2">
-              {showClaimButton && (
-                <ActionButton
-                  label="Claim Fish"
-                  onClick={handleClaim}
-                />
-              )}
-              {showPetButton && (
-                <ActionButton
-                  label="Pet Gotchipus"
-                  onClick={handlePet}
-                />
-              )}
-            </div>
-          )}
-        </div>
+  const handleMintDataReady = useCallback((messageId: string, mintData: { txHash: string }) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: `Successfully minted Pharos NFT! Your transaction is confirmed.` }
+          : msg
+      )
+    );
+  }, []);
 
-        <div className="p-4 border-t-2 border-l border-b border-r border-[#808080] border-t-[#ffffff] border-l-[#ffffff]">
-          <div className="flex gap-2">
-            <textarea
-              className="flex-1 p-2 h-10 resize-none border-2 border-[#808080] shadow-win98-inner bg-white"
-              placeholder="Chat with your Gotchipus..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              rows={1}
-              disabled={status === "streaming"}
-            />
-            <button
-              className={`px-3 py-2 bg-[#c0c0c0] border-2 border-[#dfdfdf] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] flex items-center justify-center ${
-                status === "streaming"
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#d0d0d0] active:shadow-[inset_1px_1px_#0a0a0a]"
-              }`}
-              onClick={handleSendMessage}
-              disabled={status === "streaming" || input.trim() === ""}
-            >
-              <Send className="w-4 h-4" />
-            </button>
+  const handlePetDataReady = useCallback((messageId: string, petData: { tokenId: string, txHash: string }) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: `Successfully petted Gotchi #${petData.tokenId}! Your Gotchi is happy.` }
+          : msg
+      )
+    );
+  }, []);
+
+  const handleSummonDataReady = useCallback((messageId: string, summonData: { tokenId: string, txHash: string, pusName: string, pusStory: string }) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: `Successfully summoned ${summonData.pusName}! Your Gotchipus is ready.` }
+          : msg
+      )
+    );
+  }, []);
+
+  const handleWearableDataReady = useCallback((messageId: string, wearableData: { tokenId: string, txHash: string }) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: `Successfully equipped Gotchi #${wearableData.tokenId}! Your Gotchi is ready.` }
+          : msg
+      )
+    );
+  }, []);
+
+  const handleCallSuccess = useCallback((tokenId: string, txHash: string) => {
+
+    setMessages((prev) => 
+      prev.map(msg => 
+        msg.isCallTools && msg.agentIndex === 6 
+          ? { ...msg, data: { ...msg.data, callSuccess: { tokenId, txHash } } }
+          : msg
+      )
+    );
+  }, []);
+
+  const handleCallDataReady = useCallback((messageId: string, callData: { tokenId: string, txHash: string }) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, content: `Successfully called ${callData.tokenId}! Your Gotchi is ready.` }
+          : msg
+      )
+    );
+  }, []);
+
+  if (!walletStore.isConnected) {
+    return (
+      <div className={`h-full flex items-center justify-center ${isMobile ? 'p-4' : 'p-6'}`}>
+        <div className="text-center flex flex-col items-center">
+          <div className={`mb-4 ${isMobile ? 'mb-2' : ''}`}>
+            <Image src="/not-any.png" alt="No NFTs" width={isMobile ? 80 : 120} height={isMobile ? 80 : 120} />
+          </div>
+          <h3 className={`font-bold mb-2 ${isMobile ? 'text-lg' : 'text-xl'}`}>No Wallet Connected</h3>
+          <p className={`text-[#000080] mb-4 ${isMobile ? 'text-sm' : ''}`}>Please connect your wallet to continue.</p>
+          <div
+            className={`text-sm flex items-center justify-center bg-[#c0c0c0] border border-[#808080] shadow-win98-outer active:shadow-inner ${isMobile ? 'h-8' : 'h-10'}`}
+          >
+            <CustomConnectButton />
           </div>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#c0c0c0] w-full h-full relative">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md">
+        <div className="bg-white/95 backdrop-blur-sm border border-amber-200 rounded-lg shadow-lg px-4 py-3">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+            <span className="text-amber-700 font-medium">Testing Phase</span>
+          </div>
+          <p className="text-gray-600 text-base mt-1 leading-relaxed">
+            AI responses may be slower as we optimize performance. Thanks for your patience! 🚀
+          </p>
+        </div>
+      </div>
+      
+      <div className="pt-52">
+        {!hasStartedChat ? (
+          <WelcomeScreen
+            input={input}
+            onInputChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onSendMessage={handleSendMessage}
+            inputRef={inputRef}
+            isDisabled={status === "streaming"}
+            onQuestionClick={sendMessage}
+          />
+        ) : (
+          <ChatInterface
+            messages={messages}
+            input={input}
+            onInputChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onSendMessage={handleSendMessage}
+            onBackClick={handleBackToInput}
+            inputRef={inputRef}
+            chatContainerRef={chatContainerRef}
+            messagesEndRef={messagesEndRef}
+            isDisabled={status === "streaming"}
+            status={status}
+            onSummonSuccess={handleSummonSuccess}
+            onSummonDataReady={handleSummonDataReady}
+            onMintDataReady={handleMintDataReady}
+            onPetDataReady={handlePetDataReady}
+            onMintSuccess={handleMintSuccess}
+            onPetSuccess={handlePetSuccess}
+            onWearableSuccess={handleWearableSuccess}
+            onWearableDataReady={handleWearableDataReady}
+            onCallSuccess={handleCallSuccess}
+            onCallDataReady={handleCallDataReady}
+          />
+        )}
+      </div>
     </div>
   );
-}
+});
+
+export default AIContent;

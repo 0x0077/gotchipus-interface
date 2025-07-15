@@ -22,26 +22,12 @@ export default function Window({ window, isActive, onClose, onMinimize, onActiva
   const [isAppearing, setIsAppearing] = useState(true)
   const windowRef = useRef<HTMLDivElement>(null)
   const titleBarRef = useRef<HTMLDivElement>(null)
-  const hasInitializedRef = useRef(false) 
-
   useEffect(() => {
-    if (!hasInitializedRef.current) {
-      hasInitializedRef.current = true
-      
-      const screenWidth = globalThis.window.innerWidth || document.documentElement.clientWidth
-      const screenHeight = globalThis.window.innerHeight || document.documentElement.clientHeight
-      
-      const centerX = Math.max(0, (screenWidth - window.size.width) / 2)
-      const centerY = Math.max(0, (screenHeight - window.size.height) / 2)
-      
-      onMove({ x: centerX, y: centerY })
-      
-      const timeout = setTimeout(() => {
-        setIsAppearing(false)
-      }, 300)
-      
-      return () => clearTimeout(timeout)
-    }
+    const timeout = setTimeout(() => {
+      setIsAppearing(false)
+    }, 300)
+    
+    return () => clearTimeout(timeout)
   }, []) 
 
   const startDrag = (clientX: number, clientY: number) => {
@@ -115,14 +101,14 @@ export default function Window({ window, isActive, onClose, onMinimize, onActiva
     }
   }, [isDragging, dragOffset, onMove, isMobile])
 
-  const handleTitleBarInteraction = (clientX: number, clientY: number) => {
-    const target = event?.target as HTMLElement;
+  const handleTitleBarInteraction = (clientX: number, clientY: number, event: React.MouseEvent | React.TouchEvent) => {
+    const target = event.target as HTMLElement;
     const clickedOnButton = 
       target?.tagName === 'BUTTON' || 
       target?.closest('button') !== null;
     
     if (!clickedOnButton) {
-      event?.preventDefault();
+      event.preventDefault();
       startDrag(clientX, clientY);
     }
   }
@@ -147,16 +133,16 @@ export default function Window({ window, isActive, onClose, onMinimize, onActiva
         className={`h-5 flex items-center justify-between px-1 cursor-move ${
           isActive ? "bg-uni-bg-02 text-white" : "bg-[#808080] text-[#c0c0c0]"
         }`}
-        onMouseDown={(e) => handleTitleBarInteraction(e.clientX, e.clientY)}
+        onMouseDown={(e) => handleTitleBarInteraction(e.clientX, e.clientY, e)}
         onTouchStart={(e) => {
           const touch = e.touches[0]
-          handleTitleBarInteraction(touch.clientX, touch.clientY)
+          handleTitleBarInteraction(touch.clientX, touch.clientY, e)
         }}
       >
         <div className="text-sm font-bold truncate">{window.title}</div>
         <div className="flex">
           <button
-            className={`flex items-center justify-center border border-[#808080] bg-[#c0c0c0] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] ${isMobile ? 'w-5 h-5' : 'w-4 h-4 mr-1'}`}
+            className={`flex items-center justify-center border border-[#808080] bg-[#c0c0c0] shadow-win98-inner${isMobile ? 'w-5 h-5' : 'w-4 h-4 mr-1'}`}
             onClick={(e) => {
               e.stopPropagation(); 
               onMinimize();
@@ -165,7 +151,7 @@ export default function Window({ window, isActive, onClose, onMinimize, onActiva
             <Minus className={`text-black ${isMobile ? 'w-4 h-4' : 'w-3 h-3'}`} />
           </button>
           <button
-            className={`flex items-center justify-center border border-[#808080] bg-[#c0c0c0] shadow-[inset_-1px_-1px_#0a0a0a,inset_1px_1px_#fff] ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`}
+            className={`flex items-center justify-center border border-[#808080] bg-[#c0c0c0] shadow-win98-inner${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`}
             onClick={(e) => {
               e.stopPropagation(); 
               onClose();

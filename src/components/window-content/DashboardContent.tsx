@@ -186,7 +186,7 @@ const DashboardContent = observer(() => {
       });
     }
   }, [error, isPetWriting]);
-  
+
   const handleEquipSlotClick = (index: number) => {
     setSelectedEquipSlot(index === selectedEquipSlot ? null : index)
     setSelectedType(EQUIPMENT_TYPES[index as keyof typeof EQUIPMENT_TYPES])
@@ -226,14 +226,6 @@ const DashboardContent = observer(() => {
     setCurrentPage(1);
   };
   
-  const floatAnimation = {
-    y: [0, -3, 0],
-    transition: {
-      duration: 1,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }
-  };
 
   const itemsPerPage = 12;
   const hasMore = (currentPage * itemsPerPage) < ids.length;
