@@ -18,15 +18,9 @@ import RemoveLiquidityComponent from "../defi/RemoveLiquidityComponent";
 
 interface ChatInterfaceProps {
   messages: Message[];
-  input: string;
-  onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-  onSendMessage: () => void;
   onBackClick: () => void;
-  inputRef: RefObject<HTMLTextAreaElement>;
   chatContainerRef: RefObject<HTMLDivElement>;
   messagesEndRef: RefObject<HTMLDivElement>;
-  isDisabled: boolean;
   status: "idle" | "streaming";
   onSummonSuccess?: (tokenId: string, txHash: string, pusName: string, pusStory: string) => void;
   onSummonDataReady?: (messageId: string, summonData: { tokenId: string, txHash: string, pusName: string, pusStory: string }) => void;
@@ -42,15 +36,9 @@ interface ChatInterfaceProps {
 
 export const ChatInterface = memo(({
   messages,
-  input,
-  onInputChange,
-  onKeyDown,
-  onSendMessage,
   onBackClick,
-  inputRef,
   chatContainerRef,
   messagesEndRef,
-  isDisabled,
   status,
   onSummonSuccess,
   onSummonDataReady,

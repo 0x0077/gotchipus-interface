@@ -464,15 +464,9 @@ const AIContent = observer(() => {
           <div className="h-full flex flex-col">
             <ChatInterface
               messages={messages}
-              input={input}
-              onInputChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onSendMessage={handleSendMessage}
               onBackClick={handleBackToInput}
-              inputRef={inputRef}
               chatContainerRef={chatContainerRef}
               messagesEndRef={messagesEndRef}
-              isDisabled={status === "streaming"}
               status={status}
               onSummonSuccess={handleSummonSuccess}
               onSummonDataReady={handleSummonDataReady}

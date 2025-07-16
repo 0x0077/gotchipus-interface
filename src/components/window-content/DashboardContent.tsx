@@ -73,9 +73,9 @@ const DashboardContent = observer(() => {
   const { toast } = useToast()
   const isMobile = useResponsive()
   
-  const listApiUrl = walletAddress && activeTab === null ? `/api/tokens/gotchipus?owner=${walletAddress}` : null;
+  const listApiUrl = walletAddress && activeTab === null ? `/api/tokens/gotchipus?owner=${walletAddress}&includeGotchipusInfo=false` : null;
 
-  const { data: listData, error: listError, isLoading: isListLoading, mutate: mutateList } = useSWR<ListApiData>(listApiUrl, fetcher, {
+  const { data: listData, isLoading: isListLoading } = useSWR<ListApiData>(listApiUrl, fetcher, {
     refreshInterval: 10000,
     keepPreviousData: true,
     errorRetryCount: 5,
@@ -85,8 +85,6 @@ const DashboardContent = observer(() => {
     revalidateOnReconnect: false,
     dedupingInterval: 2000,
   });
-
-  console.log(listData);
   
   const ids = listData?.ids || [];
   const balances = parseInt(listData?.balance || '0');
@@ -95,12 +93,7 @@ const DashboardContent = observer(() => {
     ? `/api/tokens/gotchipus-details?owner=${walletAddress}&tokenId=${selectedTokenId}` 
     : null; 
 
-  const { 
-    data: detailsData, 
-    error: detailsError, 
-    isLoading: isDetailsLoading,
-    mutate: mutateDetails 
-  } = useSWR<DetailsApiData>(detailsApiUrl, fetcher);
+  const { data: detailsData } = useSWR<DetailsApiData>(detailsApiUrl, fetcher);
 
   useEffect(() => {
     if (detailsData) {
