@@ -20,13 +20,8 @@ export const WearableSlot = ({ type, wearableIndex }: WearableSlotProps) => {
       'eye': 'eyes' as const
     };
 
-    const path = getWearableImagePath(typeMapping[type], wearableIndex);
-    // URL encode the path to handle special characters (spaces, quotes, etc.)
-    // Split path into base and filename, encode only the filename part
-    const pathParts = path.split('/');
-    const filename = pathParts.pop() || '';
-    const encodedFilename = encodeURIComponent(filename);
-    return [...pathParts, encodedFilename].join('/');
+    // getWearableImagePath already returns an encoded path
+    return getWearableImagePath(typeMapping[type], wearableIndex);
   }
 
   const getWearableName = () => {

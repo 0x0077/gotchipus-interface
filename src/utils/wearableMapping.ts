@@ -39,10 +39,22 @@ export const wearableMapping = {
   ]
 };
 
+/**
+ * Encodes image paths to handle special characters (spaces, quotes, etc.)
+ */
+function encodeImagePath(imagePath: string): string {
+  const pathParts = imagePath.split('/');
+  const filename = pathParts.pop() || '';
+  const encodedFilename = encodeURIComponent(filename);
+  return [...pathParts, encodedFilename].join('/');
+}
+
 export const getWearableImagePath = (type: 'backgrounds' | 'bodys' | 'eyes', index: number): string => {
   const wearables = wearableMapping[type];
   if (index >= 0 && index < wearables.length) {
-    return `/wearables/${type}/${wearables[index]}`;
+    const path = `/wearables/${type}/${wearables[index]}`;
+    return encodeImagePath(path);
   }
-  return `/wearables/${type}/${wearables[0]}`;
+  const path = `/wearables/${type}/${wearables[0]}`;
+  return encodeImagePath(path);
 };

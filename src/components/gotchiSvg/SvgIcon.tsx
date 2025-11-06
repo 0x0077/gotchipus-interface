@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { ImageProps } from 'next/image';
+import { encodeImagePath } from '@/src/utils/imagePathEncoder';
 
 interface SvgIconProps extends Omit<ImageProps, 'src'> {
   svgString?: string | null | undefined;
@@ -9,10 +10,12 @@ interface SvgIconProps extends Omit<ImageProps, 'src'> {
 
 const SvgIcon = ({ svgString, imagePath, alt, ...props }: SvgIconProps) => {
   if (imagePath) {
+    const encodedPath = encodeImagePath(imagePath);
     return (
       <Image
-        src={imagePath}
+        src={encodedPath}
         alt={alt || "Wearable Icon"}
+        unoptimized={true}
         {...props}
       />
     );

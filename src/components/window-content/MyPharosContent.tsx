@@ -166,7 +166,6 @@ const MyPharosContent = observer(() => {
         };
       });
 
-      console.log('previews', previews);
       setGotchipusPreviews(previews);
 
     } catch (err) {
