@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { getWearableImagePath, wearableMapping } from "@/src/utils/wearableMapping"
+import { getWearableImagePath, getWearableName } from "@/src/utils/wearableMapping"
 
 interface WearableSlotProps {
   type: 'background' | 'body' | 'eye';
@@ -23,18 +23,14 @@ export const WearableSlot = ({ type, wearableIndex }: WearableSlotProps) => {
     return getWearableImagePath(typeMapping[type], wearableIndex);
   }
 
-  const getWearableName = () => {
+  const getWearableDisplayName = () => {
     const typeMapping = {
       'background': 'backgrounds' as const,
       'body': 'bodys' as const,
       'eye': 'eyes' as const
     };
 
-    const wearables = wearableMapping[typeMapping[type]];
-    if (wearableIndex >= 0 && wearableIndex < wearables.length) {
-      return wearables[wearableIndex].replace('.png', '');
-    }
-    return 'Unknown';
+    return getWearableName(typeMapping[type], wearableIndex);
   }
 
   return (
@@ -58,7 +54,7 @@ export const WearableSlot = ({ type, wearableIndex }: WearableSlotProps) => {
         <div className="w-full h-full relative">
           <Image
             src={getWearableImage()}
-            alt={getWearableName()}
+            alt={getWearableDisplayName()}
             fill
             className="object-contain"
             unoptimized={true}
@@ -75,7 +71,7 @@ export const WearableSlot = ({ type, wearableIndex }: WearableSlotProps) => {
             className="absolute z-20 bottom-full mb-2 left-1/2 transform -translate-x-1/2 
                        bg-[#FFFFCC] border-2 border-[#000000] p-2 rounded whitespace-nowrap text-xs shadow-win98-outer"
           >
-            {wearableIndex !== null ? getWearableName() : `No ${type}`}
+            {wearableIndex !== null ? getWearableDisplayName() : `No ${type}`}
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
               <div className="border-4 border-transparent border-t-[#000000]"></div>
             </div>
