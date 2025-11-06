@@ -11,6 +11,8 @@ import type { JSX } from "react/jsx-runtime"
 import { WINDOW_SIZE } from "@/lib/constant"
 import { getWindowIcon, getWindowContent } from "@/lib/windowConfig"
 
+export const runtime = 'edge';
+
 export default function CatchAllPage() {
   const [openWindows, setOpenWindows] = useState<WindowType[]>([])
   const [zIndexCounter, setZIndexCounter] = useState(100)
