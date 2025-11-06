@@ -1,7 +1,6 @@
 "use client";
 
 import Image, { ImageProps } from 'next/image';
-import { encodeImagePath } from '@/src/utils/imagePathEncoder';
 
 interface SvgIconProps extends Omit<ImageProps, 'src'> {
   svgString?: string | null | undefined;
@@ -10,10 +9,11 @@ interface SvgIconProps extends Omit<ImageProps, 'src'> {
 
 const SvgIcon = ({ svgString, imagePath, alt, ...props }: SvgIconProps) => {
   if (imagePath) {
-    const encodedPath = encodeImagePath(imagePath);
+    // Use original path - Next.js Image component and browsers will handle URL encoding automatically
+    // The middleware will handle any URL-encoded direct access requests
     return (
       <Image
-        src={encodedPath}
+        src={imagePath}
         alt={alt || "Wearable Icon"}
         unoptimized={true}
         {...props}

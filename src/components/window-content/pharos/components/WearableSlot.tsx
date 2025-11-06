@@ -20,7 +20,6 @@ export const WearableSlot = ({ type, wearableIndex }: WearableSlotProps) => {
       'eye': 'eyes' as const
     };
 
-    // getWearableImagePath already returns an encoded path
     return getWearableImagePath(typeMapping[type], wearableIndex);
   }
 
