@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
       "x_id": xUserId
     };
 
-    const upsertResponse = await fetch(`${process.env.NEXT_PUBLIC_DEVELOPMENT_URL}/account/upsert_x`, {
+    const upsertResponse = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/account/upsert_x`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

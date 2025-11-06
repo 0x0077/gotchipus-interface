@@ -5,7 +5,7 @@ export const runtime = 'edge';
 export async function GET() {
   try {
     
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DEVELOPMENT_URL}/task/active`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/task/active`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -4,7 +4,7 @@ export const runtime = 'edge';
 
 export async function GET() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DEVELOPMENT_URL}/ollama/story`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/ollama/story`, {
       headers: {
         'Content-Type': 'application/json',
       },

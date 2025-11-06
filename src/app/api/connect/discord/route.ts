@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   response.cookies.set('discord_auth_jwt', token, { 
     path: '/', 
     httpOnly: true, 
-    secure: process.env.NEXT_PUBLIC_NODE_ENV !== 'development', 
+    secure: process.env.NEXT_PUBLIC_NODE_ENV !== 'production', 
     maxAge: 300 
   });
   return response;
