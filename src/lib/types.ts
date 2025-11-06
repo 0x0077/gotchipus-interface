@@ -21,11 +21,12 @@ export interface DesktopIconProps {
 }
 
 export interface TokenInfo {
-  aether?: number;
-  bonding?: number;
-  growth?: number;
-  element?: number;
-  wisdom?: number;
+  strength?: number;
+  defense?: number;
+  mind?: number;
+  vitality?: number;
+  agility?: number;
+  luck?: number;
   status?: number;
   dna?: {
     geneSeed: string;
@@ -48,13 +49,16 @@ export interface GotchipusInfo {
   epoch: number;
   utc: number;
   dna: any; 
-  bonding: number;
-  growth: number;
-  wisdom: number;
-  aether: number;
+  strength: number;
+  defense: number;
+  mind: number;
+  vitality: number;
+  agility: number;
+  luck: number;
   singer: string;
   nonces: string;
   element?: number;
+  primaryFaction?: number;
 }
 
 export interface GotchiItem {
@@ -123,10 +127,12 @@ export function parseGotchipusInfo(rawData: any): GotchipusInfo | undefined {
       epoch: Number(result.epoch || 0),
       utc: Number(result.utc || 0),
       dna: result.dna || {},
-      bonding: Number(result.bonding || 0),
-      growth: Number(result.growth || 0),
-      wisdom: Number(result.wisdom || 0),
-      aether: Number(result.aether || 0),
+      strength: Number(result.strength || 0),
+      defense: Number(result.defense || 0),
+      mind: Number(result.mind || 0),
+      vitality: Number(result.vitality || 0),
+      agility: Number(result.agility || 0),
+      luck: Number(result.luck || 0),
       singer: result.singer || "",
       nonces: (result.nonces || BigInt(0)).toString()
     };

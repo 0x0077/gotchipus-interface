@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const getUserIntent = `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/ollama/get_user_intent`;
+    const getUserIntent = `${process.env.NEXT_PUBLIC_DEVELOPMENT_URL}/ollama/get_user_intent`;
 
     const getUserIntentResp = await fetch(getUserIntent, {
       method: 'POST',

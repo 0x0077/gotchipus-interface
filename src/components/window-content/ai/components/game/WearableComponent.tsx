@@ -9,7 +9,7 @@ import { useStores } from "@stores/context";
 import { observer } from "mobx-react-lite";
 import SvgIcon from "@/components/gotchiSvg/SvgIcon";
 import EquipSelectWindow from "@/components/window-content/equip/EquipSelectWindow";
-import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, HEAD_BYTES32, CLOTHES_BYTES32 } from "@/lib/constant";
+import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, HEAD_BYTES32, CLOTHES_BYTES32, FACE_BYTES32, MOUTH_BYTES32 } from "@/lib/constant";
 import { useSvgLayers } from "@/hooks/useSvgLayers";
 import { SvgComposer } from "@/components/gotchiSvg/SvgComposer";
 import { ArrowLeft } from "lucide-react";
@@ -125,7 +125,9 @@ const WearableComponent = observer(({ onEquipSuccess }: WearableComponentProps) 
       EYE_BYTES32,    
       HAND_BYTES32,   
       HEAD_BYTES32,   
-      CLOTHES_BYTES32 
+      CLOTHES_BYTES32,
+      FACE_BYTES32,
+      MOUTH_BYTES32
     ];
     return EQUIPMENT_TYPES[selectedEquipSlot];
   };

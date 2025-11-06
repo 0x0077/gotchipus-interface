@@ -1,15 +1,21 @@
 import Image from "next/image"
 import { GotchipusInfo } from "@/lib/types"
+import { useStores } from "@stores/context"
+import { observer } from "mobx-react-lite"
 
 interface StatsTabProps {
   tokenInfo: GotchipusInfo
+  tokenId: string
   isMobile?: boolean
 }
 
-const StatsTab = ({
+const StatsTab = observer(({
   tokenInfo,
+  tokenId,
   isMobile
 }: StatsTabProps) => {
+  const { walletStore } = useStores()
+  const tokenBoundAccount = walletStore.getTokenBoundAccount(tokenId) || 'Not available'
   const dnaData = {
     name: "Genes",
     value: tokenInfo.dna?.geneSeed.toString() || "",
@@ -17,11 +23,12 @@ const StatsTab = ({
   };
 
   const attributes = [
-    { name: "Aether", value: tokenInfo.aether || 0, icon: "aether" },
-    { name: "Bonding", value: tokenInfo.bonding || 0, icon: "bonding" },
-    { name: "Growth", value: tokenInfo.growth || 0, icon: "growth" },
-    { name: "Element", value: tokenInfo.element || 0, icon: "element" },
-    { name: "Wisdom", value: tokenInfo.wisdom || 0, icon: "wisdom" },
+    { name: "STR", value: tokenInfo.strength / 100 || 0, icon: "strength" },
+    { name: "DEF", value: tokenInfo.defense / 100 || 0, icon: "defense" },
+    { name: "INT", value: tokenInfo.mind / 100 || 0, icon: "mind" },
+    { name: "VIT", value: tokenInfo.vitality / 100 || 0, icon: "vitality" },
+    { name: "AGI", value: tokenInfo.agility / 100 || 0, icon: "agility" },
+    { name: "LUK", value: tokenInfo.luck / 100 || 0, icon: "luck" },
   ];
 
   return (
@@ -32,12 +39,12 @@ const StatsTab = ({
           Attributes
         </div>
 
-        <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2 gap-2' : ''}`}>
+        <div className={`grid gap-3 mb-4 ${isMobile ? 'grid-cols-2 gap-2' : 'grid-cols-2'}`}>
           {attributes.map((attr, index) => (
             <div key={index} className={`bg-[#c0c0c0] border border-[#808080] shadow-win98-inner rounded-sm ${isMobile ? 'p-2' : 'p-3'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <Image src={`/icons/${attr.name}.png`} alt={attr.name} width={isMobile ? 14 : 18} height={isMobile ? 14 : 18} className={`mr-2 ${isMobile ? 'mr-1' : ''}`}/>
+                  <Image src={`/icons/${attr.icon}.png`} alt={attr.name} width={isMobile ? 14 : 18} height={isMobile ? 14 : 18} className={`mr-2 ${isMobile ? 'mr-1' : ''}`}/>
                   <span className={`font-medium ${isMobile ? 'text-sm' : ''}`}>{attr.name}</span>
                 </div>
                 <div className={`font-bold ${isMobile ? 'text-sm' : ''}`}>{attr.value}</div>
@@ -72,20 +79,20 @@ const StatsTab = ({
           </div>
           <div className="border-t border-[#808080] my-2"></div>
           <div className={`font-mono bg-[#c0c0c0] p-2 border border-[#808080] shadow-win98-inner overflow-x-auto whitespace-nowrap scrollbar-none ${isMobile ? 'text-xs' : 'text-xs'}`}>
-            {tokenInfo.owner || 'Not available'}
+            {tokenBoundAccount}
           </div>
         </div>
 
         <div className="mt-6 pt-4 border-t border-[#808080]">
-          <div className={`text-[#000080] mb-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>Gotchipus Level: 1</div>
+          <div className={`text-[#000080] mb-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>Gotchipus Level: {Math.floor(Number(tokenInfo.level || 0) / 100)}</div>
           <div className="w-full bg-[#c0c0c0] border border-[#808080] h-4">
-            <div className="bg-[#000080] h-full" style={{ width: `${Number(tokenInfo.growth) % 100}%` }}></div>
+            <div className="bg-[#000080] h-full" style={{ width: `${Number(tokenInfo.level || 0) % 100}%` }}></div>
           </div>
-          <div className={`text-right mt-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>XP: {tokenInfo.growth}/100</div>
+          <div className={`text-right mt-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>XP: {Number(tokenInfo.level || 0) % 100}/100</div>
         </div>
       </div>
     </div>
   )
-}
+})
 
-export default StatsTab 
+export default StatsTab

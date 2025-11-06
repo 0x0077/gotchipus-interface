@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-const TESTNET_BASE_URL = 'https://testnet.dplabs-internal.com';
+const TESTNET_BASE_URL = 'https://atlantic.dplabs-internal.com';
 const REQUEST_TIMEOUT = 30000; 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;

@@ -38,10 +38,10 @@
         }
     },
     "mint": {
-        "free": "FREE MINT!",
-        "noCost": "No cost, just gas fees",
+        "mint": "MINT OPENED!",
+        "noCost": "0.04 $PHRS per $GOTCHI",
         "button": "Mint Now",
-        "description": "Mint your unique Pharos and join our collection",
-        "limited": "Limited time offer!"
+        "description": "Mint your unique $GOTCHI and join our collection",
+        "limited": "Limited time offer! 20,000 $GOTCHI!"
     }
 } 
