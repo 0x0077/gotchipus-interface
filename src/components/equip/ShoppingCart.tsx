@@ -150,7 +150,7 @@ export const ShoppingCart = ({
                     ${isMobile ? 'py-2 text-sm' : 'py-3 text-base'}`}
                 >
                   {isPurchasing ? (
-                    <Win98Loading text="Processing..." />
+                    <Win98Loading className="w-full p-2" text="Processing..." />
                   ) : (
                     'Buy Now'
                   )}

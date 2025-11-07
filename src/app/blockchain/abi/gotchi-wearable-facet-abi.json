@@ -1,19 +1,6 @@
 [
     {
         "type": "function",
-        "name": "PRICE",
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256",
-                "internalType": "uint256"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    {
-        "type": "function",
         "name": "batchEquipWearable",
         "inputs": [
             {
@@ -34,6 +21,29 @@
         ],
         "outputs": [],
         "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "batchMintWearable",
+        "inputs": [
+            {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "wearableTokenIds",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            },
+            {
+                "name": "amounts",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
     },
     {
         "type": "function",
@@ -163,6 +173,32 @@
     },
     {
         "type": "function",
+        "name": "deleteBatchWearable",
+        "inputs": [
+            {
+                "name": "wearableTokenIds",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "deleteWearable",
+        "inputs": [
+            {
+                "name": "wearableTokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "equipWearable",
         "inputs": [
             {
@@ -216,6 +252,96 @@
                         "internalType": "bool"
                     }
                 ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getCountWearablesByType",
+        "inputs": [
+            {
+                "name": "wearableType",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "c_",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getIdByWearableType",
+        "inputs": [
+            {
+                "name": "wearableType",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            },
+            {
+                "name": "index",
+                "type": "uint8",
+                "internalType": "uint8"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getNextTokenId",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getRandomTraitsIndex",
+        "inputs": [
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "preIndex",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "indexs",
+                "type": "uint8[3]",
+                "internalType": "uint8[3]"
             }
         ],
         "stateMutability": "view"
@@ -304,6 +430,37 @@
     },
     {
         "type": "function",
+        "name": "setCountWearablesByType",
+        "inputs": [
+            {
+                "name": "wearableTypes",
+                "type": "bytes32[]",
+                "internalType": "bytes32[]"
+            },
+            {
+                "name": "lens",
+                "type": "uint8[]",
+                "internalType": "uint8[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setNextTokenId",
+        "inputs": [
+            {
+                "name": "next_",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
         "name": "setWearableApprovalForAll",
         "inputs": [
             {
@@ -387,6 +544,106 @@
                 "name": "wearableType",
                 "type": "bytes32",
                 "internalType": "bytes32"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateBatchWearable",
+        "inputs": [
+            {
+                "name": "wearableTokenIds",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            },
+            {
+                "name": "tokenUris",
+                "type": "string[]",
+                "internalType": "string[]"
+            },
+            {
+                "name": "infos",
+                "type": "tuple[]",
+                "internalType": "struct WearableInfo[]",
+                "components": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "description",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "author",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "wearableType",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "wearableId",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "updateWearable",
+        "inputs": [
+            {
+                "name": "wearableTokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "tokenUri",
+                "type": "string",
+                "internalType": "string"
+            },
+            {
+                "name": "info",
+                "type": "tuple",
+                "internalType": "struct WearableInfo",
+                "components": [
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "description",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "author",
+                        "type": "string",
+                        "internalType": "string"
+                    },
+                    {
+                        "name": "wearableType",
+                        "type": "bytes32",
+                        "internalType": "bytes32"
+                    },
+                    {
+                        "name": "wearableId",
+                        "type": "uint8",
+                        "internalType": "uint8"
+                    }
+                ]
             }
         ],
         "outputs": [],

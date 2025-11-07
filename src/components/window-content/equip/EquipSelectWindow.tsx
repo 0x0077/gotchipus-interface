@@ -11,6 +11,7 @@ import { KEY_TO_CONFIG_MAP, WearableCategoryKey, TOKEN_ID_TO_LOCAL_INDEX, TOKEN_
 import SvgIcon from "@/components/gotchiSvg/SvgIcon"; 
 import { WearableDefinition } from "@/lib/types";
 import { normalizeWearableId } from "@/lib/utils";
+import { getWearableName, WearableType } from "@/src/utils/wearableMapping";
 
 interface EquipSelectWindowProps {
   onClose: () => void
@@ -33,6 +34,20 @@ const EquipSelectWindow = observer(({ onClose, onSuccess, wearableBalances, sele
     setActiveTab(getTypeFromIndex(selectedType));
   }, [selectedType]);
 
+  const mapCategoryNameToWearableType = (categoryName: string): WearableType | null => {
+    const mapping: Record<string, WearableType> = {
+      'head': 'heads',
+      'hand': 'hands',
+      'clothes': 'clothes',
+      'face': 'faces',
+      'mouth': 'mouths',
+      'background': 'backgrounds',
+      'body': 'bodys',
+      'eye': 'eyes',
+    };
+    return mapping[categoryName] || null;
+  };
+
   const getAvailableEquipments = (type: string): WearableDefinition[] => {
     const config = KEY_TO_CONFIG_MAP[type as WearableCategoryKey];
     if (!config) return [];
@@ -41,6 +56,7 @@ const EquipSelectWindow = observer(({ onClose, onSuccess, wearableBalances, sele
     if (!categoryMapping) return [];
 
     const availableEquipments: WearableDefinition[] = [];
+    const wearableType = mapCategoryNameToWearableType(config.name);
     
     Object.keys(categoryMapping).forEach(tokenIdStr => {
       const tokenId = parseInt(tokenIdStr);
@@ -48,12 +64,13 @@ const EquipSelectWindow = observer(({ onClose, onSuccess, wearableBalances, sele
       
       if (balance > 0) {
         const imagePath = TOKEN_ID_TO_IMAGE[tokenId];
-        if (imagePath) {
-          const fileName = imagePath.split('/').pop()?.replace('.png', '') || `Item ${tokenId}`;
+        if (imagePath && wearableType) {
+          const index = tokenId - config.offset;
+          const name = getWearableName(wearableType, index);
           
           availableEquipments.push({
             id: tokenId,
-            name: fileName,
+            name: name,
             svg: "" 
           });
         }
@@ -80,7 +97,7 @@ const EquipSelectWindow = observer(({ onClose, onSuccess, wearableBalances, sele
   const handleEquipWearable = (wearableId: number) => {
     setEquipIndex(wearableId);
     setIsEquiping(true);
-    contractWrite("unequipWearable", [selectedTokenId, wearableId, selectedType]);
+    contractWrite("equipWearable", [selectedTokenId, wearableId, selectedType]);
 
     toast({
       title: "Transaction Submitted",

@@ -169,16 +169,16 @@ export const useWearableMarketplaceWrite = () => {
     }
 
     try {
-      for (let i = 0; i < wearableTokenIds.length; i++) {
-        const itemTotalValue = prices[i] * BigInt(amounts[i]);
-        writeContract({
-          address: WEARABLE_MARKETPLACE_ADDRESS as `0x${string}`,
-          abi: WEARABLE_MARKETPLACE_ABI as Abi,
-          functionName: 'mintWearable',
-          args: [BigInt(wearableTokenIds[i]), BigInt(amounts[i])],
-          value: itemTotalValue
-        });
-      }
+      console.log(ethers.parseEther('0.001') * BigInt(wearableTokenIds.length));
+      
+      writeContract({
+        address: WEARABLE_MARKETPLACE_ADDRESS as `0x${string}`,
+        abi: WEARABLE_MARKETPLACE_ABI as Abi,
+        functionName: 'batchMintWearable',
+        args: [wearableTokenIds, amounts],
+        value: ethers.parseEther('0.001') * BigInt(wearableTokenIds.length)
+      });
+
     } catch (error) {
       resetWrite();
       throw error;

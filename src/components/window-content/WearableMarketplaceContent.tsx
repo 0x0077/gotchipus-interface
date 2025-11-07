@@ -10,6 +10,7 @@ import { observer } from "mobx-react-lite"
 import { useStores } from "@stores/context"
 import useResponsive from "@/hooks/useResponsive"
 import { TOKEN_ID_TO_IMAGE } from "@/components/gotchiSvg/config"
+import { getWearableName, WearableType } from "@/src/utils/wearableMapping"
 import {
   WearableItem,
   CartItem,
@@ -19,6 +20,7 @@ import {
   ShoppingCart,
   FilterSidebar
 } from "@/components/equip"
+import { Win98Loading } from "@/components/ui/win98-loading"
 
 const generateItemMetadata = (index: number) => {
   const rarities: ('common' | 'rare' | 'epic' | 'legendary')[] = ['common', 'common', 'common', 'rare', 'rare', 'epic', 'legendary'];
@@ -40,21 +42,33 @@ const generateWearableItems = (): WearableItem[] => {
     const tokenId = parseInt(tokenIdStr);
 
     let category: 'head' | 'hand' | 'clothes' | 'face' | 'mouth' | null = null;
+    let wearableType: WearableType | null = null;
+    let index = 0;
 
     if (tokenId >= 46 && tokenId <= 62) {
       category = 'head';
+      wearableType = 'heads';
+      index = tokenId - 46;
     } else if (tokenId >= 32 && tokenId <= 45) {
       category = 'hand';
+      wearableType = 'hands';
+      index = tokenId - 32;
     } else if (tokenId >= 63 && tokenId <= 71) {
       category = 'clothes';
+      wearableType = 'clothes';
+      index = tokenId - 63;
     } else if (tokenId >= 72 && tokenId <= 78) {
       category = 'face';
+      wearableType = 'faces';
+      index = tokenId - 72;
     } else if (tokenId >= 79 && tokenId <= 84) {
       category = 'mouth';
+      wearableType = 'mouths';
+      index = tokenId - 79;
     }
 
-    if (category) {
-      const name = imagePath.split('/').pop()?.replace('.png', '') || `Item ${tokenId}`;
+    if (category && wearableType) {
+      const name = getWearableName(wearableType, index);
       const metadata = generateItemMetadata(tokenId);
 
       items.push({
@@ -214,8 +228,9 @@ const WearableMarketplaceContent = observer(() => {
   };
 
   return (
-    <div className={`bg-[#c0c0c0] min-h-screen ${isMobile ? 'p-2' : 'p-4'}`}>
-      <div className={`bg-[#000080] text-white font-bold mb-4 ${isMobile ? 'p-3' : 'p-4'}`}>
+    <div className={`bg-[#c0c0c0] min-h-screen pb-24 ${isMobile ? 'p-2' : 'p-4'}`}>
+      {/* Sticky Header */}
+      <div className={`sticky top-0 z-30 bg-[#000080] text-white font-bold mb-4 ${isMobile ? 'p-3' : 'p-4'} shadow-lg`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className={isMobile ? 'text-lg' : 'text-2xl'}>Wearable Marketplace</h1>
@@ -225,13 +240,13 @@ const WearableMarketplaceContent = observer(() => {
           </div>
           <button
             onClick={() => setShowCart(true)}
-            className={`relative border-2 border-white bg-[#000060] hover:bg-[#000040] font-bold
-              ${isMobile ? 'px-3 py-2 text-lg' : 'px-4 py-2 text-xl'}`}
+            className={`relative border-2 border-white bg-[#000060] hover:bg-[#000040] font-bold transition-all
+              ${isMobile ? 'px-3 py-2' : 'px-4 py-2'}`}
           >
             <Image src="/icons/marketplace.png" alt="Cart" width={24} height={24} />
             {cart.length > 0 && (
               <span className={`absolute -top-2 -right-2 bg-red-600 text-white rounded-full
-                ${isMobile ? 'w-5 h-5 text-xs' : 'w-6 h-6 text-sm'} flex items-center justify-center`}>
+                ${isMobile ? 'w-5 h-5 text-xs' : 'w-6 h-6 text-sm'} flex items-center justify-center animate-pulse`}>
                 {getTotalItems()}
               </span>
             )}
@@ -291,6 +306,82 @@ const WearableMarketplaceContent = observer(() => {
         onClose={() => setSelectedItem(null)}
         onAddToCart={addToCart}
       />
+
+      {cart.length > 0 && (
+        <div className={`fixed bottom-0 left-0 right-0 z-40 bg-[#d4d0c8] border-t-4 border-[#808080] 
+          shadow-[0_-4px_12px_rgba(0,0,0,0.3)] ${isMobile ? 'px-2 py-2' : 'px-6 py-3'}`}>
+          <div className={`max-w-7xl mx-auto flex items-center justify-between gap-4 ${isMobile ? 'flex-col' : ''}`}>
+            <div className={`flex items-center gap-4 ${isMobile ? 'w-full justify-between' : ''}`}>
+              <button
+                onClick={() => setShowCart(true)}
+                className={`flex items-center gap-2 border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] 
+                  hover:bg-[#b0b0b0] active:shadow-win98-inner font-bold transition-all
+                  ${isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'}`}
+              >
+                <Image src="/icons/marketplace.png" alt="Cart" width={20} height={20} />
+                <span>View Cart</span>
+                <span className="bg-red-600 text-white rounded-full px-2 py-0.5 text-xs">
+                  {getTotalItems()}
+                </span>
+              </button>
+              
+              <div className={`flex items-center gap-2 ${isMobile ? 'flex-col items-start' : ''}`}>
+                <div className={`${isMobile ? 'text-xs' : 'text-sm'} text-[#808080]`}>
+                  <span className="font-bold">{getTotalItems()}</span> item{getTotalItems() !== 1 ? 's' : ''} in cart
+                </div>
+                <div className={`font-bold text-[#000080] ${isMobile ? 'text-base' : 'text-xl'}`}>
+                  {getTotalPrice().toFixed(4)} PHRS
+                </div>
+              </div>
+            </div>
+
+            <div className={`flex items-center gap-2 ${isMobile ? 'w-full' : ''}`}>
+              <button
+                onClick={clearCart}
+                disabled={isPurchasing}
+                className={`border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] font-bold
+                  hover:bg-[#b0b0b0] active:shadow-win98-inner disabled:opacity-50 disabled:cursor-not-allowed
+                  ${isMobile ? 'px-3 py-1.5 text-xs flex-1' : 'px-4 py-2 text-sm'}`}
+              >
+                Clear
+              </button>
+              {walletStore.isConnected ? (
+                <button
+                  onClick={handlePurchase}
+                  disabled={isPurchasing || cart.length === 0}
+                  className={`border-2 border-[#808080] shadow-win98-outer bg-[#008000] text-white font-bold
+                    hover:bg-[#006000] active:shadow-win98-inner disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-all ${isMobile ? 'px-4 py-2 text-sm flex-1' : 'px-6 py-2 text-base'}`}
+                >
+                  {isPurchasing ? (
+                    <Win98Loading className="w-full" text="Processing..." />
+                  ) : (
+                    `Buy Now (${getTotalPrice().toFixed(4)} PHRS)`
+                  )}
+                </button>
+              ) : (
+                <div className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] 
+                  ${isMobile ? 'flex-1' : ''}`}>
+                  <button
+                    className={`w-full border-2 border-[#808080] shadow-win98-outer bg-[#000080] text-white font-bold
+                      hover:bg-[#000060] active:shadow-win98-inner
+                      ${isMobile ? 'px-4 py-2 text-xs' : 'px-6 py-2 text-sm'}`}
+                    onClick={() => {
+                      toast({
+                        title: "Connect Wallet",
+                        description: "Please connect your wallet to purchase items",
+                        variant: "destructive"
+                      });
+                    }}
+                  >
+                    Connect Wallet to Buy
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCart && (
         <ShoppingCart

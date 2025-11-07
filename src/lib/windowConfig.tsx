@@ -41,7 +41,7 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
     id: "wearable",
     title: "Wearable Marketplace",
     icon: "/wearable-marketplace.svg",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "ai",

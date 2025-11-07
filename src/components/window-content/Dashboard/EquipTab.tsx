@@ -12,6 +12,7 @@ import { EquipWearableType } from "@/lib/types"
 import { TOKEN_ID_TO_IMAGE, KEY_TO_CONFIG_MAP, WearableCategoryKey, TOKEN_ID_TO_LOCAL_INDEX } from "@/components/gotchiSvg/config"
 import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, FACE_BYTES32, MOUTH_BYTES32, HEAD_BYTES32, CLOTHES_BYTES32 } from "@/lib/constant"
 import { normalizeWearableId } from "@/lib/utils"
+import { getWearableName, WearableType } from "@/src/utils/wearableMapping"
 
 const EQUIPMENT_SLOTS = [
   { name: "Background", type: BG_BYTES32, canEquip: false },
@@ -93,11 +94,26 @@ const EquipSlot = ({ slot, index, selectedEquipSlot, onSlotClick, isMobile }: Eq
   )
 }
 
-const getWearableName = (imagePath: string | null): string | null => {
-  if (!imagePath) return null;
-  const fileName = imagePath.split('/').pop();
-  if (!fileName) return null;
-  return fileName.replace('.png', '').replace(/'/g, "'");
+const mapCategoryNameToWearableType = (categoryName: string): WearableType | null => {
+  const mapping: Record<string, WearableType> = {
+    'head': 'heads',
+    'hand': 'hands',
+    'clothes': 'clothes',
+    'face': 'faces',
+    'mouth': 'mouths',
+    'background': 'backgrounds',
+    'body': 'bodys',
+    'eye': 'eyes',
+  };
+  return mapping[categoryName] || null;
+};
+
+const getWearableNameFromTokenId = (tokenId: number, config: { name: string; offset: number }): string | null => {
+  const wearableType = mapCategoryNameToWearableType(config.name);
+  if (!wearableType) return null;
+  
+  const index = tokenId - config.offset;
+  return getWearableName(wearableType, index);
 };
 
 const calculateEquippedItems = (wearableTypeInfos: EquipWearableType[] | undefined): (EquippedItem & { wearableName?: string | null })[] => {
@@ -125,7 +141,7 @@ const calculateEquippedItems = (wearableTypeInfos: EquipWearableType[] | undefin
         if (categoryMapping) {
           const tokenId = normalizeWearableId(Number(wearableInfo.wearableId));
           imagePath = TOKEN_ID_TO_IMAGE[tokenId] || null;
-          wearableName = getWearableName(imagePath);
+          wearableName = getWearableNameFromTokenId(tokenId, config);
         }
       }
     }
