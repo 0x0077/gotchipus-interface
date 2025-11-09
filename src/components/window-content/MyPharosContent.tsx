@@ -9,6 +9,7 @@ import { useStores } from "@stores/context";
 import { Win98Loading } from "@/components/ui/win98-loading";
 import useSWR from 'swr';
 import useResponsive from "@/hooks/useResponsive";
+import { dispatchWindowOpenEvent } from "@/lib/windowEvents";
 import { getERC6551AccountSalt, getTraitsIndex } from "@/src/utils/contractHepler"
 import { CHAIN_ID, ZERO_ADDRESS } from "@/lib/constant"
 import { PUS_ADDRESS, ERC6551_ACCOUNT_IMPLEMENTATION_ADDRESS } from "@/src/app/blockchain"
@@ -85,9 +86,9 @@ const MyPharosContent = observer(() => {
     refreshInterval: viewState === 'list' ? 30000 : 0,
     revalidateOnMount: true,
     revalidateIfStale: true,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000,
     keepPreviousData: true,
   });
 
@@ -97,6 +98,11 @@ const MyPharosContent = observer(() => {
     }
   }, [filteredIds]);
 
+  useEffect(() => {
+    if (apiUrl && viewState === 'list') {
+      mutate();
+    }
+  }, [walletStore.address, walletStore.isConnected, apiUrl, viewState, mutate]);
 
   const getCurrentPageItems = useCallback(() => {
     const startIndex = 0;
@@ -289,7 +295,7 @@ const MyPharosContent = observer(() => {
 
   const handleBack = useCallback(() => {
     setViewState("list");
-    mutate();
+    mutate(undefined, { revalidate: true });
   }, [mutate]);
 
 
@@ -327,18 +333,39 @@ const MyPharosContent = observer(() => {
 
   if (ids.length === 0) {
     return (
-      <div className="p-6 bg-[#d4d0c8] h-full flex items-center justify-center">
-      <div className="bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer max-w-md w-full">
-          <div className="bg-[#000080] text-white px-2 py-1 flex items-center border-b-2 border-[#808080]">
-            <span className="text-xs font-bold">Information</span>
-          </div>
-          <div className="p-6 flex flex-col items-center text-center">
-            <div className="mb-4">
-              <Image src="/not-any.png" alt="No NFTs" width={80} height={80} />
-            </div>
-            <h3 className="text-lg font-bold mb-2">No Pharos NFTs Found</h3>
-            <p className="text-sm text-[#000080] mb-4">You don't have any Pharos NFTs yet.</p>
-          </div>
+      <div className="p-4 h-full scrollbar-none flex flex-col items-center justify-center gap-6">
+        <div className="flex-shrink-0">
+          <Image
+            src="/not-any.png"
+            alt="No Pharos"
+            width={150}
+            height={150}
+            className="drop-shadow-lg"
+          />
+        </div>
+
+        <div className="flex flex-col items-center gap-3 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#000080] flex items-center gap-2 justify-center">
+            Collect Your First Pharos
+          </h2>
+          <p className="text-sm text-[#404040]">
+            You don't have any Pharos NFTs yet. Mint your first Pharos to unlock new adventures with your Gotchipus.
+          </p>
+        </div>
+
+        <div className="flex gap-3 flex-wrap justify-center">
+          <button
+            onClick={() => dispatchWindowOpenEvent("mint")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#000080] text-white px-6 py-3 text-sm font-bold rounded-none hover:bg-[#1a3a99] active:shadow-win98-inner transition-all"
+          >
+            Mint Pharos
+          </button>
+          <button
+            onClick={() => dispatchWindowOpenEvent("dashboard")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] text-[#000080] px-6 py-3 text-sm font-bold rounded-none hover:bg-[#c0c0c0] active:shadow-win98-inner transition-all"
+          >
+            View Gotchipus
+          </button>
         </div>
       </div>
     );

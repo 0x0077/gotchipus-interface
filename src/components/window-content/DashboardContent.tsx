@@ -18,6 +18,7 @@ import useSWR from 'swr';
 import WalletConnectTBA from "./Dashboard/WalletTabContent/WalletConnectTBA";
 import { CustomConnectButton } from "@/components/footer/CustomConnectButton"
 import useResponsive from "@/hooks/useResponsive"
+import { dispatchWindowOpenEvent } from "@/lib/windowEvents"
 
 interface ListApiData {
   balance: string;
@@ -78,15 +79,15 @@ const DashboardContent = observer(() => {
 
   const listApiUrl = walletAddress && activeTab === null ? `/api/tokens/gotchipus?owner=${walletAddress}&includeGotchipusInfo=false` : null;
 
-  const { data: listData, isLoading: isListLoading } = useSWR<ListApiData>(listApiUrl, fetcher, {
+  const { data: listData, isLoading: isListLoading, mutate: mutateListData } = useSWR<ListApiData>(listApiUrl, fetcher, {
     refreshInterval: 30000,
     keepPreviousData: true,
     errorRetryCount: 5,
     revalidateOnMount: true,
     revalidateIfStale: true,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60000,
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000,
   });
   
   const ids = listData?.ids || [];
@@ -117,6 +118,11 @@ const DashboardContent = observer(() => {
     }
   }, [detailsData, selectedTokenId, walletStore]);
 
+  useEffect(() => {
+    if (listApiUrl && !selectedTokenId) {
+      mutateListData();
+    }
+  }, [walletAddress, listApiUrl, selectedTokenId, mutateListData]);
 
   const {contractWrite, isConfirmed, error} = useContractWrite();
 
@@ -241,6 +247,7 @@ const DashboardContent = observer(() => {
   const handleBackToList = () => {
     setSelectedTokenId("");
     setCurrentPage(1);
+    mutateListData(undefined, { revalidate: true });
   };
   
 
@@ -308,18 +315,39 @@ const DashboardContent = observer(() => {
 
   if (balances === 0) {
     return (
-      <div className="p-6 bg-[#d4d0c8] h-full flex items-center justify-center">
-        <div className="bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer max-w-md w-full">
-          <div className="bg-[#000080] text-white px-2 py-1 flex items-center border-b-2 border-[#808080]">
-            <span className="text-xs font-bold">Information</span>
-          </div>
-          <div className="p-6 flex flex-col items-center text-center">
-            <div className="mb-4">
-              <Image src="/not-any.png" alt="No NFTs" width={80} height={80} />
-            </div>
-            <h3 className="text-lg font-bold mb-2">No NFTs Found</h3>
-            <p className="text-sm text-[#000080] mb-4">You don't have any Gotchipus NFTs yet.</p>
-          </div>
+      <div className="p-4 h-full scrollbar-none flex flex-col items-center justify-center gap-6">
+        <div className="flex-shrink-0">
+          <Image
+            src="/not-any.png"
+            alt="No Pharos"
+            width={150}
+            height={150}
+            className="drop-shadow-lg"
+          />
+        </div>
+
+        <div className="flex flex-col items-center gap-3 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#000080] flex items-center gap-2 justify-center">
+            Start Your Journey
+          </h2>
+          <p className="text-sm text-[#404040]">
+            You need to own Pharos NFTs to summon and manage Gotchipus. Get started by visiting the Pharos collection.
+          </p>
+        </div>
+
+        <div className="flex gap-3 flex-wrap justify-center">
+          <button
+            onClick={() => dispatchWindowOpenEvent("pharos")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#000080] text-white px-6 py-3 text-sm font-bold rounded-none hover:bg-[#1a3a99] active:shadow-win98-inner transition-all"
+          >
+            Go to My Pharos
+          </button>
+          <button
+            onClick={() => dispatchWindowOpenEvent("mint")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] text-[#000080] px-6 py-3 text-sm font-bold rounded-none hover:bg-[#c0c0c0] active:shadow-win98-inner transition-all"
+          >
+            Mint Pharos
+          </button>
         </div>
       </div>
     );
@@ -327,20 +355,41 @@ const DashboardContent = observer(() => {
 
   if (ids.length === 0) {
     return (
-      <div className="p-6 bg-[#d4d0c8] h-full flex items-center justify-center">
-        <div className="bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer max-w-md w-full">
-          <div className="bg-[#000080] text-white px-2 py-1 flex items-center border-b-2 border-[#808080]">
-            <span className="text-xs font-bold">Information</span>
-          </div>
-          <div className="p-6 flex flex-col items-center text-center">
-            <div className="mb-4">
-              <Image src="/not-any.png" alt="No Gotchipus" width={80} height={80} />
-            </div>
-            <h3 className="text-lg font-bold mb-2">No Gotchipus Found</h3>
-            <p className="text-sm text-[#000080] mb-4">
-              {balances > 0 ? `You hold ${balances} Pharos, but you haven't summoned your Gotchipus yet.` : "You don't have any Gotchipus NFTs yet."}
-            </p>
-          </div>
+      <div className="p-4 h-full scrollbar-none flex flex-col items-center justify-center gap-6">
+        <div className="flex-shrink-0">
+          <Image
+            src="/not-any.png"
+            alt="No Gotchipus"
+            width={150}
+            height={150}
+            className="drop-shadow-lg"
+          />
+        </div>
+
+        <div className="flex flex-col items-center gap-3 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#000080] flex items-center gap-2 justify-center">
+            Ready to Summon?
+          </h2>
+          <p className="text-sm text-[#404040]">
+            {balances > 0
+              ? `You hold ${balances} Pharos, but you haven't summoned your Gotchipus yet. Head to the Pharos collection to begin the summoning ritual.`
+              : "You don't have any Gotchipus NFTs yet. Get started by visiting the Pharos collection."}
+          </p>
+        </div>
+
+        <div className="flex gap-3 flex-wrap justify-center">
+          <button
+            onClick={() => dispatchWindowOpenEvent("pharos")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#000080] text-white px-6 py-3 text-sm font-bold rounded-none hover:bg-[#1a3a99] active:shadow-win98-inner transition-all"
+          >
+            Go to Pharos
+          </button>
+          <button
+            onClick={() => dispatchWindowOpenEvent("mint")}
+            className="border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] text-[#000080] px-6 py-3 text-sm font-bold rounded-none hover:bg-[#c0c0c0] active:shadow-win98-inner transition-all"
+          >
+            Learn More
+          </button>
         </div>
       </div>
     );

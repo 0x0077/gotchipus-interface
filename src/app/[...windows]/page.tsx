@@ -10,6 +10,7 @@ import type { WindowType } from "@/lib/types"
 import type { JSX } from "react/jsx-runtime"
 import { WINDOW_SIZE } from "@/lib/constant"
 import { getWindowIcon, getWindowContent } from "@/lib/windowConfig"
+import { WINDOW_OPEN_EVENT, type WindowOpenEventDetail } from "@/lib/windowEvents"
 
 export const runtime = 'edge';
 
@@ -123,6 +124,14 @@ export default function CatchAllPage() {
         windowRouter.openWindow(windowId)
       }
 
+      if (typeof window !== "undefined") {
+        window.requestAnimationFrame(() => {
+          handleActivateWindow(windowId)
+        })
+      } else {
+        handleActivateWindow(windowId)
+      }
+
       return [...prev, newWindow]
     })
   }, [isMobile, zIndexCounter, windowRouter, handleActivateWindow])
@@ -205,6 +214,32 @@ export default function CatchAllPage() {
       })
     })
   }, [windowRouter.openWindows, isMobile, zIndexCounter, windowRouter])
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const handleExternalOpen = (event: Event) => {
+      const { windowId } = (event as CustomEvent<WindowOpenEventDetail>).detail || {}
+      if (!windowId) {
+        return
+      }
+
+      const icon = getWindowIcon(windowId)
+      if (!icon) {
+        return
+      }
+
+      const content = getWindowContent(windowId)
+      handleOpenWindow(windowId, icon.title, content)
+    }
+
+    window.addEventListener(WINDOW_OPEN_EVENT, handleExternalOpen)
+    return () => {
+      window.removeEventListener(WINDOW_OPEN_EVENT, handleExternalOpen)
+    }
+  }, [handleOpenWindow])
 
   return (
     <main className={`w-full min-w-[800px] min-h-screen overflow-auto bg-uni-bg-01 relative ${isMobile ? 'touch-manipulation' : ''}`}>
