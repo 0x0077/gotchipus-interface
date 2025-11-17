@@ -90,6 +90,8 @@ const MintContent = observer(() => {
     }
   };
 
+  const isSoldOut = totalMintedSupply >= 20000;
+
   return (
     <div className={`bg-[#c0c0c0] border-2 border-[#dfdfdf] border-t-black border-l-black border-r-[#808080] border-b-[#808080] ${isMobile ? 'p-2' : 'p-4'}`}>      
       <div className={`bg-[#c0c0c0] border-2 border-[#dfdfdf] border-t-[#808080] border-l-[#808080] border-r-black border-b-black ${isMobile ? 'p-2' : 'p-4'}`}>
@@ -118,7 +120,8 @@ const MintContent = observer(() => {
             <div className={`flex items-center justify-between mb-4 ${isMobile ? 'mb-2' : ''}`}>
               <button 
                 onClick={decrementAmount}
-                className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
+                disabled={isSoldOut}
+                className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] disabled:opacity-50 disabled:cursor-not-allowed ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
               >
                 -
               </button>
@@ -146,20 +149,23 @@ const MintContent = observer(() => {
                       setMintAmount(30);
                     }
                   }}
-                  className={`text-center font-bold bg-transparent border-none outline-none w-16 ${isMobile ? 'text-lg' : 'text-xl'}`}
+                  disabled={isSoldOut}
+                  className={`text-center font-bold bg-transparent border-none outline-none w-16 disabled:opacity-50 ${isMobile ? 'text-lg' : 'text-xl'}`}
                 />
               </div>
               
               <div className="flex items-center">
                 <button 
                   onClick={incrementAmount}
-                  className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
+                  disabled={isSoldOut}
+                  className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] disabled:opacity-50 disabled:cursor-not-allowed ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
                 >
                   +
                 </button>
                 <button
                   onClick={() => setMintAmount(30)}
-                  className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
+                  disabled={isSoldOut}
+                  className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm flex items-center justify-center font-bold hover:bg-[#c0c0c0] disabled:opacity-50 disabled:cursor-not-allowed ${isMobile ? 'w-6 h-6 text-sm' : 'w-8 h-8'}`}
                 >
                   Max
                 </button> 
@@ -169,11 +175,13 @@ const MintContent = observer(() => {
             {walletStore.isConnected ? (
               <button 
                 onClick={handleMint}
-                disabled={isMinting}
-                className={`w-full border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm font-bold hover:bg-[#c0c0c0] flex items-center justify-center ${isMobile ? 'py-1 text-sm' : 'py-2'}`}
+                disabled={isMinting || isSoldOut}
+                className={`w-full border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm font-bold hover:bg-[#c0c0c0] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${isMobile ? 'py-1 text-sm' : 'py-2'}`}
               >
                 {isMinting ? (
                   <Win98Loading text={isMobile ? "Minting..." : "Minting in progress..."} />
+                ) : isSoldOut ? (
+                  "Sold out"
                 ) : (
                   <>
                     <span className={`mr-2 ${isMobile ? 'text-sm' : ''}`}>🐙</span> 
