@@ -57,7 +57,8 @@ function flattenGotchipusInfo(info: any): GotchipusInfo {
   const core = serialized.core || {};
   const faction = serialized.faction || {};
   const serializedDna = serializeBigIntFields(serialized.dna || {});
-  
+  const leveling = serialized.leveling || {};
+
   return {
     name: serialized.name || "",
     uri: serialized.uri || "",
@@ -81,7 +82,16 @@ function flattenGotchipusInfo(info: any): GotchipusInfo {
     singer: serialized.singer || "",
     nonces: serialized.nonces?.toString() || '0',
     element: serialized.element ? Number(serialized.element) : undefined,
-    primaryFaction: Number(faction.primaryFaction ?? 0)
+    primaryFaction: Number(faction.primaryFaction ?? 0),
+    currentExp: Number(leveling.currentExp ?? 0),     
+    requiredExp: Number(leveling.requiredExp ?? 0),    
+    totalExp: Number(leveling.totalExp ?? 0),       
+    battleExp: Number(leveling.battleExp ?? 0),      
+    buildingExp: Number(leveling.buildingExp ?? 0),    
+    interactionExp: Number(leveling.interactionExp ?? 0), 
+    questExp: Number(leveling.questExp ?? 0),       
+    expMultiplier: Number(leveling.expMultiplier ?? 0),
+    lastExpGain: Number(leveling.lastExpGain ?? 0),    
   };
 }
 
@@ -107,7 +117,7 @@ export async function GET(request: NextRequest) {
     if (!info) {
         return NextResponse.json({ error: 'Token info not found' }, { status: 404 });
     }
-
+    
     const flattenedInfo = flattenGotchipusInfo(info);
 
     const responseData = {

@@ -59,6 +59,15 @@ export interface GotchipusInfo {
   nonces: string;
   element?: number;
   primaryFaction?: number;
+  currentExp?: number;
+  requiredExp?: number;
+  totalExp?: number;
+  battleExp?: number;
+  buildingExp?: number;
+  interactionExp?: number;
+  questExp?: number;
+  expMultiplier?: number;
+  lastExpGain?: number;
 }
 
 export interface GotchiItem {
