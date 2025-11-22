@@ -304,8 +304,8 @@ const DashboardTab = observer(({
               </button>
             </>
           )}
-        </div>
-      </div> */}
+        </div> */}
+      </div>
 
       <div className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] rounded-sm ${isMobile ? 'p-3' : 'p-4'}`}>
         <div className={`font-bold mb-3 flex items-center border-b border-[#808080] pb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
