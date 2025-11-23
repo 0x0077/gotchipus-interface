@@ -72,7 +72,7 @@ const DashboardContent = observer(() => {
   const [showWalletConnectTBA, setShowWalletConnectTBA] = useState<boolean>(false)
   const [petSuccessTimestamp, setPetSuccessTimestamp] = useState<number>(0)
   
-  const { walletStore } = useStores()
+  const { walletStore, wearableStore } = useStores()
   const walletAddress = walletStore.address;
   const { toast } = useToast()
   const isMobile = useResponsive()
@@ -126,11 +126,11 @@ const DashboardContent = observer(() => {
 
   const {contractWrite, isConfirmed, error} = useContractWrite();
 
-  const { data: wearableTypeInfos, isLoading: isLoadingWearables, error: wearablesError } = useContractRead(
+  const { data: wearableTypeInfos, isLoading: isLoadingWearables, error: wearablesError, refetch: refetchWearables } = useContractRead(
     "getAllEquipWearableType",
     selectedTokenId ? [selectedTokenId] : undefined,
     { enabled: !!selectedTokenId }
-  ) as { data: EquipWearableType[] | undefined; isLoading: boolean; error: Error | null };
+  ) as { data: EquipWearableType[] | undefined; isLoading: boolean; error: Error | null; refetch: () => void };
 
   const handlePet = () => {
     if (!selectedTokenId) return;
@@ -209,6 +209,17 @@ const DashboardContent = observer(() => {
       });
     }
   }, [error, isPetWriting]);
+
+  // Refresh wearable data when wearableStore.isRefreshing is true
+  useEffect(() => {
+    if (wearableStore.isRefreshing && selectedTokenId && refetchWearables) {
+      refetchWearables();
+      // Reset the refresh flag after a short delay to allow the refetch to complete
+      setTimeout(() => {
+        wearableStore.setIsRefreshing(false);
+      }, 1000);
+    }
+  }, [wearableStore.isRefreshing, selectedTokenId, refetchWearables, wearableStore]);
 
   const handleEquipSlotClick = (index: number) => {
     setSelectedEquipSlot(index === selectedEquipSlot ? null : index)
