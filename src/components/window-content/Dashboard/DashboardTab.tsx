@@ -122,6 +122,8 @@ const DashboardTab = observer(({
   isLoadingWearables = false,
   wearablesError
 }: DashboardTabProps) => {
+  // console.log("tokenInfo", tokenInfo);
+
   const tokenId = selectedTokenId;
   
   const wearableIndices = useMemo(() => calculateWearableIndices(wearableTypeInfos), [wearableTypeInfos]);

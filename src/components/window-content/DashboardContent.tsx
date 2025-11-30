@@ -97,7 +97,7 @@ const DashboardContent = observer(() => {
     ? `/api/tokens/gotchipus-details?owner=${walletAddress}&tokenId=${selectedTokenId}` 
     : null; 
 
-  const { data: detailsData } = useSWR<DetailsApiData>(detailsApiUrl, fetcher);
+  const { data: detailsData, mutate: mutateDetailsData } = useSWR<DetailsApiData>(detailsApiUrl, fetcher);
   
   useEffect(() => {
     if (selectedTokenId) {
@@ -153,6 +153,11 @@ const DashboardContent = observer(() => {
         setIsPetWriting(false);
         setPetSuccessTimestamp(Date.now());
 
+        // Refresh token info data after petting
+        if (mutateDetailsData) {
+          mutateDetailsData();
+        }
+
         const updateTask = async () => {
           await checkAndCompleteTask(walletStore.address!, 5);
         };
@@ -160,7 +165,7 @@ const DashboardContent = observer(() => {
         walletStore.setIsTaskRefreshing(true);
       }
     }
-  }, [isConfirmed]);
+  }, [isConfirmed, isPetWriting, mutateDetailsData, walletStore]);
 
 
   const handleRename = () => {
@@ -178,14 +183,20 @@ const DashboardContent = observer(() => {
   };
 
   useEffect(() => {
-    if (isConfirmed) {
+    if (isConfirmed && isRenaming) {
       setIsRenaming(false);
+      
+      // Refresh token info data after renaming
+      if (mutateDetailsData) {
+        mutateDetailsData();
+      }
+      
       toast({
         title: "Transaction Confirmed",
         description: "Transaction confirmed successfully",
       })
     }
-  }, [isConfirmed]);
+  }, [isConfirmed, isRenaming, mutateDetailsData]);
 
   useEffect(() => {
     if (error && isRenaming) {
