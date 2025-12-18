@@ -349,11 +349,11 @@ const DashboardTab = observer(({
         </div>
 
         <div className="mt-4 pt-4 border-t border-[#808080]">
-          <div className={`text-[#000080] mb-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>Gotchipus Level: {Number(tokenInfo.level)}</div>
+          <div className={`text-[#000080] mb-2 ${isMobile ? 'text-xs' : 'text-sm'}`}>Gotchipus Level: {Math.floor(Number(tokenInfo.currentExp) / 100)}</div>
           <div className="w-full bg-[#c0c0c0] border border-[#808080] h-4">
-            <div className="bg-[#000080] h-full" style={{ width: `${Number(tokenInfo.currentExp) % 100}%` }}></div>
+            <div className="bg-[#000080] h-full" style={{ width: `${((Number(tokenInfo.currentExp) / 100) % 1) * 100}%` }}></div>
           </div>
-          <div className={`text-right mt-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>XP: {Number(tokenInfo.currentExp) % 100}/100</div>
+          <div className={`text-right mt-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>XP: {Math.floor(((Number(tokenInfo.currentExp) / 100) % 1) * 100)}/100</div>
         </div>
       </div>
     </div>
