@@ -52,6 +52,10 @@ export const WINDOW_SIZE = {
   "wallet-connect-tba": {
     "width": 600,
     "height": 800
+  },
+  "all-gotchi": {
+    "width": 1200,
+    "height": 800
   }
 };
 
@@ -68,7 +72,8 @@ export const WINDOW_BG_COLOR = {
   "mint": "#ffddee",
   "wearable": "#ffddee",
   "daily-task-hall": "#ffddee",
-  "wallet-connect-tba": "#ffddee"
+  "wallet-connect-tba": "#ffddee",
+  "all-gotchi": "#ffddee"
 };
 
 export const CHAIN_ID = 688689;

@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { useSvgLayers } from "@/hooks/useSvgLayers";
+import Image from "next/image";
 import EnhancedGotchiSvg from "@/components/gotchiSvg/EnhancedGotchiSvg";
 import { backgrounds } from "@/components/gotchiSvg/svgs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { GotchiMetadata } from "@/lib/types";
+import { useAllEquipLayers } from "@/hooks/useAllEquipLayers";
 
-interface NftCardProps {
-  id: string;
-  onSelect: (tokenId: string) => void;
-  isMobile?: boolean;
+interface GotchiCardProps {
+  metadata: GotchiMetadata;
+  onClick?: (metadata: GotchiMetadata) => void;
 }
 
 const RARITY_NAMES: Record<number, string> = {
@@ -28,25 +28,15 @@ const RARITY_COLORS: Record<number, string> = {
   3: "bg-[#ff9900] text-white",
 };
 
-export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
-  const { wearableIndices, isLoading } = useSvgLayers(id);
-  const [metadata, setMetadata] = useState<GotchiMetadata | null>(null);
+const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
+  const handleClick = () => {
+    if (onClick) {
+      onClick(metadata);
+    }
+  };
 
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      try {
-        const response = await fetch(`/api/gotchi-metadata?token_id=${id}`);
-        const result = await response.json();
-        if (result.data && result.data.length > 0) {
-          setMetadata(result.data[0]);
-        }
-      } catch (error) {
-        console.error(`Error fetching metadata for token ${id}:`, error);
-      }
-    };
-
-    fetchMetadata();
-  }, [id]);
+  const isSummoned = metadata.status !== 0;
+  const wearableIndices = useAllEquipLayers(metadata.all_equip);
 
   const backgroundComponent = backgrounds(wearableIndices.backgroundIndex);
   const backgroundSvg = backgroundComponent
@@ -57,15 +47,11 @@ export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
     ? { backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(backgroundSvg)}")` }
     : {};
 
-  const handleClick = () => {
-    onSelect(id.toString());
-  };
-
-  const isSummoned = metadata?.status !== 0;
-  const currentExp = metadata?.leveling_data?.current_exp || 0;
+  const currentExp = metadata.leveling_data?.current_exp || 0;
   const calculatedLevel = Math.floor(Number(currentExp) / 100);
 
-  const rarity = metadata?.dna_data?.rarity ?? 0;
+  // Get rarity from dna_data
+  const rarity = metadata.dna_data?.rarity ?? 0;
   const rarityName = RARITY_NAMES[rarity] || "Common";
   const rarityColor = RARITY_COLORS[rarity] || "bg-[#808080] text-white";
 
@@ -77,7 +63,7 @@ export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
       whileTap={{ scale: 0.98 }}
     >
       <div className="w-full flex justify-between items-center mb-1">
-        {isSummoned && metadata ? (
+        {isSummoned ? (
           <>
             <div className="flex items-center gap-1">
               <span className="text-[10px] font-bold bg-[#000080] text-white px-1">
@@ -98,7 +84,7 @@ export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
           </>
         ) : (
           <span className="text-[10px] font-bold bg-[#808080] text-white px-1">
-            {metadata ? "PHAROS" : "GOTCHI"}
+            Not Summoned
           </span>
         )}
       </div>
@@ -107,9 +93,15 @@ export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
         className="relative w-full aspect-square mb-2 bg-white/30 border-2 border-[#808080] shadow-win98-inner p-2 bg-cover bg-center"
         style={isSummoned ? backgroundStyle : {}}
       >
-        {isLoading ? (
+        {!isSummoned ? (
           <div className="w-full h-full flex items-center justify-center">
-            <div className="text-xs">...</div>
+            <Image
+              src="/pharos-summon.gif"
+              alt="Unsummoned Gotchipus"
+              width={100}
+              height={100}
+              className="object-contain"
+            />
           </div>
         ) : (
           <EnhancedGotchiSvg
@@ -120,8 +112,10 @@ export const NftCard = ({ id, onSelect, isMobile }: NftCardProps) => {
       </div>
 
       <div className="text-center text-xs font-bold text-[#000080] px-1 py-0.5 bg-white/30 border border-[#808080] shadow-win98-inner w-full truncate">
-        {metadata?.name || `Gotchipus #${id}`}
+        {metadata.name || `Gotchipus #${metadata.token_id}`}
       </div>
     </motion.div>
   );
 };
+
+export default GotchiCard;

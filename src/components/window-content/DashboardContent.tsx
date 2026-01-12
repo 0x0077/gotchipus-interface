@@ -429,12 +429,12 @@ const DashboardContent = observer(() => {
               </div>
             </div>
           </div>
-          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 scrollbar-none ${isMobile ? 'gap-2' : ''}`}>
+          <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 scrollbar-none ${isMobile ? 'gap-2' : ''}`}>
             {getCurrentPageItems().map((id: string) => (
-              <NftCard 
-                key={id} 
-                id={id} 
-                onSelect={handleTokenSelect} 
+              <NftCard
+                key={id}
+                id={id}
+                onSelect={handleTokenSelect}
                 isMobile={isMobile}
               />
             ))}

@@ -6,6 +6,7 @@ import DashboardContent from "@/components/window-content/DashboardContent"
 import WearableMarketplaceContent from "@/src/components/window-content/WearableMarketplaceContent"
 import DailyTaskHallContent from "@/components/window-content/DailyTaskHallContent"
 import AIContent from "@/components/window-content/AIContent"
+import AllGotchiContent from "@/components/window-content/AllGotchiContent"
 
 export interface WindowIconConfig {
   id: string
@@ -55,6 +56,12 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
     icon: "/icons/pharos-proof.png",
     enabled: false,
   },
+  {
+    id: "all-gotchi",
+    title: "All Gotchi",
+    icon: "/all-gotchi.png",
+    enabled: true,
+  },
 ]
 
 export const getEnabledWindowIcons = (): WindowIconConfig[] => {
@@ -82,6 +89,8 @@ export const getWindowContent = (
       return <DailyTaskHallContent openWindow={props?.openWindow} />
     case "ai":
       return <AIContent />
+    case "all-gotchi":
+      return <AllGotchiContent />
     default:
       return <div>Unknown window: {windowId}</div>
   }

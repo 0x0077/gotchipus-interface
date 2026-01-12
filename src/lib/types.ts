@@ -1,6 +1,76 @@
 import type { JSX } from "react"
 import { ethers } from "ethers";
 
+// Gotchi Metadata from Database (matches gotchi_metadata table)
+export interface GotchiMetadata {
+  // Primary Key & Identifiers
+  id: number;
+  token_id: number;
+
+  // Basic Info
+  name?: string;
+  uri?: string;
+  story?: string; // BYTEA decoded as string
+  owner?: string;
+  collateral?: string;
+  collateral_amount?: string;
+  status: number;
+  locked: boolean;
+  birth_time?: number;
+  timezone?: number;
+
+  // Core Attributes
+  core_level: number;
+  core_evolution: number;
+  core_experience: number;
+  core_available_points: number;
+  core_strength: number;
+  core_defense: number;
+  core_mind: number;
+  core_vitality: number;
+  core_agility: number;
+  core_luck: number;
+
+  // Faction
+  faction_primary?: number;
+  faction_purity: number;
+  faction_has_secondary: boolean;
+
+  // Leveling
+  leveling_total_exp: number;
+
+  // Computed Fields
+  total_stats: number;
+  is_evolved: boolean;
+
+  // JSONB Data
+  soul_data?: Record<string, any>;
+  faction_data?: Record<string, any>;
+  spec_data?: Record<string, any>;
+  strategy_data?: Record<string, any>;
+  evolution_data?: Record<string, any>;
+  leveling_data?: Record<string, any>;
+  dynamic_states?: Record<string, any>;
+  dna_data?: Record<string, any>;
+
+  // ERC6551
+  singer?: string;
+  nonces?: string;
+
+  // Metadata
+  created_at?: string;
+  updated_at?: string;
+  synced_at?: string;
+  block_number?: number;
+
+  // Equipped wearables (array from API)
+  all_equip?: Array<{
+    equipped: boolean;
+    wearable_id: string;
+    wearable_type: string;
+  }>;
+}
+
 export interface WindowType {
   id: string
   title: string
