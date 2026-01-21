@@ -34,13 +34,13 @@ export default function Home() {
         const icon = getWindowIcon(windowId)
         if (icon) {
           const content = getWindowContent(windowId)
-          handleOpenWindow(windowId, icon.title, content)
+          handleOpenWindow(windowId, icon.title, content, icon.icon)
         }
       }
     })
   }, [windowRouter.openWindows, openWindows])
 
-  const handleOpenWindow = (windowId: string, title: string, content: JSX.Element) => {
+  const handleOpenWindow = (windowId: string, title: string, content: JSX.Element, icon?: string) => {
     if (openWindows.some((w) => w.id === windowId)) {
       handleActivateWindow(windowId)
       return
@@ -90,6 +90,7 @@ export default function Home() {
     const newWindow: WindowType = {
       id: windowId,
       title,
+      icon,
       content,
       position,
       size,
@@ -144,6 +145,19 @@ export default function Home() {
     setOpenWindows((prev) => prev.map((w) => (w.id === windowId ? { ...w, position } : w)))
   }
 
+  const handleResizeWindow = (windowId: string, size: { width: number; height: number }, position?: { x: number; y: number }) => {
+    setOpenWindows((prev) => prev.map((w) => {
+      if (w.id === windowId) {
+        return {
+          ...w,
+          size,
+          ...(position && { position })
+        }
+      }
+      return w
+    }))
+  }
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return
@@ -161,7 +175,7 @@ export default function Home() {
       }
 
       const content = getWindowContent(windowId)
-      handleOpenWindow(windowId, icon.title, content)
+      handleOpenWindow(windowId, icon.title, content, icon.icon)
     }
 
     window.addEventListener(WINDOW_OPEN_EVENT, handleExternalOpen)
@@ -190,6 +204,7 @@ export default function Home() {
               onMinimize={() => handleMinimizeWindow(window.id)}
               onActivate={() => handleActivateWindow(window.id)}
               onMove={(position) => handleMoveWindow(window.id, position)}
+              onResize={(size, position) => handleResizeWindow(window.id, size, position)}
               isMobile={isMobile}
             />
           ),

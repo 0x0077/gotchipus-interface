@@ -46,6 +46,19 @@ export default function CatchAllPage() {
     setOpenWindows((prev) => prev.map((w) => (w.id === windowId ? { ...w, position } : w)))
   }
 
+  const handleResizeWindow = (windowId: string, size: { width: number; height: number }, position?: { x: number; y: number }) => {
+    setOpenWindows((prev) => prev.map((w) => {
+      if (w.id === windowId) {
+        return {
+          ...w,
+          size,
+          ...(position && { position })
+        }
+      }
+      return w
+    }))
+  }
+
   const handleActivateWindow = useCallback((windowId: string) => {
     let newZIndex = zIndexCounter;
     if (windowId === "wallet-connect-tba") {
@@ -60,7 +73,7 @@ export default function CatchAllPage() {
     windowRouter.activateWindow(windowId)
   }, [zIndexCounter, windowRouter])
 
-  const handleOpenWindow = useCallback((windowId: string, title: string, content: JSX.Element) => {
+  const handleOpenWindow = useCallback((windowId: string, title: string, content: JSX.Element, icon?: string) => {
     setOpenWindows((prev) => {
       if (prev.some((w) => w.id === windowId)) {
         handleActivateWindow(windowId)
@@ -111,6 +124,7 @@ export default function CatchAllPage() {
       const newWindow: WindowType = {
         id: windowId,
         title,
+        icon,
         content,
         position,
         size,
@@ -194,6 +208,7 @@ export default function CatchAllPage() {
           const newWindow: WindowType = {
             id: windowId,
             title: icon.title,
+            icon: icon.icon,
             content,
             position,
             size,
@@ -232,7 +247,7 @@ export default function CatchAllPage() {
       }
 
       const content = getWindowContent(windowId)
-      handleOpenWindow(windowId, icon.title, content)
+      handleOpenWindow(windowId, icon.title, content, icon.icon)
     }
 
     window.addEventListener(WINDOW_OPEN_EVENT, handleExternalOpen)
@@ -261,6 +276,7 @@ export default function CatchAllPage() {
               onMinimize={() => handleMinimizeWindow(window.id)}
               onActivate={() => handleActivateWindow(window.id)}
               onMove={(position) => handleMoveWindow(window.id, position)}
+              onResize={(size, position) => handleResizeWindow(window.id, size, position)}
               isMobile={isMobile}
             />
           ),
