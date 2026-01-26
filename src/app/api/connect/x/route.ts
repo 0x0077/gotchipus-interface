@@ -60,7 +60,7 @@ export async function GET(request: Request) {
   response.cookies.set('x_auth_jwt', token, { 
     path: '/', 
     httpOnly: true, 
-    secure: process.env.NEXT_PUBLIC_NODE_ENV !== 'production', 
+    secure: process.env.NEXT_PUBLIC_NODE_ENV !== 'development', 
     maxAge: 300 
   });
   response.cookies.set('x_oauth_state', state, { 
