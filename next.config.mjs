@@ -84,14 +84,6 @@ const nextConfig = {
       },
     ]
   },
-  async rewrites() {
-    return [
-      {
-        source: '/cdn-assets/:path*',
-        destination: `${process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.gotchi.ai'}/:path*`,
-      },
-    ]
-  },
 };
 
 if (process.env.NODE_ENV === 'development') {
