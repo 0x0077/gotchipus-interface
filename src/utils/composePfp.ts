@@ -1,7 +1,7 @@
 import { WearableIndices } from "@/hooks/useSvgLayers";
 import { WearableType, getWearableFileName } from "@/src/utils/wearableMapping";
 
-const CDN_BASE = "/cdn-assets";
+const CDN_BASE = "https://assets.gotchi.ai";
 
 const CROP_X = 14;
 const CROP_Y = 0;
@@ -44,6 +44,7 @@ function getLayerCdnUrl(type: WearableType, localIndex: number, bodyVariant?: 'b
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;

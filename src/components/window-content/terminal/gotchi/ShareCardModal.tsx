@@ -154,7 +154,7 @@ const FACTION_MAP: Record<number, "support" | "attack" | "defense" | "speed"> = 
 
 // ── Canvas helpers ──
 
-const CDN_BASE = "/cdn-assets";
+const CDN_BASE = "https://assets.gotchi.ai";
 const R2_DIRECTORY: Record<WearableType, string> = {
   backgrounds: "backgrounds", bodys: "body_close", eyes: "eyes",
   hands: "hands", heads: "heads", clothes: "clothes",
@@ -187,6 +187,7 @@ function getLayerCdnUrl(type: WearableType, localIndex: number, bodyVariant?: 'b
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;

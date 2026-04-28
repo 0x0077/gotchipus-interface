@@ -14,7 +14,7 @@ interface AvatarPreviewModalProps {
   onClose: () => void;
 }
 
-const CDN_BASE = "/cdn-assets";
+const CDN_BASE = "https://assets.gotchi.ai";
 const OUTPUT_SIZE = 512;
 
 const CROP_X = 14;
@@ -58,6 +58,7 @@ function getLayerCdnUrl(type: WearableType, localIndex: number, bodyVariant?: 'b
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;

@@ -1,6 +1,6 @@
 export type WearableType = 'backgrounds' | 'bodys' | 'eyes' | 'hands' | 'heads' | 'clothes' | 'faces' | 'mouths';
 
-const CDN_BASE = '/cdn-assets';
+const CDN_BASE = 'https://assets.gotchi.ai';
 
 export const wearableNameMapping: Record<WearableType, string[]> = {
   backgrounds: [

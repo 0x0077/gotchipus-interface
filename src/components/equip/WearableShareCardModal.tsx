@@ -108,19 +108,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 // ── Canvas helpers ──
 
-const CDN_HOST = process.env.NEXT_PUBLIC_ASSETS_URL || "https://assets.gotchi.ai";
-
-/** Convert external CDN URL to local /cdn-assets/ proxy path to avoid CORS issues on canvas */
-function toProxyUrl(url: string): string {
-  if (url.startsWith(CDN_HOST)) {
-    return "/cdn-assets" + url.slice(CDN_HOST.length);
-  }
-  return url;
-}
-
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
     img.src = src;
@@ -474,7 +465,7 @@ export function WearableShareCardModal({ item, onClose }: WearableShareCardModal
     setIsLoading(true);
 
     Promise.all([
-      item.imagePath ? loadImage(toProxyUrl(item.imagePath)) : Promise.resolve(null),
+      item.imagePath ? loadImage(item.imagePath) : Promise.resolve(null),
       loadImage("/favicon.png"),
     ]).then(([itemImg, logoImg]) => {
       if (cancelled) return;
