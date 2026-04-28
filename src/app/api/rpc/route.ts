@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-const MAINNET_BASE_URL = 'https://rpc.pharos.xyz';
+const MAINNET_BASE_URL = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://rpc.pharos.xyz';
 const REQUEST_TIMEOUT = 30000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
