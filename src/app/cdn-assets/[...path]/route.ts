@@ -1,52 +1,61 @@
-import { NextRequest } from 'next/server';
-
 export const runtime = 'edge';
 
 const UPSTREAM = 'https://assets.gotchi.ai';
 
-async function proxy(request: NextRequest, path: string[]) {
-  const target = `${UPSTREAM}/${path.join('/')}`;
+async function proxy(request: Request, path: string[] | undefined): Promise<Response> {
+  try {
+    const safePath = (path ?? []).map(encodeURIComponent).join('/');
+    const target = `${UPSTREAM}/${safePath}`;
 
-  const forwardHeaders = new Headers();
-  const range = request.headers.get('range');
-  const ifNoneMatch = request.headers.get('if-none-match');
-  const ifModifiedSince = request.headers.get('if-modified-since');
-  if (range) forwardHeaders.set('range', range);
-  if (ifNoneMatch) forwardHeaders.set('if-none-match', ifNoneMatch);
-  if (ifModifiedSince) forwardHeaders.set('if-modified-since', ifModifiedSince);
+    const forwardHeaders = new Headers();
+    for (const name of ['range', 'if-none-match', 'if-modified-since']) {
+      const v = request.headers.get(name);
+      if (v) forwardHeaders.set(name, v);
+    }
 
-  const upstreamRes = await fetch(target, {
-    method: request.method,
-    headers: forwardHeaders,
-  });
+    const upstreamRes = await fetch(target, {
+      method: request.method,
+      headers: forwardHeaders,
+      redirect: 'follow',
+    });
 
-  const headers = new Headers();
-  const passthrough = ['content-type', 'content-length', 'etag', 'last-modified', 'accept-ranges', 'content-range'];
-  for (const name of passthrough) {
-    const v = upstreamRes.headers.get(name);
-    if (v) headers.set(name, v);
+    const headers = new Headers();
+    for (const name of ['content-type', 'content-length', 'etag', 'last-modified', 'accept-ranges', 'content-range']) {
+      const v = upstreamRes.headers.get(name);
+      if (v) headers.set(name, v);
+    }
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, HEAD');
+    headers.set(
+      'Cache-Control',
+      upstreamRes.ok || upstreamRes.status === 304
+        ? 'public, max-age=86400, s-maxage=86400, immutable'
+        : 'no-store'
+    );
+
+    return new Response(upstreamRes.body, {
+      status: upstreamRes.status,
+      statusText: upstreamRes.statusText,
+      headers,
+    });
+  } catch (e: any) {
+    const detail = `${e?.name ?? 'Error'}: ${e?.message ?? String(e)}`.slice(0, 200);
+    return new Response('Bad Gateway', {
+      status: 502,
+      headers: {
+        'content-type': 'text/plain; charset=utf-8',
+        'cache-control': 'no-store',
+        'access-control-allow-origin': '*',
+        'x-proxy-error': detail,
+      },
+    });
   }
-
-  headers.set('Access-Control-Allow-Origin', '*');
-  headers.set('Access-Control-Allow-Methods', 'GET, HEAD');
-
-  if (upstreamRes.ok || upstreamRes.status === 304) {
-    headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400, immutable');
-  } else {
-    headers.set('Cache-Control', 'no-store');
-  }
-
-  return new Response(upstreamRes.body, {
-    status: upstreamRes.status,
-    statusText: upstreamRes.statusText,
-    headers,
-  });
 }
 
-export async function GET(request: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(request, params.path);
+export async function GET(request: Request, ctx: { params: { path?: string[] } }) {
+  return proxy(request, ctx.params?.path);
 }
 
-export async function HEAD(request: NextRequest, { params }: { params: { path: string[] } }) {
-  return proxy(request, params.path);
+export async function HEAD(request: Request, ctx: { params: { path?: string[] } }) {
+  return proxy(request, ctx.params?.path);
 }
