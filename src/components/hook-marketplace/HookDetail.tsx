@@ -2,6 +2,7 @@
 
 import { Hook } from '@src/types/hook';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import LikeIcon from '@assets/icons/LikeIcon';
@@ -51,6 +52,7 @@ const getTagColor = (tag: string) => {
 };
 
 export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'overview' | 'code' | 'usage' | 'reviews'>('overview');
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
@@ -68,15 +70,15 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-[#c0c0c0]">
+    <div className="h-full flex flex-col bg-win98-face">
       <div className="border-b-2 border-[#808080] px-6 py-4">
         <div className="mb-3">
           <button
             onClick={onBack}
-            className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2"
+            className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2"
           >
             <RightIcon width={16} height={16} color="#000080" style={{ transform: 'scaleX(-1)' }} />
-            <span>Back</span>
+            <span>{t('common.back')}</span>
           </button>
         </div>
         <div className="flex items-start justify-between gap-6">
@@ -91,7 +93,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
             onMouseEnter={() => setHoveredButton('favorite')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <button className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2 flex-shrink-0">
+            <button className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2 flex-shrink-0">
               <LikeIcon width={16} height={16} color="#c00000" />
               <span>{hook.reviewCount}</span>
             </button>
@@ -103,7 +105,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute z-30 bottom-full mb-2 right-0 bg-[#FFFFCC] border-2 border-[#000000] px-3 py-1.5 rounded whitespace-nowrap text-xs shadow-win98-outer"
                 >
-                  Add to Favorites
+                  {t('hookDetail.addFavorite')}
                   <div className="absolute right-3 bottom-0 translate-y-full">
                     <div className="border-4 border-transparent border-t-[#000000]"></div>
                   </div>
@@ -114,12 +116,12 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
         </div>
       </div>
 
-      <div className="border-b-2 border-[#808080] bg-[#c0c0c0] px-6 py-3 flex gap-3">
+      <div className="border-b-2 border-[#808080] bg-win98-face px-6 py-3 flex gap-3">
         {[
-          { key: 'overview', label: 'Overview' },
-          { key: 'code', label: 'Code' },
-          { key: 'usage', label: 'Usage' },
-          { key: 'reviews', label: 'Reviews' }
+          { key: 'overview', label: t('hookDetail.overview') },
+          { key: 'code', label: t('hookDetail.code') },
+          { key: 'usage', label: t('hookDetail.usage') },
+          { key: 'reviews', label: t('hookDetail.reviews') }
         ].map((tab) => (
           <button
             key={tab.key}
@@ -127,7 +129,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
             className={`px-6 py-2 text-sm font-bold border-2 border-[#808080] rounded-sm ${
               activeTab === tab.key
                 ? 'bg-[#d4d0c8] shadow-win98-inner'
-                : 'bg-[#c0c0c0] shadow-win98-outer hover:bg-[#d4d4d4] active:shadow-win98-inner'
+                : 'bg-win98-face shadow-win98-outer hover:bg-[#d4d4d4] active:shadow-win98-inner'
             }`}
           >
             {tab.label}
@@ -135,28 +137,28 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-none">
+      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Description */}
             <div className="win98-group-box">
-              <div className="win98-group-title text-xs font-bold">Description</div>
+              <div className="win98-group-title text-xs font-bold">{t('hookDetail.descriptionTitle')}</div>
               <p className="text-sm text-black leading-relaxed">{hook.description}</p>
             </div>
 
             <div className="win98-group-box">
-              <div className="win98-group-title text-xs font-bold">Deployed Contract</div>
+              <div className="win98-group-title text-xs font-bold">{t('hookDetail.deployedContract')}</div>
               <div className="border-2 border-[#008000] bg-[#e0ffe0] px-4 py-3 mb-4">
                 <p className="text-xs font-bold text-[#008000]">
-                  Deployed hook ready to attach to your Gotchipus
+                  {t('hookDetail.deployedInfo')}
                 </p>
                 <p className="text-xs text-[#008000] mt-1">
-                  Runs inside your ERC-6551 tokenbound account via Diamond Proxy
+                  {t('hookDetail.diamondProxy')}
                 </p>
               </div>
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold min-w-[100px]">Address:</span>
+                  <span className="text-sm font-bold min-w-[100px]">{t('hookDetail.address')}</span>
                   <code className="text-xs bg-white border border-[#808080] px-3 py-2 font-mono">
                     {hook.address}
                   </code>
@@ -168,7 +170,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                     >
                       <button
                         onClick={() => copyToClipboard(hook.address, 'address')}
-                        className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-2 py-1.5 text-sm flex items-center justify-center"
+                        className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-2 py-1.5 text-sm flex items-center justify-center"
                       >
                         <CopyIcon width={14} height={14} color="#000080" />
                       </button>
@@ -180,7 +182,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                             exit={{ opacity: 0, y: -10 }}
                             className="absolute z-30 top-full mt-2 left-0 bg-[#FFFFCC] border-2 border-[#000000] px-3 py-1.5 rounded whitespace-nowrap text-xs shadow-win98-outer"
                           >
-                            {copySuccess === 'address' ? 'Copied!' : 'Copy Address'}
+                            {copySuccess === 'address' ? t('common.copied') : t('hookDetail.copyAddress')}
                             <div className="absolute left-3 top-0 -translate-y-full">
                               <div className="border-4 border-transparent border-b-[#000000]"></div>
                             </div>
@@ -195,10 +197,10 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                         onMouseLeave={() => setHoveredButton(null)}
                       >
                         <Link
-                          href={`https://atlantic.pharosscan.xyz/address/${hook.address}`}
+                          href={`https://pharosscan.xyz/address/${hook.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-2 py-1.5 text-sm flex items-center justify-center"
+                          className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-2 py-1.5 text-sm flex items-center justify-center"
                         >
                           <LinkIcon width={14} height={14} color="#000080" />
                         </Link>
@@ -210,7 +212,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                               exit={{ opacity: 0, y: -10 }}
                               className="absolute z-30 top-full mt-2 left-0 bg-[#FFFFCC] border-2 border-[#000000] px-3 py-1.5 rounded whitespace-nowrap text-xs shadow-win98-outer"
                             >
-                              View on Explorer
+                              {t('hookDetail.viewExplorer')}
                               <div className="absolute left-3 top-0 -translate-y-full">
                                 <div className="border-4 border-transparent border-b-[#000000]"></div>
                               </div>
@@ -222,13 +224,13 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold min-w-[100px]">Network:</span>
+                  <span className="text-sm font-bold min-w-[100px]">{t('hookDetail.network')}</span>
                   <span className="text-sm">{hook.network}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold min-w-[100px]">Creator:</span>
+                  <span className="text-sm font-bold min-w-[100px]">{t('hookDetail.creator')}</span>
                   <Link
-                    href={`https://atlantic.pharosscan.xyz/address/${hook.creator}`}
+                    href={`https://pharosscan.xyz/address/${hook.creator}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-mono text-[#000080] hover:underline"
@@ -240,7 +242,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold min-w-[100px]">Deployed:</span>
+                  <span className="text-sm font-bold min-w-[100px]">{t('hookDetail.deployed')}</span>
                   <span className="text-sm">{hook.createdAt.toLocaleDateString()}</span>
                 </div>
               </div>
@@ -248,9 +250,9 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
 
             {hook.hookPoints && hook.hookPoints.length > 0 && (
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Hook Points</div>
+                <div className="win98-group-title text-xs font-bold">{t('hookDetail.hookPoints')}</div>
                 <p className="text-xs text-[#808080] mb-3">
-                  This hook executes on the following triggers:
+                  {t('hookDetail.hookTriggersDesc')}
                 </p>
                 <div className="flex flex-wrap gap-2.5">
                   {hook.hookPoints.map((point, index) => (
@@ -266,20 +268,20 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
             )}
 
             <div className="win98-group-box">
-              <div className="win98-group-title text-xs font-bold">How to Integrate This Hook</div>
+              <div className="win98-group-title text-xs font-bold">{t('hookDetail.howToIntegrate')}</div>
               <ol className="space-y-2.5 text-sm list-decimal list-inside">
-                <li>Review the hook's source code and features</li>
-                <li>Copy the deployed hook address above</li>
-                <li>Navigate to your Gotchipus's Dashboard</li>
-                <li>Hook will automatically execute on configured events</li>
+                <li>{t('hookDetail.integrationStep1')}</li>
+                <li>{t('hookDetail.integrationStep2')}</li>
+                <li>{t('hookDetail.integrationStep3')}</li>
+                <li>{t('hookDetail.integrationStep4')}</li>
               </ol>
               <p className="text-xs text-[#808080] mt-4 italic">
-                Note: Hooks run inside your GOTCHI ERC-6551 account
+                {t('hookDetail.hooksNote')}
               </p>
             </div>
 
             <div className="win98-group-box">
-              <div className="win98-group-title text-xs font-bold">Features</div>
+              <div className="win98-group-title text-xs font-bold">{t('hookDetail.featuresTitle')}</div>
               <ul className="space-y-2">
                 {hook.features.map((feature, index) => (
                   <li key={index} className="text-sm flex items-start gap-2">
@@ -291,7 +293,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
             </div>
 
             <div className="win98-group-box">
-              <div className="win98-group-title text-xs font-bold">Tags</div>
+              <div className="win98-group-title text-xs font-bold">{t('hookDetail.tagsTitle')}</div>
               <div className="flex flex-wrap gap-2.5">
                 {hook.tags.map((tag, index) => (
                   <span
@@ -306,16 +308,16 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
 
             {(hook.documentationUrl || hook.githubUrl || hook.auditReportUrl) && (
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Links</div>
+                <div className="win98-group-title text-xs font-bold">{t('hookDetail.links')}</div>
                 <div className="flex flex-wrap gap-3">
                   {hook.documentationUrl && (
                     <Link
                       href={hook.documentationUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
+                      className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
                     >
-                      Documentation
+                      {t('hookDetail.documentation')}
                     </Link>
                   )}
                   {hook.githubUrl && (
@@ -323,9 +325,9 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                       href={hook.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
+                      className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
                     >
-                      GitHub
+                      {t('hookDetail.github')}
                     </Link>
                   )}
                   {hook.auditReportUrl && (
@@ -333,9 +335,9 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                       href={hook.auditReportUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
+                      className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
                     >
-                      Audit Report
+                      {t('hookDetail.auditReport')}
                     </Link>
                   )}
                 </div>
@@ -346,7 +348,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
 
         {activeTab === 'code' && (
           <div className="win98-group-box">
-            <div className="win98-group-title text-xs font-bold">Contract Source Code</div>
+            <div className="win98-group-title text-xs font-bold">{t('hookDetail.contractSource')}</div>
             <div className="relative">
               <div className="flex border-2 border-[#808080] shadow-win98-inner bg-[#ffffff] overflow-hidden">
                 {/* Line Numbers */}
@@ -363,12 +365,10 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                   <textarea
                     readOnly
                     value={hook.sourceCode}
-                    className="w-full h-[500px] px-3 py-3 text-xs font-mono font-medium leading-[1.5] bg-[#ffffff] text-black border-none outline-none resize-none overflow-auto scrollbar-none"
+                    className="w-full h-[500px] px-3 py-3 text-xs font-courier font-medium leading-[1.5] bg-[#ffffff] text-black border-none outline-none resize-none overflow-auto scrollbar-hide"
                     spellCheck={false}
                     style={{
                       lineHeight: '18px',
-                      fontFamily: "'Courier New', Courier, monospace",
-                      color: '#000000',
                       WebkitTextFillColor: '#000000'
                     }}
                   />
@@ -381,7 +381,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
               >
                 <button
                   onClick={() => copyToClipboard(hook.sourceCode, 'code')}
-                  className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-3 py-2 text-sm"
+                  className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-3 py-2 text-sm"
                 >
                   <CopyIcon width={14} height={14} color="#000080" />
                 </button>
@@ -393,7 +393,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                       exit={{ opacity: 0, y: -10 }}
                       className="absolute z-30 top-full mt-2 right-0 bg-[#FFFFCC] border-2 border-[#000000] px-3 py-1.5 rounded whitespace-nowrap text-xs shadow-win98-outer"
                     >
-                      {copySuccess === 'code' ? 'Copied!' : 'Copy Code'}
+                      {copySuccess === 'code' ? t('common.copied') : t('hookDetail.copyCode')}
                       <div className="absolute right-3 top-0 -translate-y-full">
                         <div className="border-4 border-transparent border-b-[#000000]"></div>
                       </div>
@@ -407,7 +407,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
 
         {activeTab === 'usage' && (
           <div className="win98-group-box">
-            <div className="win98-group-title text-xs font-bold">Usage Example</div>
+            <div className="win98-group-title text-xs font-bold">{t('hookDetail.usageExample')}</div>
             {hook.usageExample ? (
               <div className="relative">
                 <div className="flex border-2 border-[#808080] shadow-win98-inner bg-[#ffffff] overflow-hidden">
@@ -425,12 +425,10 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                     <textarea
                       readOnly
                       value={hook.usageExample}
-                      className="w-full h-[500px] px-3 py-3 text-xs font-mono font-medium leading-[1.5] bg-[#ffffff] text-black border-none outline-none resize-none overflow-auto scrollbar-none"
+                      className="w-full h-[500px] px-3 py-3 text-xs font-courier font-medium leading-[1.5] bg-[#ffffff] text-black border-none outline-none resize-none overflow-auto scrollbar-hide"
                       spellCheck={false}
                       style={{
                         lineHeight: '18px',
-                        fontFamily: "'Courier New', Courier, monospace",
-                        color: '#000000',
                         WebkitTextFillColor: '#000000'
                       }}
                     />
@@ -443,7 +441,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                 >
                   <button
                     onClick={() => copyToClipboard(hook.usageExample!, 'usage')}
-                    className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-3 py-2 text-sm"
+                    className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-3 py-2 text-sm"
                   >
                     <CopyIcon width={14} height={14} color="#000080" />
                   </button>
@@ -455,7 +453,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-30 top-full mt-2 right-0 bg-[#FFFFCC] border-2 border-[#000000] px-3 py-1.5 rounded whitespace-nowrap text-xs shadow-win98-outer"
                       >
-                        {copySuccess === 'usage' ? 'Copied!' : 'Copy Code'}
+                        {copySuccess === 'usage' ? t('common.copied') : t('hookDetail.copyCode')}
                         <div className="absolute right-3 top-0 -translate-y-full">
                           <div className="border-4 border-transparent border-b-[#000000]"></div>
                         </div>
@@ -465,7 +463,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-[#808080] italic">No usage example provided</p>
+              <p className="text-sm text-[#808080] italic">{t('hookDetail.noUsageExample')}</p>
             )}
           </div>
         )}
@@ -474,7 +472,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
           <div className="space-y-6">
             <div className="win98-group-box">
               <div className="win98-group-title text-xs font-bold">
-                Reviews ({reviews.length})
+                {t('hookDetail.reviewsCount', { count: reviews.length })}
               </div>
               {reviews.length > 0 ? (
                 <div className="space-y-4">
@@ -488,7 +486,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                           <span className="font-bold text-sm">
                             {review.authorName || shortenAddress(review.author)}
                           </span>
-                          <span className="text-xs text-[#808080]">Rating: {review.rating}/5</span>
+                          <span className="text-xs text-[#808080]">{t('hookDetail.rating', { score: review.rating })}</span>
                         </div>
                         <span className="text-xs text-[#808080]">
                           {review.createdAt.toLocaleDateString()}
@@ -499,7 +497,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-[#808080] italic">No reviews yet</p>
+                <p className="text-sm text-[#808080] italic">{t('hookDetail.noReviews')}</p>
               )}
             </div>
           </div>

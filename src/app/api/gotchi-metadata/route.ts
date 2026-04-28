@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ token_id: tokenId }),
+        cache: 'no-store',
       });
 
       if (!response.ok) {
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
           { data: [result.data] },
           {
             headers: {
-              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+              'Cache-Control': 'no-store',
             },
           }
         );
@@ -79,6 +80,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -93,7 +95,7 @@ export async function GET(request: NextRequest) {
         { data: result.data },
         {
           headers: {
-            'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+            'Cache-Control': 'no-store',
           },
         }
       );
@@ -102,8 +104,6 @@ export async function GET(request: NextRequest) {
     }
 
   } catch (error: any) {
-    console.error('Error fetching gotchi metadata from backend:', error);
-
     return NextResponse.json(
       {
         error: 'Backend API is not available',

@@ -2,20 +2,6 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { type Address } from "viem";
 import { ethers } from "ethers";
 
-interface DappMetadata {
-  name: string;
-  description: string;
-  url: string;
-  icons: string[];
-}
-
-interface WalletConnectSession {
-  topic: string;
-  namespaces?: any;
-  acknowledged?: () => Promise<any>;
-  metadata?: DappMetadata;
-}
-
 class WalletStore {
   address: Address | undefined = undefined;
   isConnected: boolean = false;
@@ -25,53 +11,13 @@ class WalletStore {
   chainId: number | undefined = undefined;
   isWalletConnected: boolean = false;
   isTaskRefreshing: boolean = false;
+  userId: string | undefined = undefined;
+  token: string | undefined = undefined;
 
-  walletConnectSession: WalletConnectSession | null = null;
-  walletConnectDappMetadata: DappMetadata | null = null;
-  walletConnectUri: string = '';
-  isWalletConnectConnected: boolean = false;
-  isWalletConnectPairing: boolean = false;
-  connectedTarget: string = '';
   tokenBoundAccounts: Record<string, string> = {};
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
-    this.loadWalletConnectState();
-  }
-
-  private loadWalletConnectState() {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const savedState = localStorage.getItem('walletConnectState');
-      if (savedState) {
-        const state = JSON.parse(savedState);
-        runInAction(() => {
-          this.walletConnectDappMetadata = state.dappMetadata;
-          this.walletConnectUri = state.uri || '';
-          this.isWalletConnectConnected = state.isConnected || false;
-          this.connectedTarget = state.connectedTarget || '';
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load WalletConnect state:', error);
-    }
-  }
-
-  private saveWalletConnectState() {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const state = {
-        dappMetadata: this.walletConnectDappMetadata,
-        uri: this.walletConnectUri,
-        isConnected: this.isWalletConnectConnected,
-        connectedTarget: this.connectedTarget,
-      };
-      localStorage.setItem('walletConnectState', JSON.stringify(state));
-    } catch (error) {
-      console.error('Failed to save WalletConnect state:', error);
-    }
   }
 
   setWalletState(state: {
@@ -93,64 +39,22 @@ class WalletStore {
     });
   }
 
-  setWalletConnectSession(session: WalletConnectSession | null) {
-    runInAction(() => {
-      this.walletConnectSession = session;
-    });
-  }
-
-  setWalletConnectDappMetadata(metadata: DappMetadata | null) {
-    runInAction(() => {
-      this.walletConnectDappMetadata = metadata;
-    });
-    this.saveWalletConnectState();
-  }
-
-  setWalletConnectUri(uri: string) {
-    runInAction(() => {
-      this.walletConnectUri = uri;
-    });
-    this.saveWalletConnectState();
-  }
-
-  setWalletConnectConnected(isConnected: boolean) {
-    runInAction(() => {
-      this.isWalletConnectConnected = isConnected;
-    });
-    this.saveWalletConnectState();
-  }
-
-  setWalletConnectPairing(isPairing: boolean) {
-    runInAction(() => {
-      this.isWalletConnectPairing = isPairing;
-    });
-  }
-
-  setConnectedTarget(target: string) {
-    runInAction(() => {
-      this.connectedTarget = target;
-    });
-    this.saveWalletConnectState();
-  }
-
   setIsTaskRefreshing(isRefreshing: boolean) {
     runInAction(() => {
       this.isTaskRefreshing = isRefreshing;
     });
   }
 
-  resetWalletConnect() {
+  setUserId(userId: string | undefined) {
     runInAction(() => {
-      this.walletConnectSession = null;
-      this.walletConnectDappMetadata = null;
-      this.walletConnectUri = '';
-      this.isWalletConnectConnected = false;
-      this.isWalletConnectPairing = false;
-      this.connectedTarget = '';
+      this.userId = userId;
     });
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('walletConnectState');
-    }
+  }
+
+  setToken(token: string | undefined) {
+    runInAction(() => {
+      this.token = token;
+    });
   }
 
   setTokenBoundAccount(tokenId: string, address: string) {
@@ -177,7 +81,8 @@ class WalletStore {
       this.balance = undefined;
       this.symbol = undefined;
       this.chainId = undefined;
-      this.resetWalletConnect();
+      this.userId = undefined;
+      this.token = undefined;
       this.resetTokenBoundAccounts();
     });
   }
@@ -188,7 +93,7 @@ class WalletStore {
   }
 
   get chainName() {
-    return this.chainId === 50002 ? 'Pharos Devnet' : 'Unknown Network';
+    return this.chainId === 1672 ? 'Pharos Mainnet' : 'Unknown Network';
   }
 
   formattedPharos(point: number = 4) {

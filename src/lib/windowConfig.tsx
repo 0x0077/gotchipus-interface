@@ -1,13 +1,10 @@
 import React from "react"
 import type { JSX } from "react/jsx-runtime"
 import MintContent from "@/components/window-content/MintContent"
-import MyPharosContent from "@/components/window-content/MyPharosContent"
-import DashboardContent from "@/components/window-content/DashboardContent"
 import WearableMarketplaceContent from "@/src/components/window-content/WearableMarketplaceContent"
-import DailyTaskHallContent from "@/components/window-content/DailyTaskHallContent"
-import AIContent from "@/components/window-content/AIContent"
 import AllGotchiContent from "@/components/window-content/AllGotchiContent"
 import HookRankContent from "@/components/window-content/HookRankContent"
+import TerminalContent from "@/components/window-content/terminal/TerminalContent"
 
 export interface WindowIconConfig {
   id: string
@@ -24,49 +21,31 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
   {
     id: "mint",
     title: "Mint",
-    icon: "/mint.png",
-    enabled: true,
-  },
-  {
-    id: "pharos",
-    title: "My Pharos",
-    icon: "/pharos.png",
-    enabled: true,
-  },
-  {
-    id: "dashboard",
-    title: "My Gotchipus",
-    icon: "/dashboard.png",
+    icon: "/desktop/mint.png",
     enabled: true,
   },
   {
     id: "wearable",
     title: "Wearable Marketplace",
-    icon: "/wearable-marketplace.svg",
+    icon: "/desktop/wearable.png",
     enabled: true,
-  },
-  {
-    id: "ai",
-    title: "Chat",
-    icon: "/ai-pus.png",
-    enabled: false,
-  },
-  {
-    id: "daily-task-hall",
-    title: "Daily Task Hall",
-    icon: "/icons/pharos-proof.png",
-    enabled: false,
   },
   {
     id: "all-gotchi",
     title: "All Gotchi",
-    icon: "/all-gotchi.png",
+    icon: "/desktop/all-gotchi.png",
     enabled: true,
   },
   {
     id: "hook-rank",
     title: "HookRank",
-    icon: "/hook-rank.png",
+    icon: "/desktop/hook.png",
+    enabled: true,
+  },
+  {
+    id: "terminal",
+    title: "Gotchipus Terminal",
+    icon: "/desktop/dashboard.png",
     enabled: true,
   },
 ]
@@ -86,20 +65,14 @@ export const getWindowContent = (
   switch (windowId) {
     case "mint":
       return <MintContent />
-    case "pharos":
-      return <MyPharosContent />
-    case "dashboard":
-      return <DashboardContent />
     case "wearable":
       return <WearableMarketplaceContent />
-    case "daily-task-hall":
-      return <DailyTaskHallContent openWindow={props?.openWindow} />
-    case "ai":
-      return <AIContent />
     case "all-gotchi":
       return <AllGotchiContent />
     case "hook-rank":
       return <HookRankContent />
+    case "terminal":
+      return <TerminalContent />
     default:
       return <div>Unknown window: {windowId}</div>
   }

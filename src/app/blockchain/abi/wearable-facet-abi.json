@@ -63,13 +63,6 @@
             }
         ],
         "outputs": [],
-        "stateMutability": "payable"
-    },
-    {
-        "type": "function",
-        "name": "claimWearable",
-        "inputs": [],
-        "outputs": [],
         "stateMutability": "nonpayable"
     },
     {
@@ -83,7 +76,7 @@
                 "internalType": "address"
             }
         ],
-        "stateMutability": "pure"
+        "stateMutability": "view"
     },
     {
         "type": "function",
@@ -96,7 +89,7 @@
                 "internalType": "address"
             }
         ],
-        "stateMutability": "pure"
+        "stateMutability": "view"
     },
     {
         "type": "function",
@@ -138,7 +131,7 @@
             }
         ],
         "outputs": [],
-        "stateMutability": "payable"
+        "stateMutability": "nonpayable"
     },
     {
         "type": "function",
@@ -245,6 +238,19 @@
                 "name": "baseUri",
                 "type": "string",
                 "internalType": "string"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setGotchipusDiamond",
+        "inputs": [
+            {
+                "name": "gotchipusDiamond",
+                "type": "address",
+                "internalType": "address"
             }
         ],
         "outputs": [],

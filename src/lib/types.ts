@@ -1,6 +1,5 @@
 import type { JSX } from "react"
 
-// Gotchi Metadata from Database (matches gotchi_metadata table)
 export interface GotchiMetadata {
   // Primary Key & Identifiers
   id: number;
@@ -9,48 +8,18 @@ export interface GotchiMetadata {
   // Basic Info
   name?: string;
   uri?: string;
-  story?: string; // BYTEA decoded as string
   owner?: string;
   collateral?: string;
   collateral_amount?: string;
   status: number;
   locked: boolean;
   birth_time?: number;
-  timezone?: number;
+  rarity?: number;
+  faction?: number;
+  currentExp?: number;
 
-  // Core Attributes
-  core_level: number;
-  core_evolution: number;
-  core_experience: number;
-  core_available_points: number;
-  core_strength: number;
-  core_defense: number;
-  core_mind: number;
-  core_vitality: number;
-  core_agility: number;
-  core_luck: number;
-
-  // Faction
-  faction_primary?: number;
-  faction_purity: number;
-  faction_has_secondary: boolean;
-
-  // Leveling
-  leveling_total_exp: number;
-
-  // Computed Fields
-  total_stats: number;
-  is_evolved: boolean;
-
-  // JSONB Data
-  soul_data?: Record<string, any>;
-  faction_data?: Record<string, any>;
-  spec_data?: Record<string, any>;
-  strategy_data?: Record<string, any>;
-  evolution_data?: Record<string, any>;
-  leveling_data?: Record<string, any>;
-  dynamic_states?: Record<string, any>;
-  dna_data?: Record<string, any>;
+  // Core
+  core: GotchipusCore;
 
   // ERC6551
   singer?: string;
@@ -85,107 +54,51 @@ export interface DesktopIconProps {
   id: string
   title: string
   icon: string
-  onClick: () => void
+  onClick: (id: string) => void
   isActive: boolean
   isMobile?: boolean
 }
 
-export interface TokenInfo {
-  strength?: number;
-  defense?: number;
-  mind?: number;
-  vitality?: number;
-  agility?: number;
-  luck?: number;
-  status?: number;
-  dna?: {
-    geneSeed: string;
-    ruleVersion: string;
-  };
+// ── Contract sub-structs ──
+
+export interface SoulCore {
+  balance: number;
+  maxSoulCapacity: number;
+  lastSoulUpdate: number;
+  dormantSince: number;
 }
 
-
-export interface GotchipusInfo {
-  name: string;
-  uri: string;
-  story: string; 
-  owner: string;
-  collateral: string;
-  collateralAmount: string;
-  level: number;
-  status: number;
-  evolution: number;
-  locked: boolean;
-  epoch: number;
-  utc: number;
-  dna: any; 
+export interface GotchipusCore {
   strength: number;
   defense: number;
   mind: number;
   vitality: number;
   agility: number;
   luck: number;
+  soul: SoulCore;
+}
+
+// ── Main contract struct ──
+
+export interface GotchipusInfo {
+  name: string;
+  uri: string;
+  collateral: string;
+  collateralAmount: string;
+  status: number;
+  locked: boolean;
+  birthTime: number;
+  rarity: number;
+  faction: number;
+  currentExp: number;
+  core: GotchipusCore;
   singer: string;
   nonces: string;
-  element?: number;
-  primaryFaction?: number;
-  currentExp?: number;
-  requiredExp?: number;
-  totalExp?: number;
-  battleExp?: number;
-  buildingExp?: number;
-  interactionExp?: number;
-  questExp?: number;
-  expMultiplier?: number;
-  lastExpGain?: number;
 }
 
 export interface GotchiItem {
   id: string;
   info?: GotchipusInfo;
-}
-
-export function parseGotchipusInfo(rawData: any): GotchipusInfo | undefined {
-  if (!rawData) return undefined;
-  
-  try {
-    if (!rawData.result) {
-      return undefined;
-    }
-    
-    const result = rawData.result;
-    
-    if (result.name === undefined || result.status === undefined) {
-      return undefined;
-    }
-
-    return {
-      name: result.name || "",
-      uri: result.uri || "",
-      story: result.story || "",
-      owner: result.owner || "",
-      collateral: result.collateral || "",
-      collateralAmount: (result.collateralAmount || BigInt(0)).toString(),
-      level: Number(result.level || 0),
-      status: Number(result.status || 0),
-      evolution: Number(result.evolution || 0),
-      locked: Boolean(result.locked),
-      epoch: Number(result.epoch || 0),
-      utc: Number(result.utc || 0),
-      dna: result.dna || {},
-      strength: Number(result.strength || 0),
-      defense: Number(result.defense || 0),
-      mind: Number(result.mind || 0),
-      vitality: Number(result.vitality || 0),
-      agility: Number(result.agility || 0),
-      luck: Number(result.luck || 0),
-      singer: result.singer || "",
-      nonces: (result.nonces || BigInt(0)).toString()
-    };
-  } catch (error) {
-    console.error("error::", error);
-    return undefined;
-  }
 }
 
 export interface NftParts {

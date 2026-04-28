@@ -39,7 +39,6 @@ export const hookApi = {
       // Convert backend data to frontend Hook type
       return data.data.map(apiDataToHook);
     } catch (error) {
-      console.error('Error fetching hooks:', error);
       throw error;
     }
   },
@@ -72,7 +71,6 @@ export const hookApi = {
       // Convert backend data to frontend Hook type
       return apiDataToHook(data.data[0]);
     } catch (error) {
-      console.error('Error creating hook:', error);
       throw error;
     }
   },

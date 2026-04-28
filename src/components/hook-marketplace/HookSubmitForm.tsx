@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HookCategory } from '@src/types/hook';
 import { hookApi } from '@src/services/hookApi';
 import { CreateHookRequest } from '@src/types/hook-api';
 import { useAccount } from 'wagmi';
-import { Win98Select } from '@src/components/ui/Win98Select';
+import { Win98Select } from '@src/components/ui/win98-select';
 import { validateHookSourceCode } from '@src/utils/hookValidation';
 import CloseIcon from '@assets/icons/CloseIcon';
 import RightIcon from '@assets/icons/rightIcon';
@@ -16,6 +17,7 @@ interface HookSubmitFormProps {
 }
 
 export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
+  const { t } = useTranslation();
   const { address: walletAddress } = useAccount();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -36,28 +38,28 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
   });
 
   const categories: { value: HookCategory; label: string }[] = [
-    { value: 'reward', label: 'Reward' },
-    { value: 'social', label: 'Social' },
-    { value: 'defi', label: 'Defi' },
-    { value: 'rwa', label: 'RWA' },
-    { value: 'automation', label: 'Automation' },
-    { value: 'security', label: 'Security' }
+    { value: 'reward', label: t('hookRank.reward') },
+    { value: 'social', label: t('hookRank.social') },
+    { value: 'defi', label: t('hookRank.defi') },
+    { value: 'rwa', label: t('hookRank.rwa') },
+    { value: 'automation', label: t('hookRank.automation') },
+    { value: 'security', label: t('hookRank.securityCat') }
   ];
 
   const handleSubmit = async () => {
     if (!walletAddress) {
-      setError('Please connect your wallet to submit a hook');
+      setError(t('hookSubmit.connectWalletError'));
       return;
     }
 
     if (!formData.category) {
-      setError('Please select a category');
+      setError(t('hookSubmit.selectCategoryError'));
       return;
     }
 
     const validation = validateHookSourceCode(formData.sourceCode);
     if (!validation.isValid) {
-      setError(validation.error || 'Invalid hook source code');
+      setError(validation.error || t('hookSubmit.invalidSourceError'));
       return;
     }
 
@@ -72,10 +74,10 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         icon: '',
         address: formData.address.toLowerCase(),
-        chain_id: 688689,
+        chain_id: 1672,
         source_code: formData.sourceCode,
         abi: formData.abi || '[]',
-        explorer_url: `https://atlantic.pharosscan.xyz/address/${formData.address}`,
+        explorer_url: `https://pharosscan.xyz/address/${formData.address}`,
         creator: walletAddress.toLowerCase(),
         creator_name: '',
         is_audited: false,
@@ -100,8 +102,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
         onClose();
       }
     } catch (err: any) {
-      console.error('Failed to submit hook:', err);
-      setError(err.message || 'Failed to submit hook. Please try again.');
+      setError(err.message || t('hookSubmit.submitError'));
     } finally {
       setLoading(false);
     }
@@ -111,12 +112,12 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center p-4">
-      <div className="bg-[#c0c0c0] border-4 border-[#dfdfdf] border-t-white border-l-white border-r-[#808080] border-b-[#808080] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-win98-face border-4 border-win98-highlight border-t-white border-l-white border-r-[#808080] border-b-[#808080] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div className="bg-[#000080] text-white font-bold flex items-center justify-between px-2 py-1">
-          <span>Submit Hook</span>
+          <span>{t('hookSubmit.title')}</span>
           <button
             onClick={onClose}
-            className="w-6 h-6 bg-[#c0c0c0] border border-[#808080] shadow-win98-outer flex items-center justify-center hover:bg-[#d4d0c8] text-black font-bold"
+            className="w-6 h-6 bg-win98-face border border-[#808080] shadow-win98-outer flex items-center justify-center hover:bg-[#d4d0c8] text-black font-bold"
           >
             <CloseIcon width={14} height={14} color="#000000" />
           </button>
@@ -125,13 +126,13 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
         <div className="p-4 border-b-2 border-[#808080]">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-bold">
-              Step {step} of {totalSteps}
+              {t('sessionWizard.stepOf', { step, total: totalSteps })}
             </span>
             <span className="text-xs text-[#808080]">
-              {step === 1 && 'Basic Information'}
-              {step === 2 && 'Contract Details'}
-              {step === 3 && 'Additional Info'}
-              {step === 4 && 'Preview & Submit'}
+              {step === 1 && t('sessionWizard.steps.basicInfo')}
+              {step === 2 && t('sessionWizard.steps.contractDetails')}
+              {step === 3 && t('sessionWizard.steps.additionalInfo')}
+              {step === 4 && t('sessionWizard.steps.previewSubmit')}
             </span>
           </div>
           <div className="h-4 border-2 border-[#808080] shadow-win98-inner bg-white">
@@ -152,57 +153,58 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
           {step === 1 && (
             <div className="space-y-4">
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Basic Information</div>
+                <div className="win98-group-title text-xs font-bold">{t('sessionWizard.steps.basicInfo')}</div>
 
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Hook Name <span className="text-red-600">*</span>
+                      {t('hookSubmit.hookName')} <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full border-2 border-[#808080] shadow-win98-inner px-2 py-1 text-sm"
-                      placeholder="My Awesome Hook"
+                      placeholder={t('hookSubmit.hookNamePlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Category <span className="text-red-600">*</span>
+                      {t('hookSubmit.category')} <span className="text-red-600">*</span>
                     </label>
                     <Win98Select
+                      size="md"
                       value={formData.category}
                       onChange={(value) => setFormData({ ...formData, category: value as HookCategory })}
                       options={categories}
-                      placeholder="Select a category"
+                      placeholder={t('hookSubmit.categoryPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Description <span className="text-red-600">*</span>
+                      {t('hookSubmit.description')} <span className="text-red-600">*</span>
                     </label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full border-2 border-[#808080] shadow-win98-inner px-2 py-1 text-sm h-24 resize-none"
-                      placeholder="Describe what your hook does and its main features..."
+                      placeholder={t('hookSubmit.descriptionPlaceholder')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-1">Tags</label>
+                    <label className="block text-sm font-bold mb-1">{t('hookSubmit.tags')}</label>
                     <input
                       type="text"
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                       className="w-full border-2 border-[#808080] shadow-win98-inner px-2 py-1 text-sm"
-                      placeholder="referral, commission, rewards (comma separated)"
+                      placeholder={t('hookSubmit.tagsPlaceholder')}
                     />
                     <p className="text-xs text-[#808080] mt-1">
-                      Separate tags with commas
+                      {t('hookSubmit.tagsSeparator')}
                     </p>
                   </div>
                 </div>
@@ -213,21 +215,21 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
           {step === 2 && (
             <div className="space-y-4">
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Deployed Contract Details</div>
+                <div className="win98-group-title text-xs font-bold">{t('sessionWizard.steps.contractDetails')}</div>
 
                 <div className="border-2 border-[#000080] bg-[#e0e0ff] px-3 py-2 mb-3">
                   <p className="text-xs font-bold text-[#000080]">
-                    Submit your deployed hook contract
+                    {t('hookSubmit.submitInfo')}
                   </p>
                   <p className="text-xs text-[#000080] mt-1">
-                    Your hook must be deployed on Pharos before submission. Only contracts that inherit from BaseHook (BeforeExecuteHook, AfterExecuteHook, or FullHook) will be accepted.
+                    {t('hookSubmit.submitInfoDesc')}
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Contract Address <span className="text-red-600">*</span>
+                      {t('hookSubmit.contractAddress')} <span className="text-red-600">*</span>
                     </label>
                     <input
                       type="text"
@@ -237,13 +239,13 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                       placeholder="0x..."
                     />
                     <p className="text-xs text-[#808080] mt-1">
-                      The deployed contract address on Pharos
+                      {t('hookSubmit.contractAddressHelper')}
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Source Code <span className="text-red-600">*</span>
+                      {t('hookSubmit.sourceCode')} <span className="text-red-600">*</span>
                     </label>
                     <textarea
                       value={formData.sourceCode}
@@ -273,8 +275,8 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                             : 'text-[#ff0000]'
                         }`}>
                           {sourceCodeValidation.isValid
-                            ? '✓ Valid Hook Contract'
-                            : '✗ Invalid Hook Contract'}
+                            ? `✓ ${t('hookSubmit.validContract')}`
+                            : `✗ ${t('hookSubmit.invalidContract')}`}
                         </p>
                         {sourceCodeValidation.error && (
                           <p className="text-xs text-[#ff0000] mt-1">
@@ -286,7 +288,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
 
                     <div className="border-2 border-[#000080] bg-[#e0e0ff] px-3 py-2 mt-2">
                       <p className="text-xs font-bold text-[#000080] mb-1">
-                        Required Hook Structure:
+                        {t('hookSubmit.requiredStructure')}
                       </p>
                       <ul className="text-xs text-[#000080] space-y-1 list-disc list-inside">
                         <li>Import BaseHook (BeforeExecuteHook/AfterExecuteHook/FullHook)</li>
@@ -297,13 +299,13 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                     </div>
 
                     <p className="text-xs text-[#808080] mt-1">
-                      Paste your Solidity source code here
+                      {t('hookSubmit.sourceCodeHelper')}
                     </p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold mb-1">
-                      Contract ABI (optional)
+                      {t('hookSubmit.contractAbi')}
                     </label>
                     <textarea
                       value={formData.abi}
@@ -311,7 +313,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                       className="w-full border-2 border-[#808080] shadow-win98-inner px-2 py-1 text-xs font-mono h-40 resize-none"
                     />
                     <p className="text-xs text-[#808080] mt-1">
-                      Contract ABI in JSON format (optional, defaults to empty array)
+                      {t('hookSubmit.contractAbiHelper')}
                     </p>
                   </div>
                 </div>
@@ -322,11 +324,11 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
           {step === 3 && (
             <div className="space-y-4">
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Additional Information</div>
+                <div className="win98-group-title text-xs font-bold">{t('sessionWizard.steps.additionalInfo')}</div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-bold mb-1">Features</label>
+                    <label className="block text-sm font-bold mb-1">{t('hookSubmit.features')}</label>
                     <textarea
                       value={formData.features}
                       onChange={(e) => setFormData({ ...formData, features: e.target.value })}
@@ -334,12 +336,12 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                       placeholder="List key features (one per line)"
                     />
                     <p className="text-xs text-[#808080] mt-1">
-                      One feature per line
+                      {t('hookSubmit.featuresHelper')}
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-1">Usage Example</label>
+                    <label className="block text-sm font-bold mb-1">{t('hookSubmit.usageExample')}</label>
                     <textarea
                       value={formData.usageExample}
                       onChange={(e) => setFormData({ ...formData, usageExample: e.target.value })}
@@ -349,7 +351,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-1">Documentation URL</label>
+                    <label className="block text-sm font-bold mb-1">{t('hookSubmit.docUrl')}</label>
                     <input
                       type="url"
                       value={formData.documentationUrl}
@@ -360,7 +362,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-1">GitHub URL</label>
+                    <label className="block text-sm font-bold mb-1">{t('hookSubmit.githubUrl')}</label>
                     <input
                       type="url"
                       value={formData.githubUrl}
@@ -377,34 +379,34 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
           {step === 4 && (
             <div className="space-y-4">
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Preview</div>
+                <div className="win98-group-title text-xs font-bold">{t('hookSubmit.preview')}</div>
 
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="font-bold">Name:</span> {formData.name || '(not set)'}
+                    <span className="font-bold">{t('hookSubmit.name')}</span> {formData.name || t('hookSubmit.notSet')}
                   </div>
                   <div>
-                    <span className="font-bold">Category:</span>{' '}
-                    {formData.category ? categories.find(c => c.value === formData.category)?.label : '(not set)'}
+                    <span className="font-bold">{t('hookSubmit.categoryLabel')}</span>{' '}
+                    {formData.category ? categories.find(c => c.value === formData.category)?.label : t('hookSubmit.notSet')}
                   </div>
                   <div>
-                    <span className="font-bold">Description:</span> {formData.description || '(not set)'}
+                    <span className="font-bold">{t('hookSubmit.descriptionLabel')}</span> {formData.description || t('hookSubmit.notSet')}
                   </div>
                   <div>
-                    <span className="font-bold">Tags:</span> {formData.tags || '(none)'}
+                    <span className="font-bold">{t('hookSubmit.tagsLabel')}</span> {formData.tags || t('hookSubmit.none')}
                   </div>
                   <div>
-                    <span className="font-bold">Contract:</span>{' '}
-                    <code className="text-xs">{formData.address || '(not set)'}</code>
+                    <span className="font-bold">{t('hookSubmit.contractLabel')}</span>{' '}
+                    <code className="text-xs">{formData.address || t('hookSubmit.notSet')}</code>
                   </div>
                   <div>
-                    <span className="font-bold">Network:</span> Pharos
+                    <span className="font-bold">{t('hookSubmit.network')}</span>
                   </div>
                 </div>
               </div>
 
               <div className="win98-group-box">
-                <div className="win98-group-title text-xs font-bold">Source Code Validation</div>
+                <div className="win98-group-title text-xs font-bold">{t('hookSubmit.sourceValidation')}</div>
                 {(() => {
                   const validation = validateHookSourceCode(formData.sourceCode);
                   return (
@@ -419,8 +421,8 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                           : 'text-[#ff0000]'
                       }`}>
                         {validation.isValid
-                          ? '✓ Valid Hook Contract - Ready to submit'
-                          : '✗ Invalid Hook Contract - Cannot submit'}
+                          ? `✓ ${t('hookSubmit.readyToSubmit')}`
+                          : `✗ ${t('hookSubmit.cannotSubmit')}`}
                       </p>
                       {validation.error && (
                         <p className="text-xs text-[#ff0000] mt-1">
@@ -438,19 +440,19 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
         <div className="border-t-2 border-[#808080] p-4 flex items-center justify-between bg-[#d4d0c8]">
           <button
             onClick={onClose}
-            className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
+            className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
 
           <div className="flex gap-2">
             {step > 1 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2"
+                className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2"
               >
                 <RightIcon width={14} height={14} color="#000000" style={{ transform: 'scaleX(-1)' }} />
-                <span>Previous</span>
+                <span>{t('hookSubmit.previous')}</span>
               </button>
             )}
 
@@ -459,7 +461,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                 onClick={() => setStep(step + 1)}
                 className="border-2 border-[#808080] shadow-win98-outer bg-[#000080] text-white hover:bg-[#000060] active:shadow-win98-inner px-4 py-2 text-sm font-bold flex items-center gap-2"
               >
-                <span>Next</span>
+                <span>{t('common.next')}</span>
                 <RightIcon width={14} height={14} color="white" />
               </button>
             ) : (
@@ -468,7 +470,7 @@ export const HookSubmitForm = ({ onClose, onSuccess }: HookSubmitFormProps) => {
                 disabled={loading || !validateHookSourceCode(formData.sourceCode).isValid}
                 className="border-2 border-[#808080] shadow-win98-outer bg-[#008000] text-white hover:bg-[#006000] active:shadow-win98-inner px-4 py-2 text-sm font-bold disabled:bg-[#808080] disabled:cursor-not-allowed disabled:hover:bg-[#808080]"
               >
-                {loading ? 'Submitting...' : 'Submit Hook'}
+                {loading ? t('hookSubmit.submitting') : t('hookSubmit.submit')}
               </button>
             )}
           </div>

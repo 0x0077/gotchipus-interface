@@ -1,23 +1,23 @@
 import { defineChain } from "viem";
 
 export const pharos = defineChain({
-  id: 688689, 
-  name: 'Pharos Atlantic Testnet',
+  id: 1672,
+  name: 'Pharos Mainnet',
   nativeCurrency: {
     decimals: 18,
     name: 'Pharos',
-    symbol: 'PHRS',      
+    symbol: 'PROS',
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_TESTNET_RPC!], 
+      http: [process.env.NEXT_PUBLIC_MAINNET_RPC!],
     },
     public: {
-      http: [process.env.NEXT_PUBLIC_TESTNET_RPC!], 
+      http: [process.env.NEXT_PUBLIC_MAINNET_RPC!],
     },
   },
   blockExplorers: {
-    default: { name: 'PharosScan', url: 'https://atlantic.pharosscan.xyz' }, 
+    default: { name: 'PharosScan', url: 'https://pharosscan.xyz' },
   },
   contracts: {
     multicall3: undefined,

@@ -1,36 +1,40 @@
 "use client";
 
-import Image, { ImageProps } from 'next/image';
+/* eslint-disable @next/next/no-img-element */
 
-interface SvgIconProps extends Omit<ImageProps, 'src'> {
+interface SvgIconProps {
   svgString?: string | null | undefined;
   imagePath?: string | null | undefined;
+  alt?: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-const SvgIcon = ({ svgString, imagePath, alt, ...props }: SvgIconProps) => {
+const SvgIcon = ({ svgString, imagePath, alt, width, height, className, style }: SvgIconProps) => {
   if (imagePath) {
-    // Use original path - Next.js Image component and browsers will handle URL encoding automatically
-    // The middleware will handle any URL-encoded direct access requests
     return (
-      <Image
+      <img
         src={imagePath}
         alt={alt || "Wearable Icon"}
-        unoptimized={true}
-        {...props}
+        width={width}
+        height={height}
+        className={className}
+        style={style}
       />
     );
   }
 
   if (svgString) {
     const viewBox = "0 0 80 80";
-    const completeSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${svgString}</svg>`;
-    const dataUri = `data:image/svg+xml;utf8,${encodeURIComponent(completeSvg)}`;
-
+    const completeSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100%" height="100%">${svgString}</svg>`;
     return (
-      <Image
-        src={dataUri}
-        alt={alt || "Wearable Icon"}
-        {...props}
+      <div
+        className={className}
+        style={{ width, height, overflow: 'hidden', ...style }}
+        title={alt}
+        dangerouslySetInnerHTML={{ __html: completeSvg }}
       />
     );
   }

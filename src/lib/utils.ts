@@ -6,5 +6,5 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function normalizeWearableId(wearableId: number): number {
-  return wearableId > 85 ? wearableId - 85 : wearableId;
+  return wearableId;
 }

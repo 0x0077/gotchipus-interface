@@ -3,12 +3,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { GotchiMetadata } from "@/lib/types";
 import { useAllEquipLayers } from "@/hooks/useAllEquipLayers";
 import {
   useGotchiNavigation,
   useBackgroundSvg,
-  useStoryDecoder,
   useEquippedWearables,
   useGotchiComputedData,
 } from "./hooks";
@@ -37,11 +37,11 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
   onClose,
   onNavigate,
 }) => {
+  const { t } = useTranslation();
   const isSummoned = metadata.status !== 0;
   const wearableIndices = useAllEquipLayers(metadata.all_equip);
 
   const { backgroundStyle } = useBackgroundSvg(wearableIndices.backgroundIndex);
-  const decodedStory = useStoryDecoder(metadata.story);
   const equippedWearables = useEquippedWearables(metadata.all_equip);
   const {
     currentExp,
@@ -70,14 +70,14 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer w-full max-w-6xl max-h-[85vh] flex flex-col"
+        className="bg-win98-face border-2 border-[#808080] shadow-win98-outer w-full max-w-6xl max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-[#c0c0c0] px-4 py-1 border-b-2 border-[#808080]">
+        <div className="bg-win98-face px-4 py-1 border-b-2 border-[#808080]">
           <div className="flex items-center justify-end">
             <button
               onClick={onClose}
-              className="w-6 h-6 border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] flex items-center justify-center hover:bg-[#d4d0c8] active:shadow-win98-inner"
+              className="w-6 h-6 border-2 border-[#808080] shadow-win98-outer bg-win98-face flex items-center justify-center hover:bg-[#d4d0c8] active:shadow-win98-inner"
             >
               <X size={14} className="text-black" />
             </button>
@@ -89,7 +89,7 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
             <UnsummonedView tokenId={metadata.token_id} />
           ) : (
             <>
-              <div className="w-2/5 border-r-2 border-[#808080] bg-[#c0c0c0] p-6 flex flex-col">
+              <div className="w-2/5 border-r-2 border-[#808080] bg-win98-face p-6 flex flex-col">
                 <NavigationBar
                   hasPrev={hasPrev}
                   hasNext={hasNext}
@@ -105,7 +105,7 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
                 />
               </div>
 
-              <div className="w-3/5 overflow-auto scrollbar-none p-6 bg-[#c0c0c0]">
+              <div className="w-3/5 overflow-auto scrollbar-hide p-6 bg-win98-face">
                 <DetailHeader
                   metadata={metadata}
                   calculatedLevel={calculatedLevel}
@@ -121,31 +121,12 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
                   metadata={metadata}
                 />
 
-                {metadata.story && (
-                  <CollapsibleSection title="Story" icon="/icons/story.png" defaultOpen={true}>
-                    <div className="bg-[#d4d0c8] border border-[#808080] shadow-win98-inner p-3 text-sm max-h-32 overflow-y-auto scrollbar-none whitespace-pre-wrap">
-                      {decodedStory || 'No story available'}
-                    </div>
-                  </CollapsibleSection>
-                )}
-
                 <AttributesSection attributes={attributes} />
 
-                <CollapsibleSection title="Genetics" icon="/icons/dna.png" defaultOpen={false}>
-                  <div className="bg-[#d4d0c8] border border-[#808080] shadow-win98-inner rounded-sm p-3">
-                    <div className="mb-2">
-                      <span className="text-xs text-[#808080] uppercase block mb-1">DNA Gene Seed</span>
-                      <div className="font-mono bg-white p-2 border border-[#808080] overflow-x-auto whitespace-nowrap scrollbar-none text-xs text-[#000080]">
-                        {metadata.dna_data?.gene_seed?.toString() || "N/A"}
-                      </div>
-                    </div>
-                  </div>
-                </CollapsibleSection>
-
                 {metadata.birth_time && (
-                  <CollapsibleSection title="Gotchi Info" icon="/icons/tba.png" defaultOpen={false}>
+                  <CollapsibleSection title={t('gotchiDetailView.gotchiInfo')} icon="/icons/tba.png" defaultOpen={false}>
                     <div className="bg-[#d4d0c8] border border-[#808080] shadow-win98-inner rounded-sm p-3">
-                      <span className="text-xs text-[#808080] uppercase block mb-1">Birth Time</span>
+                      <span className="text-xs text-[#808080] uppercase block mb-1">{t('gotchiDetailView.birthTime')}</span>
                       <div className="text-xs text-[#000080]">
                         {formatBirthTime(metadata.birth_time)}
                       </div>
@@ -154,7 +135,7 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
                 )}
 
                 {equippedWearables.length > 0 && (
-                  <CollapsibleSection title="Equipped Wearables" icon="/icons/equip.png" defaultOpen={false}>
+                  <CollapsibleSection title={t('gotchiDetailView.equippedWearables')} icon="/icons/equip.png" defaultOpen={false}>
                     <div className="grid grid-cols-4 gap-2">
                       {equippedWearables.map((item, index) => (
                         <EquippedWearableItem

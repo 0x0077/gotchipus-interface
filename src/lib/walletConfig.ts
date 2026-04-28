@@ -9,6 +9,7 @@ import {
   walletConnectWallet,
   okxWallet,
   trustWallet,
+  rabbyWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '';
@@ -19,6 +20,7 @@ export const connectors = connectorsForWallets(
       groupName: 'Recommended',
       wallets: [
         metaMaskWallet,
+        rabbyWallet,
         coinbaseWallet,
         walletConnectWallet,
         rainbowWallet,

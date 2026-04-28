@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ethers } from 'ethers';
-import { PUS_ABI, PUS_ADDRESS, ERC6551_REGISTRY_ADDRESS, ERC6551_ABI, ERC20_ABI, WEARABLE_MARKETPLACE_ADDRESS, WEARABLE_MARKETPLACE_ABI } from '@/src/app/blockchain';
+import { PUS_ABI, PUS_ADDRESS, ERC6551_REGISTRY_ADDRESS, ERC6551_ABI, ERC20_ABI, WEARABLE_MARKETPLACE_ADDRESS, WEARABLE_MARKETPLACE_ABI, CHI_REGISTRY_ABI, CHI_DIAMOND_ADDRESS } from '@/src/app/blockchain';
 import { useWriteContract, useReadContract, useReadContracts, useWaitForTransactionReceipt } from "wagmi";
 import type { Abi } from 'viem';
 
@@ -161,22 +161,18 @@ export const useWearableMarketplaceWrite = () => {
 
   const purchaseWearables = useCallback(async (
     wearableTokenIds: number[],
-    amounts: number[],
-    prices: bigint[]
+    amounts: number[]
   ) => {
-    if (wearableTokenIds.length !== amounts.length || wearableTokenIds.length !== prices.length) {
-      throw new Error('wearableTokenIds, amounts, and prices arrays must have the same length');
+    if (wearableTokenIds.length !== amounts.length) {
+      throw new Error('wearableTokenIds and amounts arrays must have the same length');
     }
 
     try {
-      console.log(ethers.parseEther('0.001') * BigInt(wearableTokenIds.length));
-      
       writeContract({
         address: WEARABLE_MARKETPLACE_ADDRESS as `0x${string}`,
         abi: WEARABLE_MARKETPLACE_ABI as Abi,
         functionName: 'batchMintWearable',
         args: [wearableTokenIds, amounts],
-        value: ethers.parseEther('0.001') * BigInt(wearableTokenIds.length)
       });
 
     } catch (error) {
@@ -187,8 +183,7 @@ export const useWearableMarketplaceWrite = () => {
 
   const purchaseSingleWearable = useCallback(async (
     wearableTokenId: number,
-    amount: number,
-    value: bigint
+    amount: number
   ) => {
     try {
       writeContract({
@@ -196,7 +191,6 @@ export const useWearableMarketplaceWrite = () => {
         abi: WEARABLE_MARKETPLACE_ABI as Abi,
         functionName: 'mintWearable',
         args: [BigInt(wearableTokenId), BigInt(amount)],
-        value: value
       });
     } catch (error) {
       resetWrite();
@@ -251,6 +245,26 @@ export const useWearableMarketplaceRead = (
     args: args,
     query: {
       enabled: options?.enabled
+    }
+  });
+
+  return { data, isLoading, error, isError, ...rest };
+};
+
+export const useChiRegistryRead = (
+  functionName: string,
+  args: any[] = [],
+  options?: {
+    enabled?: boolean
+  }
+) => {
+  const { data, isLoading, error, isError, ...rest } = useReadContract({
+    address: CHI_DIAMOND_ADDRESS as `0x${string}`,
+    abi: CHI_REGISTRY_ABI as Abi,
+    functionName: functionName,
+    args: args,
+    query: {
+      enabled: (options?.enabled !== false) && !!CHI_DIAMOND_ADDRESS
     }
   });
 

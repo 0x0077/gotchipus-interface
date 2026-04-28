@@ -13,7 +13,7 @@ interface PharosResponse {
 
 export const runtime = 'edge';
 
-const rpcUrl = process.env.NEXT_PUBLIC_TESTNET_RPC;
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
 
 const publicClient = createPublicClient({
   chain: pharos,
@@ -42,33 +42,38 @@ function serializeBigIntFields(obj: any): any {
   return obj;
 }
 
-function serializeGotchipusInfo(info: any): GotchipusInfo {
-  const serializedDna = serializeBigIntFields(info.dna || {});
-  
+function serializeGotchipusInfo(raw: any): GotchipusInfo {
+  const s = serializeBigIntFields(raw);
+  const core = s.core || {};
+  const soul = core.soul || {};
+
   return {
-    name: info.name || "",
-    uri: info.uri || "",
-    story: info.story || "",
-    owner: info.owner || "",
-    collateral: info.collateral || "",
-    collateralAmount: info.collateralAmount?.toString() || '0',
-    level: Number(info.level || 0),
-    status: Number(info.status || 0),
-    evolution: Number(info.evolution || 0),
-    locked: Boolean(info.locked),
-    epoch: Number(info.epoch || 0),
-    utc: Number(info.utc || 0),
-    dna: serializedDna,
-    singer: info.singer || "",
-    nonces: info.nonces?.toString() || '0',
-    element: info.element ? Number(info.element) : undefined,
-    strength: Number(info.strength || 0),
-    defense: Number(info.defense || 0),
-    mind: Number(info.mind || 0),
-    vitality: Number(info.vitality || 0),
-    agility: Number(info.agility || 0),
-    luck: Number(info.luck || 0),
-    primaryFaction: Number(info.primaryFaction || 0),
+    name: s.name || "",
+    uri: s.uri || "",
+    collateral: s.collateral || "",
+    collateralAmount: String(s.collateralAmount ?? '0'),
+    status: Number(s.status ?? 0),
+    locked: Boolean(s.locked),
+    birthTime: Number(s.birthTime ?? 0),
+    rarity: Number(s.rarity ?? 0),
+    faction: Number(s.faction ?? 0),
+    currentExp: Number(s.currentExp ?? 0),
+    core: {
+      strength: Number(core.strength ?? 0),
+      defense: Number(core.defense ?? 0),
+      mind: Number(core.mind ?? 0),
+      vitality: Number(core.vitality ?? 0),
+      agility: Number(core.agility ?? 0),
+      luck: Number(core.luck ?? 0),
+      soul: {
+        balance: Number(soul.balance ?? 0),
+        maxSoulCapacity: Number(soul.maxSoulCapacity ?? 0),
+        lastSoulUpdate: Number(soul.lastSoulUpdate ?? 0),
+        dormantSince: Number(soul.dormantSince ?? 0),
+      },
+    },
+    singer: s.singer || "",
+    nonces: String(s.nonces ?? '0'),
   };
 }
 
@@ -107,7 +112,6 @@ async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean)
           
           return serializeGotchipusInfo(info);
         } catch (error) {
-          console.error(`Error fetching info for token ${tokenId}:`, error);
           return null;
         }
       });
@@ -123,7 +127,6 @@ async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean)
       totalCount: ids.length
     };
   } catch (error: any) {
-    console.error('Error calling getGotchiOrPharosInfo for pharos:', error);
     if (error.message?.includes('execution reverted')) {
       return {
         balance: '0',
@@ -156,7 +159,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response, { status: 200 });
 
   } catch (error: any) {
-    console.error('API Error (pharos-list):', error);
     return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
   }
 }

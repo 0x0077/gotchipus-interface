@@ -5,7 +5,6 @@ import {
   WearableCategoryKey,
   TOKEN_ID_TO_LOCAL_INDEX
 } from '@/components/gotchiSvg/config';
-import { normalizeWearableId } from '@/lib/utils';
 
 interface EquippedWearable {
   type: string;
@@ -25,7 +24,7 @@ export const useEquippedWearables = (allEquip: any[] | undefined): EquippedWeara
         const config = KEY_TO_CONFIG_MAP[item.wearable_type as WearableCategoryKey];
         if (!config) return null;
 
-        const tokenId = normalizeWearableId(Number(item.wearable_id));
+        const tokenId = Number(item.wearable_id);
 
         const categoryMapping = TOKEN_ID_TO_LOCAL_INDEX[config.name];
         if (!categoryMapping) return null;

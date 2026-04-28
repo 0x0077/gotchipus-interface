@@ -6,9 +6,11 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { CustomJazzicon } from './Jazzicon'
 import { useToast } from '@/hooks/use-toast'
 import { useAccount } from 'wagmi'
+import { useTranslation } from 'react-i18next'
 
 export const CustomConnectButton = () => {
   const { toast } = useToast()
+  const { t } = useTranslation()
   const prevConnectedRef = useRef<boolean | null>(null)
   const isInitialMountRef = useRef(true)
   const { address, isConnected } = useAccount()
@@ -27,13 +29,13 @@ export const CustomConnectButton = () => {
     if (prevConnectedRef.current !== isConnected) {
       if (isConnected && address) {
         toast({
-          title: "Wallet connected",
-          description: `Connected to wallet ${formatAddress(address)}`,
+          title: t('toast.connectWallet'),
+          description: t('toast.connectWalletDesc'),
         })
       } else if (!isConnected && prevConnectedRef.current) {
         toast({
-          title: "Disconnected Wallet",
-          description: "Disconnected",
+          title: t('toast.txCancelled'),
+          description: t('toast.txCancelledDesc'),
         })
       }
       prevConnectedRef.current = isConnected ?? false
@@ -78,7 +80,7 @@ export const CustomConnectButton = () => {
                     className="w-full text-black py-2 px-4 rounded-lg flex items-center justify-center gap-2"
                   >
                     <Image src="/connect.png" alt="Connect Wallet" width={24} height={24} />
-                    <span className="text-base">Connect Wallet</span>
+                    <span className="text-base">{t('common.connectWallet')}</span>
                   </button>
                 )
               }
@@ -89,7 +91,7 @@ export const CustomConnectButton = () => {
                     onClick={openChainModal}
                     className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4"
                   >
-                    Wrong Network
+                    {t('common.error')}
                   </button>
                 )
               }

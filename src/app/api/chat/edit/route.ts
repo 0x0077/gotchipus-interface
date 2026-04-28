@@ -1,0 +1,37 @@
+import { NextRequest } from 'next/server';
+import { getBackendUrl } from '@/lib/api-config';
+
+export const runtime = 'edge';
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const upstream = `${getBackendUrl()}/ai/chat/edit`;
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const auth = req.headers.get('authorization');
+  if (auth) headers['Authorization'] = auth;
+
+  const originResp = await fetch(upstream, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+    cache: 'no-store',
+  });
+
+  if (!originResp.ok || !originResp.body) {
+    const errorText = await originResp.text().catch(() => 'Unknown error');
+    return new Response(
+      errorText,
+      { status: originResp.status, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
+  return new Response(originResp.body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      'X-Accel-Buffering': 'no',
+    },
+  });
+}

@@ -9,11 +9,12 @@ interface GotchipusResponse {
   ids: string[];
   gotchipusInfo: GotchipusInfo[];
   totalCount: number;
+  tbaAddresses: string[];
 }
 
 export const runtime = 'edge';
 
-const rpcUrl = process.env.NEXT_PUBLIC_TESTNET_RPC;
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
 const publicClient = createPublicClient({ chain: pharos, transport: http(rpcUrl) });
 
 async function getGotchipusTokens(ownerAddress: string, includeGotchipusInfo: boolean): Promise<GotchipusResponse> {
@@ -30,50 +31,59 @@ async function getGotchipusTokens(ownerAddress: string, includeGotchipusInfo: bo
         balance: '0',
         ids: [],
         gotchipusInfo: [],
-        totalCount: 0
+        totalCount: 0,
+        tbaAddresses: [],
       };
     }
 
     const balance = tokenIds.length.toString();
     const ids = tokenIds.map(id => id.toString());
-    
-    let gotchipusInfo: GotchipusInfo[] = [];
-    
-    if (includeGotchipusInfo) {
-      const infoPromises = tokenIds.map(async (tokenId) => {
-        try {
-          const info = await publicClient.readContract({
-            address: PUS_ADDRESS,
-            abi: PUS_ABI,
-            functionName: 'ownedTokenInfo',
-            args: [ownerAddress, tokenId]
-          }) as any;
-          
-          return serializeGotchipusInfo(info);
-        } catch (error) {
-          console.error(`Error fetching info for token ${tokenId}:`, error);
-          return null;
-        }
-      });
-      
-      const infoResults = await Promise.all(infoPromises);
-      gotchipusInfo = infoResults.filter(info => info !== null) as GotchipusInfo[];
-    }
+
+    const [gotchipusInfoResults, tbaResults] = await Promise.all([
+      includeGotchipusInfo
+        ? Promise.all(
+            tokenIds.map(async (tokenId) => {
+              try {
+                const info = await publicClient.readContract({
+                  address: PUS_ADDRESS,
+                  abi: PUS_ABI,
+                  functionName: 'ownedTokenInfo',
+                  args: [ownerAddress, tokenId],
+                }) as any;
+                return serializeGotchipusInfo(info);
+              } catch {
+                return null;
+              }
+            })
+          )
+        : Promise.resolve([]),
+      Promise.all(
+        tokenIds.map(tokenId =>
+          publicClient
+            .readContract({ address: PUS_ADDRESS, abi: PUS_ABI, functionName: 'account', args: [tokenId] })
+            .catch(() => null)
+        )
+      ),
+    ]);
+
+    const gotchipusInfo = (gotchipusInfoResults as (GotchipusInfo | null)[]).filter(Boolean) as GotchipusInfo[];
+    const tbaAddresses = tbaResults.map(addr => (addr as string) || '');
 
     return {
       balance,
       ids,
       gotchipusInfo,
-      totalCount: ids.length
+      totalCount: ids.length,
+      tbaAddresses,
     };
   } catch (error: any) {
-    console.error('Error calling getGotchiOrPharosInfo:', error);
     if (error.message?.includes('execution reverted')) {
       return {
         balance: '0',
         ids: [],
         gotchipusInfo: [],
-        totalCount: 0
+        totalCount: 0,
+        tbaAddresses: [],
       };
     }
     throw error;
@@ -103,32 +113,37 @@ function serializeBigIntFields(obj: any): any {
 }
 
 function serializeGotchipusInfo(info: any): GotchipusInfo {
-  const serializedDna = serializeBigIntFields(info.dna || {});
-  
+  const s = serializeBigIntFields(info);
+  const core = s.core || {};
+  const soul = core.soul || {};
+
   return {
-    name: info.name || "",
-    uri: info.uri || "",
-    story: info.story || "",
-    owner: info.owner || "",
-    collateral: info.collateral || "",
-    collateralAmount: info.collateralAmount?.toString() || '0',
-    level: Number(info.level || 0),
-    status: Number(info.status || 0),
-    evolution: Number(info.evolution || 0),
-    locked: Boolean(info.locked),
-    epoch: Number(info.epoch || 0),
-    utc: Number(info.utc || 0),
-    dna: serializedDna,
-    singer: info.singer || "",
-    nonces: info.nonces?.toString() || '0',
-    element: info.element ? Number(info.element) : undefined,
-    strength: Number(info.strength || 0),
-    defense: Number(info.defense || 0),
-    mind: Number(info.mind || 0),
-    vitality: Number(info.vitality || 0),
-    agility: Number(info.agility || 0),
-    luck: Number(info.luck || 0),
-    primaryFaction: Number(info.primaryFaction || 0),
+    name: s.name || "",
+    uri: s.uri || "",
+    collateral: s.collateral || "",
+    collateralAmount: String(s.collateralAmount ?? '0'),
+    status: Number(s.status ?? 0),
+    locked: Boolean(s.locked),
+    birthTime: Number(s.birthTime ?? 0),
+    rarity: Number(s.rarity ?? 0),
+    faction: Number(s.faction ?? 0),
+    currentExp: Number(s.currentExp ?? 0),
+    core: {
+      strength: Number(core.strength ?? 0),
+      defense: Number(core.defense ?? 0),
+      mind: Number(core.mind ?? 0),
+      vitality: Number(core.vitality ?? 0),
+      agility: Number(core.agility ?? 0),
+      luck: Number(core.luck ?? 0),
+      soul: {
+        balance: Number(soul.balance ?? 0),
+        maxSoulCapacity: Number(soul.maxSoulCapacity ?? 0),
+        lastSoulUpdate: Number(soul.lastSoulUpdate ?? 0),
+        dormantSince: Number(soul.dormantSince ?? 0),
+      },
+    },
+    singer: s.singer || "",
+    nonces: String(s.nonces ?? '0'),
   };
 }
 
@@ -146,7 +161,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
 
   } catch (error: any) {
-    console.error('API Error (gotchipus-list):', error);
     return NextResponse.json({ message: 'Internal Server Error', error: error.message }, { status: 500 });
   }
 }

@@ -1,15 +1,18 @@
 "use client"
 
+import { memo } from "react"
 import Image from "next/image"
 import type { DesktopIconProps } from "@/lib/types"
 
-export default function DesktopIcon({ id, title, icon, onClick, isActive, isMobile = false }: DesktopIconProps) {
+function DesktopIcon({ id, title, icon, onClick, isActive, isMobile = false }: DesktopIconProps) {
   return (
-    <div
-      className={`flex flex-col items-center cursor-pointer p-2 transition-all hover:-translate-y-0.5 group ${
+    <button
+      type="button"
+      aria-label={title}
+      className={`flex flex-col items-center cursor-pointer p-2 transition-all hover:-translate-y-0.5 group bg-transparent border-none focus:outline-none focus-visible:outline-dotted focus-visible:outline-1 focus-visible:outline-white focus-visible:outline-offset-[-2px] ${
         isMobile ? 'w-24' : 'w-24'
       }`}
-      onClick={onClick}
+      onClick={() => onClick(id)}
     >
       <div className={`mb-1 transition-transform ${isActive ? '-translate-y-1' : ''}`}>
         <Image
@@ -33,7 +36,9 @@ export default function DesktopIcon({ id, title, icon, onClick, isActive, isMobi
       >
         {title}
       </div>
-    </div>
+    </button>
   )
 }
+
+export default memo(DesktopIcon)
 

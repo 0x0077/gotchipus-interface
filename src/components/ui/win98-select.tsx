@@ -13,7 +13,13 @@ interface Win98SelectProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  size?: "sm" | "md";
 }
+
+const SIZE_CLASSES = {
+  sm: { button: "text-xs py-1", item: "text-xs py-1" },
+  md: { button: "text-sm py-1.5", item: "text-sm py-1.5" },
+};
 
 export const Win98Select: React.FC<Win98SelectProps> = ({
   options,
@@ -21,11 +27,13 @@ export const Win98Select: React.FC<Win98SelectProps> = ({
   onChange,
   placeholder = "Select...",
   className = "",
+  size = "sm",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
+  const sz = SIZE_CLASSES[size];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,11 +58,10 @@ export const Win98Select: React.FC<Win98SelectProps> = ({
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
-      {/* Select Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white border-2 border-[#808080] shadow-win98-inner px-2 py-1 text-xs text-left flex items-center justify-between"
+        className={`w-full bg-white border-2 border-[#808080] shadow-win98-inner px-2 ${sz.button} text-left flex items-center justify-between`}
       >
         <span className={selectedOption ? "text-black" : "text-[#808080]"}>
           {selectedOption ? selectedOption.label : placeholder}
@@ -62,19 +69,19 @@ export const Win98Select: React.FC<Win98SelectProps> = ({
         <span className="text-[#808080] ml-2">▼</span>
       </button>
 
-      {/* Dropdown List */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#808080] shadow-win98-outer max-h-48 overflow-y-auto scrollbar-thin">
+        <div className="absolute z-50 w-full mt-1 bg-white border-2 border-[#808080] shadow-win98-outer max-h-60 overflow-y-auto">
           {options.map((option) => (
-            <div
+            <button
               key={option.value}
+              type="button"
               onClick={() => handleSelect(option.value)}
-              className={`px-2 py-1 text-xs cursor-pointer hover:bg-[#000080] hover:text-white ${
+              className={`w-full px-2 ${sz.item} text-left hover:bg-[#000080] hover:text-white ${
                 option.value === value ? "bg-[#000080] text-white" : "text-black"
               }`}
             >
               {option.label}
-            </div>
+            </button>
           ))}
         </div>
       )}

@@ -1,0 +1,311 @@
+.markdown-body {
+  font-family: "VT323", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #000000;
+  background-color: transparent;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  color: #000000;
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-body h1 {
+  font-size: 1.5em;
+  border-bottom: 2px solid #808080;
+  padding-bottom: 0.3em;
+}
+
+.markdown-body h2 {
+  font-size: 1.3em;
+  border-bottom: 1px solid #c0c0c0;
+  padding-bottom: 0.3em;
+}
+
+.markdown-body h3 {
+  font-size: 1.1em;
+}
+
+.markdown-body p {
+  margin: 0.5em 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.markdown-body strong {
+  font-weight: bold;
+  color: #000000;
+}
+
+.markdown-body em {
+  font-style: italic;
+  color: #000000;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-body li {
+  margin: 0.2em 0;
+}
+
+.markdown-body ul li {
+  list-style-type: disc;
+}
+
+.markdown-body ol li {
+  list-style-type: decimal;
+}
+
+.markdown-body blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 3px solid #808080;
+  background-color: #f0f0f0;
+  font-style: italic;
+}
+
+.markdown-body code {
+  background-color: #f0f0f0;
+  border: 1px solid #c0c0c0;
+  border-radius: 3px;
+  padding: 0.2em 0.4em;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  color: #000000;
+  word-break: break-word;
+}
+
+.markdown-body pre {
+  background-color: #f0f0f0;
+  border: 2px solid #808080;
+  border-radius: 3px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+  position: relative;
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-body pre code {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  border: 2px solid #808080;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.markdown-body th {
+  border: 1px solid #808080;
+  padding: 0.5em;
+  background-color: #c0c0c0;
+  font-weight: bold;
+  text-align: left;
+  color: #000000;
+}
+
+.markdown-body td {
+  border: 1px solid #808080;
+  padding: 0.5em;
+}
+
+.markdown-body a {
+  color: #0000ff;
+  text-decoration: underline;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+.markdown-body a:hover {
+  color: #0000cc;
+}
+
+.markdown-body a:visited {
+  color: #800080;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid #808080;
+  margin: 1em 0;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #808080;
+}
+
+.markdown-body .hljs {
+  background-color: #f0f0f0 !important;
+  color: #000000 !important;
+}
+
+.markdown-body .hljs-comment,
+.markdown-body .hljs-quote {
+  color: #008000 !important;
+  font-style: italic;
+}
+
+.markdown-body .hljs-keyword,
+.markdown-body .hljs-selector-tag,
+.markdown-body .hljs-literal {
+  color: #000080 !important;
+  font-weight: bold;
+}
+
+.markdown-body .hljs-string,
+.markdown-body .hljs-title {
+  color: #800000 !important;
+}
+
+.markdown-body .hljs-number,
+.markdown-body .hljs-symbol,
+.markdown-body .hljs-bullet {
+  color: #800080 !important;
+}
+
+.markdown-body .hljs-attribute,
+.markdown-body .hljs-variable,
+.markdown-body .hljs-template-variable {
+  color: #008080 !important;
+}
+
+.copy-code-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #c0c0c0;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.copy-code-button:hover {
+  opacity: 1;
+  background-color: #d0d0d0;
+}
+
+.copy-code-button::after {
+  content: "Copy";
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.show-hide-button {
+  text-align: center;
+  margin-top: 1em;
+}
+
+.show-hide-button button {
+  background-color: #c0c0c0;
+  border: 2px solid #808080;
+  border-radius: 3px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.show-hide-button button:hover {
+  background-color: #d0d0d0;
+}
+
+.show-hide-button button:active {
+  border-style: inset;
+}
+
+.markdown-body .mermaid {
+  background-color: #ffffff;
+  border: 1px solid #808080;
+  border-radius: 3px;
+  padding: 1em;
+  margin: 1em 0;
+}
+
+.markdown-streaming {
+  position: relative;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  contain: content;
+  transition: height 0.1s ease-out;
+  max-width: 100%;
+}
+
+.markdown-streaming > * {
+  margin-top: 0;
+}
+
+.markdown-streaming > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-streaming .animate-pulse {
+  animation: blink 1s infinite;
+  font-weight: bold;
+}
+
+.markdown-streaming pre {
+  min-height: 2em;
+}
+
+.markdown-streaming ul,
+.markdown-streaming ol {
+  padding-left: 2em;
+  margin: 0.5em 0;
+}
+
+.markdown-streaming ul li {
+  list-style-type: disc;
+  margin: 0.3em 0;
+  line-height: 1.6;
+}
+
+.markdown-streaming ol li {
+  list-style-type: decimal;
+  margin: 0.3em 0;
+  line-height: 1.6;
+}
+
+.markdown-streaming ul > li::marker {
+  color: #000000;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}

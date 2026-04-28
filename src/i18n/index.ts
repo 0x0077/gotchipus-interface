@@ -3,6 +3,9 @@ import { initReactI18next } from 'react-i18next';
 import { Locale, DEFAULT_LOCALE } from './constants';
 import enUsLocale from './locales/translations/en-US.json';
 import zhCNLocale from './locales/translations/zh-CN.json';
+import jaJPLocale from './locales/translations/ja-JP.json';
+import koKRLocale from './locales/translations/ko-KR.json';
+import viVNLocale from './locales/translations/vi-VN.json';
 
 const resources = {
   [Locale.EnglishUnitedStates]: {
@@ -10,6 +13,15 @@ const resources = {
   },
   [Locale.ChineseSimplified]: {
     translation: zhCNLocale
+  },
+  [Locale.Japanese]: {
+    translation: jaJPLocale
+  },
+  [Locale.Korean]: {
+    translation: koKRLocale
+  },
+  [Locale.Vietnamese]: {
+    translation: viVNLocale
   }
 };
 

@@ -1,11 +1,45 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
+import { getAuthHeaders } from '@/lib/auth';
 
 interface ChatCallbacks {
   onData?: (data: any) => void;
   onText?: (text: string) => void;
+  onThinking?: (text: string) => void;
+  onAction?: (action: any) => void;
+  onToolResult?: (data: { tool: string; success: boolean; data: any }) => void;
+  onTextReplace?: (text: string) => void;
+  onStatus?: (status: string) => void;
   onError?: (error: any) => void;
-  onComplete?: () => void;
+  onComplete?: (stopReason?: string) => void;
+  /** Carries the DB UUID assigned to the user message so the frontend can
+   *  replace its session-local id (Date.now()) before any later edit/delete. */
+  onUserMessageStart?: (userMessageId: string) => void;
+}
+
+interface ChatPayload {
+  msg: string;
+  gotchi_id: number | null;
+  account: string | null;
+  conversation_id: string;
+  is_new_conversation: boolean;
+  session_active: boolean;
+}
+
+interface RegeneratePayload {
+  gotchi_id: number | null;
+  account: string | null;
+  conversation_id: string;
+  session_active: boolean;
+}
+
+interface EditPayload {
+  gotchi_id: number | null;
+  account: string | null;
+  conversation_id: string;
+  message_id: string;
+  new_content: string;
+  session_active: boolean;
 }
 
 interface ChatState {
@@ -14,21 +48,28 @@ interface ChatState {
 }
 
 const useChat = () => {
-  const send = useCallback(
+  const abortRef = useRef<AbortController | null>(null);
+
+  const processSSEStream = useCallback(
     async (
-      payload: { query: string; is_call_tools: boolean; agent_index: number; message: string },
+      url: string,
+      payload: ChatPayload | RegeneratePayload | EditPayload,
       callbacks?: ChatCallbacks
     ) => {
+      // Abort any previous stream
+      abortRef.current?.abort();
+
       let hasError = false;
       const ctrl = new AbortController();
+      abortRef.current = ctrl;
       let chatState: ChatState = { buffer: '', inThinkBlock: false };
 
       const processContent = (content: string): string => {
         chatState.buffer += content;
-        
+
         let result = '';
         let tempBuffer = chatState.buffer;
-        
+
         while (tempBuffer.length > 0) {
           if (!chatState.inThinkBlock) {
             const thinkStart = tempBuffer.indexOf('<think>');
@@ -42,7 +83,7 @@ const useChat = () => {
               chatState.inThinkBlock = true;
             }
           }
-          
+
           if (chatState.inThinkBlock) {
             const thinkEnd = tempBuffer.indexOf('</think>');
             if (thinkEnd === -1) {
@@ -54,16 +95,19 @@ const useChat = () => {
             }
           }
         }
-        
+
         chatState.buffer = tempBuffer;
         return result;
       };
 
       try {
-        await fetchEventSource('/api/chat/callIntent', {
+        await fetchEventSource(url, {
           signal: ctrl.signal,
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
           body: JSON.stringify(payload),
 
           onopen: async (res) => {
@@ -75,36 +119,87 @@ const useChat = () => {
 
           onmessage: async (ev) => {
             if (hasError) return;
-            
-            if (ev.event === 'data') {
-              try {
-                const json = JSON.parse(ev.data);
-                callbacks?.onData?.(json);
-              } catch (parseError) {
-                console.error('Failed to parse data event:', parseError);
-              }
-            } else if (ev.event === 'text') {
-              try {
-                const json = JSON.parse(ev.data);
-                if (json.content) {
-                  const filteredContent = processContent(json.content);
-                  
-                  if (filteredContent.trim()) {
-                    callbacks?.onText?.(filteredContent);
+
+            try {
+              const eventData = JSON.parse(ev.data);
+
+              switch (eventData.type) {
+                case 'message_start':
+                  break;
+
+                case 'user_message_start':
+                  if (eventData.user_message_id) {
+                    callbacks?.onUserMessageStart?.(eventData.user_message_id);
                   }
-                }
-              } catch (parseError) {
-                const filteredContent = processContent(ev.data);
-                if (filteredContent.trim()) {
-                  callbacks?.onText?.(filteredContent);
-                }
+                  break;
+
+                case 'thinking':
+                  if (eventData.message) {
+                    callbacks?.onThinking?.(eventData.message);
+                  }
+                  break;
+
+                case 'thinking_delta':
+                  if (eventData.text) {
+                    callbacks?.onThinking?.(eventData.text);
+                  }
+                  break;
+
+                case 'text_delta':
+                  if (eventData.text) {
+                    const filteredContent = processContent(eventData.text);
+                    if (filteredContent.trim()) {
+                      callbacks?.onText?.(filteredContent);
+                    }
+                  }
+                  break;
+
+                case 'action':
+                  if (eventData.action) {
+                    callbacks?.onAction?.(eventData);
+                  }
+                  break;
+
+                case 'text_replace':
+                  callbacks?.onTextReplace?.(eventData.text || '');
+                  break;
+
+                case 'tool_result':
+                  callbacks?.onToolResult?.(eventData);
+                  break;
+
+                case 'status':
+                  if (eventData.message) {
+                    callbacks?.onStatus?.(eventData.message);
+                  }
+                  break;
+
+                case 'error':
+                  // Backend-emitted business error (LLM failure, session expired,
+                  // rate limit, tool failure, etc.). Mark the stream as failed so
+                  // the finally-block skips onComplete, and surface the reason
+                  // via onError so the UI can display the real message instead
+                  // of a generic network-error placeholder.
+                  hasError = true;
+                  callbacks?.onError?.(new Error(eventData.message || 'Stream error'));
+                  break;
+
+                case 'message_stop':
+                  callbacks?.onComplete?.(eventData.stop_reason);
+                  break;
+
+                default:
+                  break;
               }
+            } catch (parseError) {
             }
           },
 
           onerror(err) {
             hasError = true;
             callbacks?.onError?.(err);
+            // Must throw to prevent fetchEventSource from retrying infinitely
+            throw err;
           }
         });
       } catch (error) {
@@ -114,13 +209,61 @@ const useChat = () => {
         if (!hasError) {
           callbacks?.onComplete?.();
         }
-        ctrl.abort();
+        if (abortRef.current === ctrl) {
+          abortRef.current = null;
+        }
       }
     },
     [],
   );
 
-  return { send };
+  const send = useCallback(
+    async (payload: ChatPayload, callbacks?: ChatCallbacks) => {
+      return processSSEStream('/api/chat/stream', payload, callbacks);
+    },
+    [processSSEStream],
+  );
+
+  const regenerate = useCallback(
+    async (payload: RegeneratePayload, callbacks?: ChatCallbacks) => {
+      return processSSEStream('/api/chat/regenerate', payload, callbacks);
+    },
+    [processSSEStream],
+  );
+
+  const edit = useCallback(
+    async (payload: EditPayload, callbacks?: ChatCallbacks) => {
+      return processSSEStream('/api/chat/edit', payload, callbacks);
+    },
+    [processSSEStream],
+  );
+
+  const stop = useCallback(
+    async (conversationId: string) => {
+      // Abort the client-side stream immediately
+      abortRef.current?.abort();
+      abortRef.current = null;
+
+      // Notify the backend to stop generation
+      try {
+        const res = await fetch('/api/chat/stop', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
+          body: JSON.stringify({ conversation_id: conversationId }),
+        });
+        return res.json();
+      } catch (error) {
+        return { code: 1, status: 'error' };
+      }
+    },
+    [],
+  );
+
+  return { send, regenerate, edit, stop };
 };
 
 export default useChat;
+export type { ChatPayload, RegeneratePayload, EditPayload, ChatCallbacks };

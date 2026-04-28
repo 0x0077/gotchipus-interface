@@ -1,0 +1,138 @@
+{
+  "version": "1.0.0",
+  "layers": [
+    {
+      "name": "Backgrounds",
+      "directory": "backgrounds",
+      "parts": [
+        { "id": "000-beach-lighthouse", "label": "Beach Lighthouse", "rarity": "common" },
+        { "id": "001-big-ben", "label": "Big Ben", "rarity": "common" },
+        { "id": "002-burj-khalifa", "label": "Burj Khalifa", "rarity": "common" },
+        { "id": "003-christ-the-redeemer", "label": "Christ The Redeemer", "rarity": "common" },
+        { "id": "004-diamond-head-mountain", "label": "Diamond Head Mountain", "rarity": "common" },
+        { "id": "005-eiffel-tower", "label": "Eiffel Tower", "rarity": "common" },
+        { "id": "006-grand-palace", "label": "Grand Palace", "rarity": "common" },
+        { "id": "007-green", "label": "Green", "rarity": "common" },
+        { "id": "008-hollywood-sign", "label": "Hollywood Sign", "rarity": "common" },
+        { "id": "009-oriental-pearl-tower", "label": "Oriental Pearl Tower", "rarity": "common" },
+        { "id": "010-pure-gold", "label": "Pure Gold", "rarity": "common" },
+        { "id": "011-pyramids-of-egypt", "label": "Pyramids of Egypt", "rarity": "common" },
+        { "id": "012-red", "label": "Red", "rarity": "common" },
+        { "id": "013-st-basils-cathedral", "label": "St. Basil's Cathedral", "rarity": "common" },
+        { "id": "014-statue-of-liberty", "label": "Statue of Liberty", "rarity": "common" },
+        { "id": "015-tokyo-tower", "label": "Tokyo Tower", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Bodies",
+      "directory": "bodys",
+      "parts": [
+        { "id": "016-aqua-spirit", "label": "Aqua Spirit", "rarity": "common" },
+        { "id": "017-blazing-flame", "label": "Blazing Flame", "rarity": "common" },
+        { "id": "018-candy-pink", "label": "Candy Pink", "rarity": "common" },
+        { "id": "019-crystal", "label": "Crystal", "rarity": "common" },
+        { "id": "020-deep-sea", "label": "Deep Sea", "rarity": "common" },
+        { "id": "021-golden-glow", "label": "Golden Glow", "rarity": "common" },
+        { "id": "022-ink-shadow", "label": "Ink Shadow", "rarity": "common" },
+        { "id": "023-orca-wrap", "label": "Orca Wrap", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Eyes",
+      "directory": "eyes",
+      "parts": [
+        { "id": "024-bitcoin-eyes", "label": "Bitcoin Eyes", "rarity": "common" },
+        { "id": "025-curved-smiling-closed-eyes", "label": "Curved Smiling Closed Eyes", "rarity": "common" },
+        { "id": "026-dogecoin-logo-eyes", "label": "Dogecoin Logo Eyes", "rarity": "common" },
+        { "id": "027-dollar-sign-eyes", "label": "Dollar Sign Eyes", "rarity": "common" },
+        { "id": "028-normal", "label": "Normal", "rarity": "common" },
+        { "id": "029-pharos-logo-eyes", "label": "Pharos Logo Eyes", "rarity": "common" },
+        { "id": "030-single-eye", "label": "Single Eye", "rarity": "common" },
+        { "id": "031-yellow-lightning-eyes", "label": "Yellow Lightning Eyes", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Hands",
+      "directory": "hands",
+      "parts": [
+        { "id": "032-drink-bottle", "label": "Drink Bottle", "rarity": "common" },
+        { "id": "033-fire", "label": "Fire", "rarity": "common" },
+        { "id": "034-gold-coin-pouch", "label": "Gold Coin Pouch", "rarity": "common" },
+        { "id": "035-ink-bottle", "label": "Ink Bottle", "rarity": "common" },
+        { "id": "036-lighthouse-model", "label": "Lighthouse Model", "rarity": "common" },
+        { "id": "037-lightning", "label": "Lightning", "rarity": "common" },
+        { "id": "038-magic-potion-bottle", "label": "Magic Potion Bottle", "rarity": "common" },
+        { "id": "039-magic-scroll", "label": "Magic Scroll", "rarity": "common" },
+        { "id": "040-magic-wand", "label": "Magic Wand", "rarity": "common" },
+        { "id": "041-miners-pickaxe", "label": "Miner's Pickaxe", "rarity": "common" },
+        { "id": "042-pharos-coin", "label": "Pharos Coin", "rarity": "common" },
+        { "id": "043-sea-urchin", "label": "Sea Urchin", "rarity": "common" },
+        { "id": "044-spray-paint-can", "label": "Spray Paint Can", "rarity": "common" },
+        { "id": "045-trident", "label": "Trident", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Heads",
+      "directory": "heads",
+      "parts": [
+        { "id": "046-aviator-hat", "label": "Aviator Hat", "rarity": "common" },
+        { "id": "047-captain-hat", "label": "Captain Hat", "rarity": "common" },
+        { "id": "048-cowboy-hat", "label": "Cowboy Hat", "rarity": "common" },
+        { "id": "049-crocodile-hat", "label": "Crocodile Hat", "rarity": "common" },
+        { "id": "050-crown", "label": "Crown", "rarity": "common" },
+        { "id": "051-dogecoin-hat", "label": "Dogecoin Hat", "rarity": "common" },
+        { "id": "052-frog-hat", "label": "Frog Hat", "rarity": "common" },
+        { "id": "053-miner-helmet", "label": "Miner Helmet", "rarity": "common" },
+        { "id": "054-orca-hat-full", "label": "Orca Hat (Full)", "rarity": "common" },
+        { "id": "055-panda-hat", "label": "Panda Hat", "rarity": "common" },
+        { "id": "056-pirate-bandana", "label": "Pirate Bandana", "rarity": "common" },
+        { "id": "057-polar-bear-hat", "label": "Polar Bear Hat", "rarity": "common" },
+        { "id": "058-sea-lion-hat", "label": "Sea Lion Hat", "rarity": "common" },
+        { "id": "059-shark-hat", "label": "Shark Hat", "rarity": "common" },
+        { "id": "060-straw-hat", "label": "Straw Hat", "rarity": "common" },
+        { "id": "061-unicorn-hat", "label": "Unicorn Hat", "rarity": "common" },
+        { "id": "062-wizard-hat", "label": "Wizard Hat", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Clothing",
+      "directory": "clothes",
+      "parts": [
+        { "id": "063-camouflage-outfit", "label": "Camouflage Outfit", "rarity": "common" },
+        { "id": "064-cloak", "label": "Cloak", "rarity": "common" },
+        { "id": "065-explorer-jacket", "label": "Explorer Jacket", "rarity": "common" },
+        { "id": "066-golden-robe", "label": "Golden Robe", "rarity": "common" },
+        { "id": "067-knight-armor", "label": "Knight Armor", "rarity": "common" },
+        { "id": "068-miner-outfit", "label": "Miner Outfit", "rarity": "common" },
+        { "id": "069-royal-cape", "label": "Royal Cape", "rarity": "common" },
+        { "id": "070-tactical-vest", "label": "Tactical Vest", "rarity": "common" },
+        { "id": "071-wizard-robe", "label": "Wizard Robe", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Faces",
+      "directory": "faces",
+      "parts": [
+        { "id": "072-diving-googles", "label": "Diving Googles", "rarity": "common" },
+        { "id": "073-gas-mask", "label": "Gas Mask", "rarity": "common" },
+        { "id": "074-iron-man-mask", "label": "Iron Man Mask", "rarity": "common" },
+        { "id": "075-led-gmotchi", "label": "LED GMOTCHI", "rarity": "common" },
+        { "id": "076-led-gotchi", "label": "LED GOTCHI", "rarity": "common" },
+        { "id": "077-led-pharos", "label": "LED PHAROS", "rarity": "common" },
+        { "id": "078-tactical-face-mask", "label": "Tactical Face Mask", "rarity": "common" }
+      ]
+    },
+    {
+      "name": "Mouths",
+      "directory": "mouths",
+      "parts": [
+        { "id": "079-biting-a-golden-key", "label": "Biting a Golden Key", "rarity": "common" },
+        { "id": "080-eating-a-fish", "label": "Eating a Fish", "rarity": "common" },
+        { "id": "081-eating-a-starfish", "label": "Eating a Starfish", "rarity": "common" },
+        { "id": "082-hidden", "label": "Hidden", "rarity": "common" },
+        { "id": "083-hodl-tape", "label": "HODL Tape", "rarity": "common" },
+        { "id": "084-smile", "label": "Smile", "rarity": "common" }
+      ]
+    }
+  ]
+}

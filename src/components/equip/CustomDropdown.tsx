@@ -52,7 +52,7 @@ export const CustomDropdown = ({
             e.stopPropagation();
             setIsOpen(!isOpen);
           }}
-          className={`w-full border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] px-3 flex items-center justify-between hover:bg-[#b0b0b0] active:shadow-win98-inner
+          className={`w-full border-2 border-[#808080] shadow-win98-outer bg-win98-face px-3 flex items-center justify-between hover:bg-[#b0b0b0] active:shadow-win98-inner
             ${isMobile ? 'py-1.5 text-sm' : 'py-2 text-base'}`}
         >
           <span className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export const CustomDropdown = ({
         </button>
 
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-1 border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] z-10 max-h-60 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1 border-2 border-[#808080] shadow-win98-outer bg-win98-face z-10 max-h-60 overflow-y-auto">
             {options.map((option) => (
               <button
                 key={option.value}

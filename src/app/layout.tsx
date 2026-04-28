@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: '%s | Gotchipus ',
   },
   description: 'An AI-powered dNFT virtual pet platform! ',
-  keywords: ['cryptocurrency', 'blockchain', 'Gotchipus', 'gotchipus', 'BNB', 'PancakeSwap', "AIPet", "Pet"],
+  keywords: ['cryptocurrency', 'blockchain', 'gotchipus', 'gotchi', 'AIPet', 'pet', 'ai agent', 'pharos', 'pharos network'],
   authors: [{ name: 'Gotchipus' }],
   creator: 'Gotchipus',
   publisher: 'Gotchipus',

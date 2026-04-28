@@ -3,7 +3,6 @@ import { useContractRead } from '@/hooks/useContract';
 import { TOKEN_ID_TO_IMAGE } from '@/components/gotchiSvg/config';
 import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, FACE_BYTES32, MOUTH_BYTES32, HEAD_BYTES32, CLOTHES_BYTES32 } from '@/lib/constant';
 import { EquipWearableType } from "@/lib/types";
-import { normalizeWearableId } from '@/lib/utils';
 
 
 const EQUIPMENT_SLOTS = [
@@ -27,7 +26,7 @@ export interface EquippedItem {
 export const useEquippedItems = (tokenId: number) => {
   const [equippedItems, setEquippedItems] = useState<EquippedItem[]>([]);
   const { data: wearableTypeInfos, isLoading, error } = useContractRead("getAllEquipWearableType", [tokenId]);
-  
+
   useEffect(() => {
     if (wearableTypeInfos && Array.isArray(wearableTypeInfos)) {
       const slotsWithIcons = EQUIPMENT_SLOTS.map(slot => {
@@ -38,7 +37,7 @@ export const useEquippedItems = (tokenId: number) => {
         let imagePath: string | null = null;
 
         if (wearableInfo) {
-          const tokenId = normalizeWearableId(Number(wearableInfo.wearableId));
+          const tokenId = Number(wearableInfo.wearableId);
           imagePath = TOKEN_ID_TO_IMAGE[tokenId] || null;
         }
 

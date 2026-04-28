@@ -28,7 +28,7 @@ yarn-error.log*
 .idea
 .env
 wrangler.toml
-.vercel
 
-# docs
 /docs
+CLAUDE.md
+/tasks

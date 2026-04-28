@@ -3,9 +3,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 import EnhancedGotchiSvg from "@/components/gotchiSvg/EnhancedGotchiSvg";
-import { backgrounds } from "@/components/gotchiSvg/svgs";
-import { renderToStaticMarkup } from "react-dom/server";
+import { getWearablePngUrl } from "@/src/utils/wearableMapping";
 import { GotchiMetadata } from "@/lib/types";
 import { useAllEquipLayers } from "@/hooks/useAllEquipLayers";
 
@@ -14,11 +14,11 @@ interface GotchiCardProps {
   onClick?: (metadata: GotchiMetadata) => void;
 }
 
-const RARITY_NAMES: Record<number, string> = {
-  0: "Common",
-  1: "Rare",
-  2: "Epic",
-  3: "Legendary",
+const RARITY_KEYS: Record<number, string> = {
+  0: "common",
+  1: "rare",
+  2: "epic",
+  3: "legendary",
 };
 
 const RARITY_COLORS: Record<number, string> = {
@@ -29,6 +29,7 @@ const RARITY_COLORS: Record<number, string> = {
 };
 
 const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
+  const { t } = useTranslation();
   const handleClick = () => {
     if (onClick) {
       onClick(metadata);
@@ -38,26 +39,22 @@ const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
   const isSummoned = metadata.status !== 0;
   const wearableIndices = useAllEquipLayers(metadata.all_equip);
 
-  const backgroundComponent = backgrounds(wearableIndices.backgroundIndex);
-  const backgroundSvg = backgroundComponent
-    ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">${renderToStaticMarkup(backgroundComponent)}</svg>`
+  const bgUrl = wearableIndices.backgroundIndex > 0
+    ? getWearablePngUrl('backgrounds', wearableIndices.backgroundIndex - 1)
     : null;
+  const backgroundStyle = bgUrl ? { backgroundImage: `url("${bgUrl}")` } : {};
 
-  const backgroundStyle = backgroundSvg
-    ? { backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(backgroundSvg)}")` }
-    : {};
-
-  const currentExp = metadata.leveling_data?.current_exp || 0;
+  const currentExp = metadata.currentExp || 0;
   const calculatedLevel = Math.floor(Number(currentExp) / 100);
 
-  // Get rarity from dna_data
-  const rarity = metadata.dna_data?.rarity ?? 0;
-  const rarityName = RARITY_NAMES[rarity] || "Common";
+  const rarity = metadata.rarity ?? 0;
+  const rarityKey = RARITY_KEYS[rarity] || "common";
+  const rarityName = t(`common.rarity.${rarityKey}`);
   const rarityColor = RARITY_COLORS[rarity] || "bg-[#808080] text-white";
 
   return (
     <motion.div
-      className="bg-[#c0c0c0] flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-2 hover:border-dashed hover:border-[#000080] transition-all"
+      className="bg-win98-face flex flex-col items-center justify-center cursor-pointer border-2 border-[#808080] shadow-win98-outer rounded-none p-2 hover:border-dashed hover:border-[#000080] transition-all"
       onClick={handleClick}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
@@ -69,11 +66,6 @@ const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
               <span className="text-[10px] font-bold bg-[#000080] text-white px-1">
                 Lv.{calculatedLevel}
               </span>
-              {metadata.is_evolved && (
-                <span className="text-[10px] font-bold bg-[#ffd700] text-[#000080] px-1">
-                  ★{metadata.core_evolution}
-                </span>
-              )}
               {metadata.locked && (
                 <span className="text-[10px]">🔒</span>
               )}
@@ -84,7 +76,7 @@ const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
           </>
         ) : (
           <span className="text-[10px] font-bold bg-[#808080] text-white px-1">
-            Not Summoned
+            {t('allGotchi.notSummoned')}
           </span>
         )}
       </div>

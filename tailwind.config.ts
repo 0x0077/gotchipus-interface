@@ -20,6 +20,13 @@ const config: Config = {
 				'uni-bg-02': "#000080",
   		},
   		colors: {
+			win98: {
+				face: '#c0c0c0',
+				shadow: '#808080',
+				highlight: '#dfdfdf',
+				title: '#000080',
+				desktop: '#008080',
+			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -64,6 +71,8 @@ const config: Config = {
   		fontFamily: {
   			sans: ['"VT323"', "monospace"],
 				vt323: ['"VT323"', "monospace"],
+				win98: ["'MS Sans Serif'", "Tahoma", "sans-serif"],
+				courier: ["'Courier New'", "Courier", "monospace"],
   		},
   		screens: {
   			xs: '396px',
@@ -91,11 +100,16 @@ const config: Config = {
           '0%': { transform: 'translateY(100%)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        'slide-down': {
+          '0%': { transform: 'translateY(-10px)', opacity: '0', maxHeight: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1', maxHeight: '500px' },
+        },
   		},
   		animation: {
   			'wiggle-zoom': 'wiggle 0.2s ease-in-out 2, scaleAndColor 0.4s ease-in-out 0.5s forwards',
 			'window-appear': 'window-appear 0.3s ease-out',
 			'slide-up': 'slide-up 0.3s ease-out',
+			'slide-down': 'slide-down 0.2s ease-out forwards',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

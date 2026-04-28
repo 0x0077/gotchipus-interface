@@ -19,10 +19,22 @@
     },
     {
         "type": "function",
-        "name": "freeMint",
-        "inputs": [],
-        "outputs": [],
-        "stateMutability": "nonpayable"
+        "name": "isWhitelisted",
+        "inputs": [
+            {
+                "name": "wallet",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
     },
     {
         "type": "function",
@@ -35,7 +47,7 @@
             }
         ],
         "outputs": [],
-        "stateMutability": "payable"
+        "stateMutability": "nonpayable"
     },
     {
         "type": "function",
@@ -45,6 +57,19 @@
                 "name": "_paused",
                 "type": "bool",
                 "internalType": "bool"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setChiDiamond",
+        "inputs": [
+            {
+                "name": "_chiDiamond",
+                "type": "address",
+                "internalType": "address"
             }
         ],
         "outputs": [],
@@ -93,16 +118,6 @@
                         "internalType": "uint256"
                     },
                     {
-                        "name": "utc",
-                        "type": "uint8",
-                        "internalType": "uint8"
-                    },
-                    {
-                        "name": "story",
-                        "type": "bytes",
-                        "internalType": "bytes"
-                    },
-                    {
                         "name": "preIndex",
                         "type": "uint256",
                         "internalType": "uint256"
@@ -119,6 +134,45 @@
         "inputs": [],
         "outputs": [],
         "stateMutability": "nonpayable"
+    },
+    {
+        "type": "event",
+        "name": "ChiDiamondUpdated",
+        "inputs": [
+            {
+                "name": "newChiDiamond",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Paused",
+        "inputs": [
+            {
+                "name": "isPaused",
+                "type": "bool",
+                "indexed": false,
+                "internalType": "bool"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "SaltUpdated",
+        "inputs": [
+            {
+                "name": "newSalt",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
     },
     {
         "type": "event",
@@ -154,6 +208,62 @@
                 "type": "uint256",
                 "indexed": true,
                 "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "TransferSingle",
+        "inputs": [
+            {
+                "name": "operator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "from",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "to",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "id",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            },
+            {
+                "name": "value",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "WhitelistUpdated",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "isWhitelisted",
+                "type": "bool",
+                "indexed": true,
+                "internalType": "bool"
             }
         ],
         "anonymous": false

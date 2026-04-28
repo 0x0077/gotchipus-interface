@@ -1,73 +1,115 @@
 'use client'
 
+import { useState } from "react"
 import SvgIcon from "@/components/gotchiSvg/SvgIcon"
-import useResponsive from "@/hooks/useResponsive"
-import { WearableItem, RARITY_COLORS } from "./types"
+import { WearableItem, RARITY } from "./types"
 
 interface EquipCardProps {
   item: WearableItem;
-  isInCart: boolean;
-  onItemClick: (item: WearableItem) => void;
-  onAddToCart: (item: WearableItem) => void;
+  inCart: boolean;
+  isTrying: boolean;
+  onAdd: () => void;
+  onRemove: () => void;
+  onTryOn: (item: WearableItem) => void;
+  onPreview: (item: WearableItem) => void;
+  index: number;
 }
 
-export const EquipCard = ({ item, isInCart, onItemClick, onAddToCart }: EquipCardProps) => {
-  const isMobile = useResponsive();
+export const EquipCard = ({ item, inCart, isTrying, onAdd, onRemove, onTryOn, onPreview, index }: EquipCardProps) => {
+  const [hover, setHover] = useState(false);
+  const r = RARITY[item.rarity];
 
   return (
     <div
-      className={`border-2 border-[#808080] shadow-win98-outer bg-[#d4d0c8] hover:border-[#000080] transition-all ${isMobile ? 'p-2' : 'p-3'}`}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onClick={() => onPreview(item)}
+      className={`bg-win98-face cursor-pointer transition-transform duration-150 flex flex-col relative ${isTrying ? '' : 'shadow-win98-outer'}`}
+      style={{
+        boxShadow: isTrying
+          ? `inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf, 0 0 0 2px ${r.color}`
+          : undefined,
+        transform: hover ? 'translateY(-2px)' : undefined,
+        animation: `cardIn 0.3s ease ${index * 0.03}s both`,
+      }}
     >
-      <div
-        onClick={() => onItemClick(item)}
-        className="cursor-pointer mb-3 relative aspect-square border-2 border-[#808080] overflow-hidden"
-      >
+      {/* Trying indicator */}
+      {isTrying && (
         <div
-          className={`absolute top-1 left-1 px-2 py-0.5 text-white font-bold uppercase shadow-md z-10 ${isMobile ? 'text-[10px]' : 'text-xs'}`}
-          style={{ backgroundColor: RARITY_COLORS[item.rarity] }}
+          className="absolute -top-px -left-px -right-px text-white text-[8px] font-bold text-center py-px tracking-wider z-[5]"
+          style={{ background: r.color }}
         >
-          {item.rarity}
+          PREVIEWING
+        </div>
+      )}
+
+      {/* Image area */}
+      <div className={`relative m-0.5 aspect-square shadow-win98-inner flex items-center justify-center overflow-hidden ${isTrying ? 'mt-3.5' : ''}`}>
+        <SvgIcon
+          imagePath={item.imagePath}
+          alt={item.name}
+          width={120}
+          height={120}
+          className="w-full h-full object-contain transition-transform duration-200"
+          style={{
+            transform: hover ? 'scale(1.12)' : undefined,
+            filter: hover ? `drop-shadow(0 0 6px ${r.color}44)` : undefined,
+          }}
+        />
+
+        {/* Scanline */}
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none z-[1]"
+          style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #000 3px)' }}
+        />
+
+        {/* Top badges */}
+        <div className="absolute top-[3px] left-[3px] right-[3px] z-[2] flex justify-between items-start">
+          <span
+            className="px-[5px] text-[9px] font-bold tracking-wider uppercase inline-block"
+            style={{ background: r.bg, color: r.color, border: `1px solid ${r.border}` }}
+          >{item.rarity}</span>
+          <span className="text-[9px] text-black/35 font-mono bg-white/50 px-[3px]">#{item.id}</span>
         </div>
 
-        <div className="w-full h-full flex items-center justify-center">
-          <SvgIcon
-            imagePath={item.imagePath}
-            alt={item.name}
-            width={500}
-            height={500}
-            className="w-full h-full object-cover"
-          />
+        {/* Stats pills */}
+        <div className="absolute bottom-[3px] left-[3px] right-[3px] z-[2] flex gap-0.5 flex-wrap">
+          {Object.entries(item.stats).map(([k, v]) => (
+            <span key={k} className="bg-white border border-[#808080] px-1 py-px text-[9px] font-mono inline-flex items-center gap-0.5">
+              <span className="text-[#808080]">{k}</span>
+              <span className="text-[#000080] font-bold">+{v}</span>
+            </span>
+          ))}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className={`flex items-center justify-between ${isMobile ? 'text-xs' : 'text-sm'}`}>
-          <span className="font-bold capitalize">{item.category}</span>
-          <span className="text-[#808080] font-mono">#{item.id}</span>
-        </div>
-
-        <div className="border-t-2 border-[#808080]"></div>
-
-        <p className={`font-bold truncate ${isMobile ? 'text-sm' : 'text-base'}`} title={item.name}>
-          {item.name}
-        </p>
-
-        <div className="flex items-center gap-2">
-          <span className={`font-bold text-[#000080] flex-shrink-0 ${isMobile ? 'text-sm' : 'text-base'}`}>
-            {item.price} PHRS
+      {/* Info */}
+      <div className="px-[5px] pt-1 pb-[5px]">
+        <div className="text-[9px] text-[#808080] tracking-wider uppercase mb-px">{item.category}</div>
+        <div className="text-[11px] font-bold whitespace-nowrap overflow-hidden text-ellipsis mb-1">{item.name}</div>
+        <div className="flex items-center justify-between gap-[3px]">
+          <span className="text-[11px] font-bold text-[#000080] font-mono">
+            {item.price} USDC
           </span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddToCart(item);
-            }}
-            disabled={isInCart}
-            className={`flex-1 border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] font-bold
-              ${isMobile ? 'py-1 text-xs' : 'py-1.5 text-sm'}
-              ${isInCart ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#b0b0b0] active:shadow-win98-inner'}`}
-          >
-            {isInCart ? '✓ In Cart' : 'Buy'}
-          </button>
+          <div className="flex gap-0.5">
+            <button
+              onClick={e => { e.stopPropagation(); onTryOn(item); }}
+              className={`${isTrying ? 'shadow-win98-inner' : 'shadow-win98-outer'} bg-win98-face border-none px-[5px] py-px text-[9px] cursor-pointer whitespace-nowrap`}
+            >
+              {isTrying ? 'On' : 'Try'}
+            </button>
+            {inCart ? (
+              <button
+                onClick={e => { e.stopPropagation(); onRemove(); }}
+                className="shadow-win98-outer bg-win98-face border-none text-[#008000] text-[9px] px-[5px] py-px cursor-pointer"
+              >✓</button>
+            ) : (
+              <button
+                onClick={e => { e.stopPropagation(); onAdd(); }}
+                className="shadow-win98-outer bg-win98-face border-none text-[9px] px-[5px] py-px cursor-pointer"
+              >+ Cart</button>
+            )}
+          </div>
         </div>
       </div>
     </div>

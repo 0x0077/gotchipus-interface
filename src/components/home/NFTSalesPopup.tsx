@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface NFTSalesData {
   totalSupply: number
@@ -11,6 +12,7 @@ interface NFTSalesData {
 }
 
 export default function NFTSalesPopup() {
+  const { t } = useTranslation()
   const [isVisible, setIsVisible] = useState(true)
   const [salesData, setSalesData] = useState<NFTSalesData>({
     totalSupply: 20000,
@@ -25,17 +27,16 @@ export default function NFTSalesPopup() {
 
   return (
     <div
-      className="fixed top-4 right-4 z-[9999] w-80 bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer animate-in slide-in-from-top-2 duration-300"
-      style={{ fontFamily: "MS Sans Serif, sans-serif" }}
+      className="fixed top-4 right-4 z-[9999] w-80 bg-win98-face border-2 border-[#808080] shadow-win98-outer animate-in slide-in-from-top-2 duration-300 font-win98"
     >
       <div className="flex items-center justify-between px-1 py-0.5 bg-gradient-to-r from-[#000080] to-[#1084d0] text-white text-[11px] font-bold h-[18px]">
         <div className="flex items-center gap-1">
           <span className="text-[10px]"></span>
-          <span>Gotchi Minted</span>
+          <span>{t('mint.gotchiMinted')}</span>
         </div>
         <button
           onClick={() => setIsVisible(false)}
-          className="flex items-center justify-center border border-[#808080] bg-[#c0c0c0] shadow-win98-outer w-4 h-4 hover:bg-[#d4d0c8] active:shadow-win98-inner"
+          className="flex items-center justify-center border border-[#808080] bg-win98-face shadow-win98-outer w-4 h-4 hover:bg-[#d4d0c8] active:shadow-win98-inner"
         >
           <X className="text-black w-3 h-3" />
         </button>
@@ -48,15 +49,15 @@ export default function NFTSalesPopup() {
 
         <div className="mb-3">
           <div className="flex justify-between mb-1">
-            <span className="text-black">Minted:</span>
+            <span className="text-black">{t('mint.mintedLabel')}</span>
             <span className="font-bold text-[#000080]">
               {salesData.currentMinted.toLocaleString()} / {salesData.totalSupply.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between mb-1">
-            <span className="text-black">Price:</span>
+            <span className="text-black">{t('mint.price')}</span>
             <span className="font-bold text-[#008000]">
-              {salesData.price} PHRS
+              {salesData.price} PROS
             </span>
           </div>
         </div>
@@ -89,25 +90,25 @@ export default function NFTSalesPopup() {
           <div className="flex items-start gap-1">
             <span>💡</span>
             <span>
-              {percentage < 25 && "Early bird special! Get yours now!"}
-              {percentage >= 25 && percentage < 50 && "Sales are heating up! Don't miss out!"}
-              {percentage >= 50 && percentage < 75 && "Over halfway sold! Limited supply remaining!"}
-              {percentage >= 75 && percentage < 90 && "Almost sold out! Final chance!"}
-              {percentage >= 90 && "FINAL UNITS! Selling out soon!"}
+              {percentage < 25 && t('mint.earlyBird')}
+              {percentage >= 25 && percentage < 50 && t('mint.heatingUp')}
+              {percentage >= 50 && percentage < 75 && t('mint.halfwaySold')}
+              {percentage >= 75 && percentage < 90 && t('mint.almostSoldOut')}
+              {percentage >= 90 && t('mint.finalUnits')}
             </span>
           </div>
         </div>
 
         <div className="flex gap-2">
           <button
-            className="flex-1 px-2 py-1 bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer text-[11px] font-bold text-black hover:bg-[#d4d0c8] active:shadow-win98-inner transition-transform active:translate-y-px"
+            className="flex-1 px-2 py-1 bg-win98-face border-2 border-[#808080] shadow-win98-outer text-[11px] font-bold text-black hover:bg-[#d4d0c8] active:shadow-win98-inner transition-transform active:translate-y-px"
           >
-            Mint Now
+            {t('mint.button')}
           </button>
           <button
-            className="px-2 py-1 bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer text-[11px] text-black hover:bg-[#d4d0c8] active:shadow-win98-inner transition-transform active:translate-y-px"
+            className="px-2 py-1 bg-win98-face border-2 border-[#808080] shadow-win98-outer text-[11px] text-black hover:bg-[#d4d0c8] active:shadow-win98-inner transition-transform active:translate-y-px"
           >
-            Details
+            {t('mint.details')}
           </button>
         </div>
       </div>

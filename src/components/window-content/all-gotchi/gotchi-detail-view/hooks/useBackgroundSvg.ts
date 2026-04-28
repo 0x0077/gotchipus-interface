@@ -1,22 +1,18 @@
 import { useMemo } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { backgrounds } from '@/components/gotchiSvg/svgs';
+import { getWearablePngUrl } from '@/src/utils/wearableMapping';
 
 export const useBackgroundSvg = (backgroundIndex: number) => {
-  const backgroundSvg = useMemo(() => {
-    const backgroundComponent = backgrounds(backgroundIndex);
-    if (!backgroundComponent) return null;
-
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">${renderToStaticMarkup(backgroundComponent)}</svg>`;
+  const backgroundSvgUrl = useMemo(() => {
+    if (backgroundIndex <= 0) return null;
+    return getWearablePngUrl('backgrounds', backgroundIndex - 1);
   }, [backgroundIndex]);
 
   const backgroundStyle = useMemo(() => {
-    if (!backgroundSvg) return {};
-
+    if (!backgroundSvgUrl) return {};
     return {
-      backgroundImage: `url("data:image/svg+xml;utf8,${encodeURIComponent(backgroundSvg)}")`,
+      backgroundImage: `url("${backgroundSvgUrl}")`,
     };
-  }, [backgroundSvg]);
+  }, [backgroundSvgUrl]);
 
-  return { backgroundSvg, backgroundStyle };
+  return { backgroundSvg: backgroundSvgUrl, backgroundStyle };
 };

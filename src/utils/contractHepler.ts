@@ -13,7 +13,7 @@ export function getERC6551AccountSalt(chainId: number | bigint, tokenId: number 
 
 
 export async function getPharosNativeBalance(address: string) {
-  const provider = new ethers.JsonRpcProvider("https://atlantic.dplabs-internal.com");
+  const provider = new ethers.JsonRpcProvider("https://rpc.pharos.xyz");
   const balance = await provider.getBalance(address);
   return balance;
 }
@@ -35,7 +35,7 @@ export function getTraitsIndex(
     )
   );
 
-  const counts = [16, 8, 8];
+  const counts = [25, 37, 13];
   const indices: number[] = [];
 
   for (let i = 0; i < 3; i++) {

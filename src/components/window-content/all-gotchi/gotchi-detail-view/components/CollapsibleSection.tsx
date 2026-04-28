@@ -24,7 +24,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     <div className="my-4 flex flex-col rounded-lg bg-[#d4d0c8]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full flex-row justify-between px-4 py-2 border-2 border-[#808080] shadow-win98-outer bg-[#c0c0c0] hover:bg-[#d4d0c8] active:shadow-win98-inner"
+        className="flex w-full flex-row justify-between px-4 py-2 border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d0c8] active:shadow-win98-inner"
       >
         <div className="flex items-center">
           {icon && (
@@ -49,7 +49,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="p-4 border-2 border-t-0 border-[#808080] shadow-win98-inner bg-[#c0c0c0]">
+            <div className="p-4 border-2 border-t-0 border-[#808080] shadow-win98-inner bg-win98-face">
               {children}
             </div>
           </motion.div>

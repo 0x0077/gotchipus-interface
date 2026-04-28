@@ -2,35 +2,31 @@
 
 import { useWalletStore } from "@/hooks/useWalletStore";
 import { useEffect } from "react";
+import { getToken, removeToken } from "@/lib/auth";
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   const { isConnected, walletStore } = useWalletStore();
-  
+
+  // Restore cached token and userId on reconnect
   useEffect(() => {
-    const handleError = () => {
-      if (!isConnected) {
-        walletStore.reset();
-      }
-    };
+    if (!isConnected || !walletStore.address) return;
 
-    // const checkUserInfo = async () => {
-    //   if (!walletStore.address) return;
+    const existingToken = getToken();
+    const cacheKey = `userId_${walletStore.address.toLowerCase()}`;
+    const cachedUserId = localStorage.getItem(cacheKey);
 
-    //   const response = await fetch(`/api/tasks/info`, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ address: walletStore.address }),
-    //   });
+    if (existingToken && cachedUserId) {
+      walletStore.setToken(existingToken);
+      walletStore.setUserId(cachedUserId);
+    }
+  }, [isConnected, walletStore]);
 
-    //   if (response.ok) {
-    //     await response.json();
-    //   }
-    // }
-
-    // checkUserInfo();
-
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
+  // Clean up on disconnect
+  useEffect(() => {
+    if (!isConnected) {
+      removeToken();
+      walletStore.reset();
+    }
   }, [isConnected, walletStore]);
 
   return <>{children}</>;

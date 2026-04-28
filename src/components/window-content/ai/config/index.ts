@@ -1,1 +1,0 @@
-export { getAgentConfig } from './agentConfig';

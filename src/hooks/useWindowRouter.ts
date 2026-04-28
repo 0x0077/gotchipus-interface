@@ -69,7 +69,6 @@ export function useWindowRouter(): UseWindowRouterReturn {
 
   const openWindow = useCallback((windowId: string) => {
     if (!isValidWindowId(windowId)) {
-      console.warn(`Invalid window ID: ${windowId}`)
       return
     }
 
@@ -107,14 +106,16 @@ export function useWindowRouter(): UseWindowRouterReturn {
       return
     }
 
+    if (activeWindow === windowId) return;
+
     setActiveWindow(windowId)
-    
+
     const newUrl = updateActiveWindowUrl(openWindows, windowId)
     const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '')
     if (currentUrl !== newUrl && newUrl !== '/') {
       window.history.pushState({}, '', newUrl)
     }
-  }, [pathname, searchParams, openWindows, openWindow])
+  }, [pathname, searchParams, openWindows, openWindow, activeWindow])
 
   const isWindowOpen = useCallback((windowId: string) => {
     return openWindows.includes(windowId)

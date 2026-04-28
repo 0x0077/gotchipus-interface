@@ -29,7 +29,7 @@ export const EquippedWearableItem: React.FC<EquippedWearableItemProps> = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="w-full aspect-square border-2 border-[#808080] shadow-win98-inner bg-[#d4d0c8] rounded-sm flex items-center justify-center cursor-pointer hover:bg-[#c0c0c0] overflow-hidden">
+      <div className="w-full aspect-square border-2 border-[#808080] shadow-win98-inner bg-[#d4d0c8] rounded-sm flex items-center justify-center cursor-pointer hover:bg-win98-face overflow-hidden">
         <div className="w-full h-full relative p-2">
           <Image
             src={getWearableImagePath(wearableType, index)}

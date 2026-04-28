@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { GotchiMetadata } from "@/lib/types";
 import { calculateExpProgress, calculateExpPercentage } from "../utils";
 
@@ -15,6 +16,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
   calculatedLevel,
   currentExp
 }) => {
+  const { t } = useTranslation();
   const expProgress = calculateExpProgress(currentExp);
   const expPercentage = calculateExpPercentage(currentExp);
 
@@ -30,10 +32,10 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
           </div>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="text-[#808080]">Owner:</span>
+              <span className="text-[#808080]">{t('gotchiDetailView.owner')}</span>
               {metadata.owner ? (
                 <a
-                  href={`https://atlantic.pharosscan.xyz/address/${metadata.owner}`}
+                  href={`https://pharosscan.xyz/address/${metadata.owner}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#000080] font-mono text-xs hover:underline hover:text-[#0000ff] cursor-pointer"
@@ -41,14 +43,14 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
                   {metadata.owner.slice(0, 6)}...{metadata.owner.slice(-4)}
                 </a>
               ) : (
-                <span className="text-[#000080] font-mono text-xs">Unknown</span>
+                <span className="text-[#000080] font-mono text-xs">{t('gotchiDetailView.unknown')}</span>
               )}
             </div>
             {metadata.singer && (
               <div className="flex items-center gap-2">
-                <span className="text-[#808080]">Account:</span>
+                <span className="text-[#808080]">{t('gotchiDetailView.account')}</span>
                 <a
-                  href={`https://atlantic.pharosscan.xyz/address/${metadata.singer}`}
+                  href={`https://pharosscan.xyz/address/${metadata.singer}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#000080] font-mono text-xs hover:underline hover:text-[#0000ff] cursor-pointer"
@@ -63,8 +65,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
         <div className="w-40">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm text-[#000080] font-bold">
-              Level {calculatedLevel}
-              {metadata.is_evolved && <span className="text-[#ffd700] ml-1">★{metadata.core_evolution}</span>}
+              {t('allGotchi.level')} {calculatedLevel}
             </div>
             <div className="text-xs text-[#808080]">
               {expProgress}/100 XP

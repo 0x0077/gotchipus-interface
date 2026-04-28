@@ -53,49 +53,41 @@ function serializeBigIntFields(obj: any): any {
 }
 
 function flattenGotchipusInfo(info: any): GotchipusInfo {
-  const serialized = stringifyBigInts(info);
-  const core = serialized.core || {};
-  const faction = serialized.faction || {};
-  const serializedDna = serializeBigIntFields(serialized.dna || {});
-  const leveling = serialized.leveling || {};
+  const s = stringifyBigInts(info);
+  const core = s.core || {};
+  const soul = core.soul || {};
 
   return {
-    name: serialized.name || "",
-    uri: serialized.uri || "",
-    story: serialized.story || "",
-    owner: serialized.owner || "",
-    collateral: serialized.collateral || "",
-    collateralAmount: serialized.collateralAmount?.toString() || '0',
-    level: Number(core.level || 0),
-    status: Number(serialized.status || 0),
-    evolution: Number(core.evolution || 0),
-    locked: Boolean(serialized.locked),
-    epoch: Number(serialized.epoch || 0),
-    utc: Number(serialized.utc || 0),
-    dna: serializedDna,
-    strength: Number(core.strength || 0),
-    defense: Number(core.defense || 0),
-    mind: Number(core.mind || 0),
-    vitality: Number(core.vitality || 0),
-    agility: Number(core.agility || 0),
-    luck: Number(core.luck || 0),
-    singer: serialized.singer || "",
-    nonces: serialized.nonces?.toString() || '0',
-    element: serialized.element ? Number(serialized.element) : undefined,
-    primaryFaction: Number(faction.primaryFaction ?? 0),
-    currentExp: Number(leveling.currentExp ?? 0),     
-    requiredExp: Number(leveling.requiredExp ?? 0),    
-    totalExp: Number(leveling.totalExp ?? 0),       
-    battleExp: Number(leveling.battleExp ?? 0),      
-    buildingExp: Number(leveling.buildingExp ?? 0),    
-    interactionExp: Number(leveling.interactionExp ?? 0), 
-    questExp: Number(leveling.questExp ?? 0),       
-    expMultiplier: Number(leveling.expMultiplier ?? 0),
-    lastExpGain: Number(leveling.lastExpGain ?? 0),    
+    name: s.name || "",
+    uri: s.uri || "",
+    collateral: s.collateral || "",
+    collateralAmount: String(s.collateralAmount ?? '0'),
+    status: Number(s.status ?? 0),
+    locked: Boolean(s.locked),
+    birthTime: Number(s.birthTime ?? 0),
+    rarity: Number(s.rarity ?? 0),
+    faction: Number(s.faction ?? 0),
+    currentExp: Number(s.currentExp ?? 0),
+    core: {
+      strength: Number(core.strength ?? 0),
+      defense: Number(core.defense ?? 0),
+      mind: Number(core.mind ?? 0),
+      vitality: Number(core.vitality ?? 0),
+      agility: Number(core.agility ?? 0),
+      luck: Number(core.luck ?? 0),
+      soul: {
+        balance: Number(soul.balance ?? 0),
+        maxSoulCapacity: Number(soul.maxSoulCapacity ?? 0),
+        lastSoulUpdate: Number(soul.lastSoulUpdate ?? 0),
+        dormantSince: Number(soul.dormantSince ?? 0),
+      },
+    },
+    singer: s.singer || "",
+    nonces: String(s.nonces ?? '0'),
   };
 }
 
-const publicClient = createPublicClient({ chain: pharos, transport: http(process.env.NEXT_PUBLIC_TESTNET_RPC!) });
+const publicClient = createPublicClient({ chain: pharos, transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!) });
 
 export async function GET(request: NextRequest) {
   try {
@@ -129,7 +121,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(responseData);
 
   } catch (error) {
-    console.error('API Error (gotchipus-details):', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

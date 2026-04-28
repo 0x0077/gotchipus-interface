@@ -43,6 +43,11 @@
                 "internalType": "uint256"
             },
             {
+                "name": "hook",
+                "type": "address",
+                "internalType": "contract IHook"
+            },
+            {
                 "name": "_data",
                 "type": "bytes",
                 "internalType": "bytes"
@@ -126,6 +131,43 @@
     },
     {
         "type": "error",
+        "name": "DailyLimitExceeded",
+        "inputs": [
+            {
+                "name": "remaining",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "requested",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "HookNotFound",
+        "inputs": [
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "hook",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "InfiniteApprovalBlocked",
+        "inputs": []
+    },
+    {
+        "type": "error",
         "name": "InvalidHookResponse",
         "inputs": []
     },
@@ -133,5 +175,75 @@
         "type": "error",
         "name": "ReentrancyGuardReentrantCall",
         "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "SessionExpired",
+        "inputs": [
+            {
+                "name": "holder",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "expiredAt",
+                "type": "uint32",
+                "internalType": "uint32"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "SessionNotActive",
+        "inputs": [
+            {
+                "name": "holder",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "SessionValueExceeded",
+        "inputs": [
+            {
+                "name": "remaining",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "requested",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "SingleTxLimitExceeded",
+        "inputs": [
+            {
+                "name": "limit",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "requested",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "TargetNotAllowed",
+        "inputs": [
+            {
+                "name": "target",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
     }
 ]

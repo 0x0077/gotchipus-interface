@@ -5,3 +5,6 @@ export * from './ShoppingCart';
 export * from './CustomDropdown';
 export * from './FilterSidebar';
 export * from './MobileFilterMenu';
+export * from './StatsBar';
+export * from './ActivityTicker';
+export * from './GotchiPreviewPanel';

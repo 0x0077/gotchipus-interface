@@ -55,7 +55,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'app.gotchipus.com',
         port: '',
-        pathname: '/**', 
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.gotchi.ai',
+        port: '',
+        pathname: '/**',
       },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -81,8 +87,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/testnet/:path*',
-        destination: 'https://testnet.dplabs-internal.com/:path*',
+        source: '/cdn-assets/:path*',
+        destination: `${process.env.NEXT_PUBLIC_ASSETS_URL || 'https://assets.gotchi.ai'}/:path*`,
       },
     ]
   },

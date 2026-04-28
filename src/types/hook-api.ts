@@ -82,7 +82,7 @@ export function apiDataToHook(data: HookApiData): any {
     icon: data.icon || '',
 
     address: data.address,
-    network: 'Pharos Atlantic',
+    network: 'Pharos Mainnet',
     sourceCode: data.source_code,
     abi: data.abi,
     explorerUrl: data.explorer_url,

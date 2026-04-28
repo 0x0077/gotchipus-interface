@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useCallback, useMemo, useRef } from "react"
 import { useWindowRouter } from "@/hooks/useWindowRouter"
 import DesktopIcon from "@/components/home/DesktopIcon"
 import type { JSX } from "react/jsx-runtime"
@@ -18,32 +18,38 @@ export default function Desktop({ onOpenWindow, isMobile = false, openWindowIds 
   const [activeIcon, setActiveIcon] = useState<string | null>(null)
   const windowRouter = useWindowRouter()
   const icons = getEnabledWindowIcons()
-  
-  const MAX_ICONS_PER_COLUMN = isMobile ? 6 : 6
-  
-  const numberOfColumns = Math.ceil(icons.length / MAX_ICONS_PER_COLUMN)
-  
-  const columns = Array.from({ length: numberOfColumns }, (_, columnIndex) => {
-    const columnStart = columnIndex * MAX_ICONS_PER_COLUMN
-    const columnEnd = Math.min((columnIndex + 1) * MAX_ICONS_PER_COLUMN, icons.length)
-    return icons.slice(columnStart, columnEnd)
-  })
 
-  const handleIconClick = (iconId: string) => {
+  const MAX_ICONS_PER_COLUMN = 6
+
+  const columns = useMemo(() => {
+    const numberOfColumns = Math.ceil(icons.length / MAX_ICONS_PER_COLUMN)
+    return Array.from({ length: numberOfColumns }, (_, columnIndex) => {
+      const columnStart = columnIndex * MAX_ICONS_PER_COLUMN
+      const columnEnd = Math.min((columnIndex + 1) * MAX_ICONS_PER_COLUMN, icons.length)
+      return icons.slice(columnStart, columnEnd)
+    })
+  }, [icons])
+
+  const routerRef = useRef(windowRouter)
+  routerRef.current = windowRouter
+  const onOpenWindowRef = useRef(onOpenWindow)
+  onOpenWindowRef.current = onOpenWindow
+  const iconsRef = useRef(icons)
+  iconsRef.current = icons
+
+  const handleIconClick = useCallback((iconId: string) => {
     setActiveIcon(iconId)
-    
-    windowRouter.openWindow(iconId)
-    
-    const icon = icons.find(i => i.id === iconId)
+    routerRef.current.openWindow(iconId)
+    const icon = iconsRef.current.find(i => i.id === iconId)
     if (icon) {
       const content = getWindowContent(iconId)
-      onOpenWindow(iconId, icon.title, content, icon.icon)
+      onOpenWindowRef.current(iconId, icon.title, content, icon.icon)
     }
-  }
+  }, [])
 
   return (
-    <div className={`top-0 left-0 w-full h-[calc(100%-28px)] p-4 flex flex-col items-start gap-2 relative ${isMobile ? 'p-2' : ''}`}>
-      <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none">
+    <div className={`top-0 left-0 w-full h-[calc(100%-var(--titlebar-h))] p-4 flex flex-col items-start gap-2 relative ${isMobile ? 'p-2' : ''}`}>
+      <div className="fixed inset-0 bottom-[var(--titlebar-h)] flex items-center justify-center pb-[10%] z-0 pointer-events-none">
         <Image
           src="/gotchipus.png"
           alt="Gotchipus"
@@ -65,7 +71,7 @@ export default function Desktop({ onOpenWindow, isMobile = false, openWindowIds 
                   id={icon.id}
                   title={icon.title}
                   icon={icon.icon}
-                  onClick={() => handleIconClick(icon.id)}
+                  onClick={handleIconClick}
                   isActive={isActive}
                   isMobile={isMobile}
                 />

@@ -22,27 +22,16 @@ const queryClient = new QueryClient()
 
 const CustomAvatar: AvatarComponent = ({ address, ensImage, size }) => {  
   return (
-    <div 
-      style={{ 
-        width: size, 
-        height: size, 
-        borderRadius: '50%', 
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
+    <div
+      className="rounded-full overflow-hidden flex items-center justify-center"
+      style={{ width: size, height: size }}
     >
       {ensImage ? (
         <img
           src={ensImage}
           width={size}
           height={size}
-          style={{ 
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover'
-          }}
+          className="w-full h-full object-cover"
           alt="ENS Avatar"
         />
       ) : (

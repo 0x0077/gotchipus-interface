@@ -2,6 +2,7 @@
 
 import { Hook } from '@src/types/hook';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import LikeIcon from '@assets/icons/LikeIcon';
 
 interface HookCardProps {
@@ -11,6 +12,7 @@ interface HookCardProps {
 
 export const HookCard = ({ hook, onClick }: HookCardProps) => {
   const [isAddressHovered, setIsAddressHovered] = useState(false);
+  const { t } = useTranslation();
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -34,21 +36,21 @@ export const HookCard = ({ hook, onClick }: HookCardProps) => {
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return 'today';
-    if (diffDays === 1) return 'yesterday';
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    return `${Math.floor(diffDays / 30)}mo ago`;
+    if (diffDays === 0) return t('hookCard.today');
+    if (diffDays === 1) return t('hookCard.yesterday');
+    if (diffDays < 7) return t('hookCard.daysAgo', { days: diffDays });
+    if (diffDays < 30) return t('hookCard.weeksAgo', { weeks: Math.floor(diffDays / 7) });
+    return t('hookCard.monthsAgo', { months: Math.floor(diffDays / 30) });
   };
 
   const handleAddressClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`https://atlantic.pharosscan.xyz/address/${hook.address}`, '_blank');
+    window.open(`https://pharosscan.xyz/address/${hook.address}`, '_blank');
   };
 
   return (
     <article
-      className={`bg-[#c0c0c0] border-2 border-[#808080] shadow-win98-outer cursor-pointer transition-all p-3 ${
+      className={`bg-win98-face border-2 border-[#808080] shadow-win98-outer cursor-pointer transition-all p-3 ${
         !isAddressHovered ? 'hover:border-dashed hover:border-[#000080]' : ''
       }`}
       onClick={onClick}
