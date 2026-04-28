@@ -12,6 +12,8 @@ import { Win98Loading } from "@/components/ui/win98-loading"
 import { checkAndCompleteTask } from "@/src/utils/taskUtils"
 import { useWindowMode } from "@/hooks/useWindowMode"
 
+const IS_MINT_OPEN = false;
+
 const MintContent = observer(() => {
   const { t } = useTranslation();
   const [mintAmount, setMintAmount] = useState(1);
@@ -21,6 +23,34 @@ const MintContent = observer(() => {
   const { walletStore } = useStores()
   const { mode: windowMode, width: windowWidth } = useWindowMode()
   const isMobileMode = windowMode === 'mobile' || (windowWidth !== null && windowWidth <= 640)
+
+  if (!IS_MINT_OPEN) {
+    return (
+      <div className={`bg-[#c0c0c0] border-2 border-[#dfdfdf] border-t-black border-l-black border-r-[#808080] border-b-[#808080] ${isMobileMode ? 'p-2' : 'p-4'}`}>
+        <div className={`bg-[#c0c0c0] border-2 border-[#dfdfdf] border-t-[#808080] border-l-[#808080] border-r-black border-b-black ${isMobileMode ? 'p-4' : 'p-8'}`}>
+          <div className={`flex flex-col items-center justify-center text-center ${isMobileMode ? 'py-12 gap-4' : 'py-24 gap-6'}`}>
+            <h1
+              className={`font-bold text-[#000080] tracking-wide leading-tight ${isMobileMode ? 'text-2xl' : 'text-5xl'}`}
+              style={{ fontFamily: '"MS Sans Serif", "Tahoma", sans-serif', textShadow: '2px 2px 0 #dfdfdf' }}
+            >
+              Mint not open,
+            </h1>
+            <h1
+              className={`font-bold text-[#000080] tracking-wide leading-tight ${isMobileMode ? 'text-2xl' : 'text-5xl'}`}
+              style={{ fontFamily: '"MS Sans Serif", "Tahoma", sans-serif', textShadow: '2px 2px 0 #dfdfdf' }}
+            >
+              Wait patiently.
+            </h1>
+            <div className={`bg-[#c0c0c0] border-2 border-[#dfdfdf] border-t-[#808080] border-l-[#808080] border-r-black border-b-black mt-4 ${isMobileMode ? 'px-4 py-2' : 'px-8 py-3'}`}>
+              <p className={`text-[#000080] font-bold ${isMobileMode ? 'text-xs' : 'text-base'}`}>
+                Please wait for the mainnet launch
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const {contractWrite, isConfirmed, error} = useContractWrite();
   const { data: totalSupply, refetch: refetchTotalSupply } = useContractRead("totalSupply", [], {
