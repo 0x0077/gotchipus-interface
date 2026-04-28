@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getBackendUrl } from '@/lib/api-config';
 
+export const runtime = 'edge';
+
 export async function POST() {
   try {
     const backendUrl = getBackendUrl();

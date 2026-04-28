@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBackendUrl } from "@/lib/api-config";
 
+export const runtime = 'edge';
+
 /** Transaction history — forwards to gotchi-rs `/transactions/list`, which
  *  reads the chain-indexer Supabase `tba_transactions` table directly. */
 const TIMEOUT_MS = 30000;

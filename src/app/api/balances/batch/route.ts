@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBackendUrl } from "@/lib/api-config";
 
+export const runtime = 'edge';
+
 const TIMEOUT_MS = 30000;
 
 export async function POST(req: NextRequest) {

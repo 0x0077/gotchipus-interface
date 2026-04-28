@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBackendUrl } from '@/lib/api-config';
 
+export const runtime = 'edge';
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

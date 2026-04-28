@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBackendUrl } from '@/lib/api-config';
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
