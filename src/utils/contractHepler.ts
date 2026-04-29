@@ -19,19 +19,23 @@ export async function getPharosNativeBalance(address: string) {
 }
 
 
+// On-chain `globalSalt` set in InitDiamond at deploy time (see gotchipus-core
+// script/Deploy.s.sol). MUST match the deployed value or the trait preview
+// computed here will diverge from what `randomTraitsIndex` produces on summon.
+const GLOBAL_SALT = BigInt(
+  "16785146710873639958811097543422045518556785791473492795158444787863316856832"
+);
+
 export function getTraitsIndex(
   tokenId: number,
   account: string,
   sender: string,
   preIndex: number
 ) {
-
-  const salt = BigInt("0x" + Buffer.from("gotchipus", "utf8").toString("hex").padEnd(64, "0"));
-
   let seed = keccak256(
     solidityPacked(
       ["uint256", "address", "address", "uint256", "uint256"],
-      [tokenId, getAddress(account), getAddress(sender), BigInt(salt), preIndex]
+      [tokenId, getAddress(account), getAddress(sender), GLOBAL_SALT, preIndex]
     )
   );
 

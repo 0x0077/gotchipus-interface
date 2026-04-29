@@ -114,7 +114,7 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src = src;
+    img.src = src + (src.includes("?") ? "&" : "?") + "_cors=1";
   });
 }
 

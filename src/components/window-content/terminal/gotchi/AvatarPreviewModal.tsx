@@ -61,7 +61,9 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src = src;
+    // Cache-buster: bare URL was likely cached without CORS by display <img>.
+    // A distinct URL forces a fresh CORS-validated cache entry for canvas use.
+    img.src = src + (src.includes("?") ? "&" : "?") + "_cors=1";
   });
 }
 
