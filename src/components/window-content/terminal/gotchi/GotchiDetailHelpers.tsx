@@ -1,5 +1,31 @@
 "use client";
 
+import { Tokens } from "@/lib/constant";
+
+const FALLBACK_LOGOS_BY_SYMBOL: Record<string, string> = {
+  PROS: "/tokens/pros.png",
+  WPROS: "/tokens/pros.png",
+  ETH: "/tokens/eth.png",
+  WETH: "/tokens/eth.png",
+  USDC: "/tokens/usdc.png",
+  USDT: "/tokens/usdt.png",
+  DAI: "/tokens/dai.png",
+  WBTC: "/tokens/wbtc.png",
+  USDE: "/tokens/usde.svg",
+};
+
+export function resolveTokenLogo(contract: string, symbol: string, apiLogo?: string): string {
+  if (contract && contract !== "native") {
+    const lc = contract.toLowerCase();
+    const known = Tokens.find((t) => t.contract.toLowerCase() === lc);
+    if (known?.icon) return known.icon;
+  }
+  const sym = (symbol || "").toUpperCase();
+  if (FALLBACK_LOGOS_BY_SYMBOL[sym]) return FALLBACK_LOGOS_BY_SYMBOL[sym];
+  if (apiLogo) return apiLogo;
+  return "/tokens/default.png";
+}
+
 export interface EquipSlotData {
   name: string;
   fullName: string;

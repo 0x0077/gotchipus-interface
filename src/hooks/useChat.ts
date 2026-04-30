@@ -12,8 +12,6 @@ interface ChatCallbacks {
   onStatus?: (status: string) => void;
   onError?: (error: any) => void;
   onComplete?: (stopReason?: string) => void;
-  /** Carries the DB UUID assigned to the user message so the frontend can
-   *  replace its session-local id (Date.now()) before any later edit/delete. */
   onUserMessageStart?: (userMessageId: string) => void;
 }
 
@@ -148,7 +146,7 @@ const useChat = () => {
                 case 'text_delta':
                   if (eventData.text) {
                     const filteredContent = processContent(eventData.text);
-                    if (filteredContent.trim()) {
+                    if (filteredContent) {
                       callbacks?.onText?.(filteredContent);
                     }
                   }
@@ -175,11 +173,6 @@ const useChat = () => {
                   break;
 
                 case 'error':
-                  // Backend-emitted business error (LLM failure, session expired,
-                  // rate limit, tool failure, etc.). Mark the stream as failed so
-                  // the finally-block skips onComplete, and surface the reason
-                  // via onError so the UI can display the real message instead
-                  // of a generic network-error placeholder.
                   hasError = true;
                   callbacks?.onError?.(new Error(eventData.message || 'Stream error'));
                   break;
@@ -198,7 +191,6 @@ const useChat = () => {
           onerror(err) {
             hasError = true;
             callbacks?.onError?.(err);
-            // Must throw to prevent fetchEventSource from retrying infinitely
             throw err;
           }
         });
@@ -240,11 +232,9 @@ const useChat = () => {
 
   const stop = useCallback(
     async (conversationId: string) => {
-      // Abort the client-side stream immediately
       abortRef.current?.abort();
       abortRef.current = null;
 
-      // Notify the backend to stop generation
       try {
         const res = await fetch('/api/chat/stop', {
           method: 'POST',

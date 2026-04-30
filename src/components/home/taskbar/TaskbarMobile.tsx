@@ -11,6 +11,7 @@ import { CustomConnectButton } from "@/components/footer/CustomConnectButton"
 import AboutContent from "@/components/window-content/AboutContent"
 import { Locale, LOCALE_LABELS } from "@i18n/constants"
 import { BlockIndicator } from "./BlockIndicator"
+import { NetworkStats } from "./NetworkStats"
 import { SocialLinks } from "./SocialLinks"
 
 interface TaskbarMobileProps {
@@ -83,6 +84,7 @@ export const TaskbarMobile = observer(({
           <div className="bg-win98-face border border-[#808080] shadow-win98-outer h-8 px-2 flex items-center">
             <CustomConnectButton />
           </div>
+          <NetworkStats variant="mobile" />
           <BlockIndicator variant="mobile" />
         </div>
       </div>

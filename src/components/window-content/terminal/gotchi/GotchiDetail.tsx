@@ -17,7 +17,7 @@ import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, HEAD_BYTES32, CLOT
 import { getWearableName, getWearablePngUrl, WearableType } from "@/src/utils/wearableMapping";
 import EquipSelectWindow from "@/components/window-content/equip/EquipSelectWindow";
 import RightIcon from "@assets/icons/rightIcon";
-import { EquipSlotData, TokenItem, NftCollection, PortfolioApiData } from "./GotchiDetailHelpers";
+import { EquipSlotData, TokenItem, NftCollection, PortfolioApiData, resolveTokenLogo } from "./GotchiDetailHelpers";
 import { GotchiPreviewPanel } from "./GotchiPreviewPanel";
 import { WalletOverviewPanel } from "./WalletOverviewPanel";
 import { SessionWizardData } from "../session/SessionWizard";
@@ -105,7 +105,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const tokenInfo = detailsData?.info;
   const tbaAddress = detailsData?.tokenBoundAccount || "";
 
-  // Portfolio data: use pre-fetched prop from TerminalContent, fallback to own SWR if absent
   const portfolioApiUrl = !portfolioProp && tbaAddress
     ? `http://120.26.254.74:3000/api/portfolio/${tbaAddress}`
     : null;
@@ -115,6 +114,13 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
     { refreshInterval: 60000 }
   );
   const portfolio = portfolioProp || (portfolioRaw?.code === 0 ? portfolioRaw.data : undefined);
+
+  const { data: networkStatsRes } = useSWR<{ data: { price: number } }>(
+    '/api/tokens/network-stats',
+    fetcher,
+    { refreshInterval: 5000, revalidateOnFocus: false }
+  );
+  const prosPrice = networkStatsRes?.data?.price ?? 0;
 
   const { data: wearableTypeInfosData } = useContractRead(
     'getAllEquipWearableType',
@@ -270,29 +276,39 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const factionName = FACTION_NAMES[tokenInfo?.faction ?? 0] || "NONE";
 
   const totalValue = parseFloat(pharosBalance) || 0;
-  const totalUsd = totalValue * 1.40;
+  const totalUsd = totalValue * prosPrice;
 
-  // Build token list: native PROS (from chain) + ERC20s (from portfolio API)
   const tokens: TokenItem[] = useMemo(() => {
     const list: TokenItem[] = [
       { symbol: "PROS", name: "Pharos Token", amount: totalValue, usd: totalUsd, logoPath: "/tokens/pros.png", contract: "native" },
     ];
+    const STABLES = new Set(["USDC", "USDT", "DAI", "USDE"]);
     if (portfolio?.erc20s) {
       for (const erc20 of portfolio.erc20s) {
+        const sym = (erc20.symbol || "").toUpperCase();
+        const isNativePros =
+          sym === "PROS" ||
+          erc20.token_address?.toLowerCase() === "0x0000000000000000000000000000000000000000";
+        if (isNativePros) continue;
+
+        const amount = parseFloat(erc20.balance) || 0;
+        let usd = erc20.usd || 0;
+        if (STABLES.has(sym)) usd = amount;
+        else if (sym === "WPROS") usd = amount * prosPrice;
+
         list.push({
           symbol: erc20.symbol,
           name: erc20.name,
-          amount: parseFloat(erc20.balance) || 0,
-          usd: erc20.usd || 0,
-          logoPath: erc20.logo || "/tokens/default.png",
+          amount,
+          usd,
+          logoPath: resolveTokenLogo(erc20.token_address, erc20.symbol, erc20.logo),
           contract: erc20.token_address,
         });
       }
     }
     return list;
-  }, [totalValue, totalUsd, portfolio]);
+  }, [totalValue, totalUsd, portfolio, prosPrice]);
 
-  // Build NFT collections: portfolio API first, fallback to chain reads if API failed
   const nftCollections: NftCollection[] = useMemo(() => {
     // If portfolio API succeeded and has nft data, use it
     if (portfolio && !portfolioError) {

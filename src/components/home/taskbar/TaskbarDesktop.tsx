@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { BlockIndicator } from "./BlockIndicator"
+import { NetworkStats } from "./NetworkStats"
 import { SocialLinks } from "./SocialLinks"
 
 interface TaskbarDesktopProps {
@@ -117,6 +118,7 @@ export const TaskbarDesktop = observer(({
           </SelectContent>
         </Select>
 
+        <NetworkStats variant="desktop" />
         <SocialLinks variant="desktop" />
         <BlockIndicator variant="desktop" />
       </div>

@@ -25,7 +25,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
   return (
     <Win98GroupBox label={`TBA Assets — ${tbaAddress ? `${tbaAddress.slice(0, 6)}...${tbaAddress.slice(-4)}` : "N/A"}`}>
       <div className="flex gap-1 mb-1.5 items-center">
-        {/* Tokens tab — green accent */}
         <button
           onClick={() => setWalletTab("tokens")}
           className={`px-2.5 py-1 text-xs font-medium border cursor-pointer transition-colors ${
@@ -37,7 +36,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
           <span className={walletTab === "tokens" ? "text-[#006633]" : "text-[#555555]"}>■ </span>
           {t('terminal.detail.tokens')} ({tokens.length})
         </button>
-        {/* NFTs tab — purple accent */}
         <button
           onClick={() => setWalletTab("nfts")}
           className={`px-2.5 py-1 text-xs font-medium border cursor-pointer transition-colors ${
@@ -59,7 +57,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
       </div>
 
       <div className="border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-white">
-        {/* ═══ TOKENS TAB ═══ */}
         {walletTab === "tokens" && (
           <>
             <div className="grid grid-cols-[2.2fr_1.2fr_1.2fr_1.2fr_32px] px-2 py-1 border-b border-[#808080] bg-win98-face text-xs font-bold">
@@ -69,13 +66,14 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
               <span className="text-right">{t('terminal.detail.contract')}</span>
               <span></span>
             </div>
+            <div className="max-h-[280px] overflow-y-auto">
             {tokens.map((tk, i) => (
               <div
                 key={i}
-                className="grid grid-cols-[2.2fr_1.2fr_1.2fr_1.2fr_32px] px-2 py-1.5 border-b border-[#e0e0e0] items-center cursor-pointer"
+                className="grid grid-cols-[2.2fr_1.2fr_1.2fr_1.2fr_32px] px-2 py-1.5 border-b border-[#e0e0e0] items-center cursor-pointer transition-colors hover:bg-[#eef2fb]"
                 style={{ background: i % 2 === 0 ? "#ffffff" : "#f8f8f8" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#000080"; e.currentTarget.style.color = "#ffffff"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = i % 2 === 0 ? "#ffffff" : "#f8f8f8"; e.currentTarget.style.color = "#000000"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#eef2fb"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = i % 2 === 0 ? "#ffffff" : "#f8f8f8"; }}
               >
                 <div className="flex items-center gap-1.5">
                   <div className="w-5 h-5 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-[#e0e0e0] flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -99,7 +97,9 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                   ${tk.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 <div className="text-right text-xs text-[#808080] font-courier">
-                  {tk.contract === "native" ? t('terminal.detail.native') : `${tk.contract.slice(0, 6)}...`}
+                  {tk.contract === "native"
+                    ? t('terminal.detail.native')
+                    : `${tk.contract.slice(0, 6)}...${tk.contract.slice(-7)}`}
                 </div>
                 <div className="flex items-center justify-center">
                   <Link
@@ -113,6 +113,7 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                 </div>
               </div>
             ))}
+            </div>
             <div className="grid grid-cols-[2.2fr_1.2fr_1.2fr_1.2fr_32px] px-2 py-1.5 bg-[#f0f0f0] border-t border-[#808080] text-xs font-bold">
               <span>{t('terminal.detail.total')}</span>
               <span></span>
@@ -125,7 +126,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
           </>
         )}
 
-        {/* ═══ NFTS TAB ═══ */}
         {walletTab === "nfts" && (
           totalNfts === 0 ? (
             <div className="text-center py-6 text-[#808080]">
@@ -135,7 +135,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
             <div className="p-2 space-y-2">
               {nftCollections.map((collection) => (
                 <div key={collection.type}>
-                  {/* Collection header — clickable to expand */}
                   <button
                     onClick={() => setExpandedCollection(expandedCollection === collection.type ? null : collection.type)}
                     className="w-full flex items-center gap-1.5 px-1.5 py-1 bg-win98-face border border-t-white border-l-white border-r-[#404040] border-b-[#404040] cursor-pointer hover:bg-[#b0b0b0] text-left"
@@ -149,7 +148,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                     <span className="text-[10px] text-[#808080]">({collection.items.length})</span>
                   </button>
 
-                  {/* Preview grid (always visible) — 2x2 square container */}
                   {expandedCollection !== collection.type && (
                     <div className="mt-1 flex gap-1.5 flex-wrap">
                       <div
@@ -173,7 +171,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                             <div key={`empty-${i}`} className="bg-white border border-win98-face" />
                           ))}
                         </div>
-                        {/* Count badge */}
                         <span className="absolute bottom-1 right-1 text-[9px] font-bold text-[#000] bg-win98-face border border-t-white border-l-white border-r-[#404040] border-b-[#404040] px-1 py-px">
                           {collection.items.length}
                         </span>
@@ -181,7 +178,6 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                     </div>
                   )}
 
-                  {/* Expanded grid — all items */}
                   {expandedCollection === collection.type && (
                     <div className="mt-1 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-white p-1.5 max-h-[200px] overflow-y-auto">
                       {collection.type === "wearable" ? (
