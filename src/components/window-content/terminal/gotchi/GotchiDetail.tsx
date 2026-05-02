@@ -69,7 +69,8 @@ const EQUIPMENT_SLOTS_DEF = [
 ] as const;
 
 const RARITY_NAMES: Record<number, string> = { 0: "Common", 1: "Rare", 2: "Epic", 3: "Legendary" };
-const FACTION_NAMES: Record<number, string> = { 0: "NONE", 1: "COMBAT", 2: "SUPPORT", 3: "DEFENSE", 4: "TECH" };
+// On-chain faction encoding (LibFaction.sol — uint8 0/1/2 only).
+const FACTION_NAMES: Record<number, string> = { 0: "COMBAT", 1: "DEFENSE", 2: "TECHNOLOGY" };
 
 export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHooks, sessionStatus, sessionDaysLeft, sessionInfo, pharosBalance: pharosBalanceProp, portfolioData: portfolioProp }: GotchiDetailProps) => {
   const { t } = useTranslation();
@@ -273,7 +274,7 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const level = Math.floor(currentExp / 100);
   const expInLevel = Math.floor(((currentExp / 100) % 1) * 100);
   const rarityName = RARITY_NAMES[tokenInfo?.rarity ?? 0] || "Common";
-  const factionName = FACTION_NAMES[tokenInfo?.faction ?? 0] || "NONE";
+  const factionName = FACTION_NAMES[tokenInfo?.faction ?? -1] ?? "—";
 
   const totalValue = parseFloat(pharosBalance) || 0;
   const totalUsd = totalValue * prosPrice;

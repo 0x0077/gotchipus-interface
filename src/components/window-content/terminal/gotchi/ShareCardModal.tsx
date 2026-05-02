@@ -148,8 +148,13 @@ const RARITY_MAP: Record<number, "common" | "rare" | "epic" | "legendary"> = {
   0: "common", 1: "rare", 2: "epic", 3: "legendary",
 };
 
+// Maps on-chain faction (LibFaction.sol — uint8 0/1/2 only) to the
+// share-card flavor taxonomy in `ShareCardQuotes.ts`. The flavor system has
+// 4 buckets but the chain only has 3 factions, so `support` is unused.
 const FACTION_MAP: Record<number, "support" | "attack" | "defense" | "speed"> = {
-  0: "support", 1: "attack", 2: "support", 3: "defense", 4: "speed",
+  0: "attack",   // COMBAT     → attack quotes
+  1: "defense",  // DEFENSE    → defense quotes
+  2: "speed",    // TECHNOLOGY → speed quotes (mind / luck flavor)
 };
 
 // ── Canvas helpers ──
@@ -616,7 +621,7 @@ function buildPetData(tokenId: string, pusName: string, tokenInfo: GotchipusInfo
     id: Number(tokenId),
     name: pusName ? `${pusName}.chi` : `Gotchipus #${tokenId}`,
     rarity: RARITY_MAP[tokenInfo.rarity ?? 0] || "common",
-    cls: FACTION_MAP[tokenInfo.faction ?? 0] || "support",
+    cls: FACTION_MAP[tokenInfo.faction ?? -1] ?? "attack",
     level,
     xp,
     xpMax: 100,

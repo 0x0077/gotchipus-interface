@@ -154,9 +154,8 @@ export function GotchiPreviewPanel({
           style={{
             color:
               factionName === "COMBAT" ? "#cc0000" :
-              factionName === "SUPPORT" ? "#008000" :
               factionName === "DEFENSE" ? "#0000cc" :
-              factionName === "TECH" ? "#800080" : "#808080",
+              factionName === "TECHNOLOGY" ? "#800080" : "#808080",
           }}
         >
           ■ {factionName}

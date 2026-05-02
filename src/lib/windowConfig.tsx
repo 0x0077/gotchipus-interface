@@ -5,6 +5,7 @@ import WearableMarketplaceContent from "@/src/components/window-content/Wearable
 import AllGotchiContent from "@/components/window-content/AllGotchiContent"
 import HookRankContent from "@/components/window-content/HookRankContent"
 import TerminalContent from "@/components/window-content/terminal/TerminalContent"
+import PharosWorldContent from "@/components/window-content/pharos-world/PharosWorldContent"
 
 export interface WindowIconConfig {
   id: string
@@ -48,6 +49,12 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
     icon: "/desktop/dashboard.png",
     enabled: true,
   },
+  {
+    id: "pharos-world",
+    title: "PharosWorld",
+    icon: "/desktop/pharos.png",
+    enabled: true,
+  },
 ]
 
 export const getEnabledWindowIcons = (): WindowIconConfig[] => {
@@ -73,6 +80,8 @@ export const getWindowContent = (
       return <HookRankContent />
     case "terminal":
       return <TerminalContent />
+    case "pharos-world":
+      return <PharosWorldContent />
     default:
       return <div>Unknown window: {windowId}</div>
   }

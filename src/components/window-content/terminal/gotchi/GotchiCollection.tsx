@@ -88,20 +88,18 @@ const RARITY_COLORS: Record<number, string> = {
   3: "text-[#ff9900]",     // Legendary - Orange
 };
 
+// On-chain faction encoding (LibFaction.sol — uint8 0/1/2 only).
+// Source-of-truth helpers in `@/lib/faction`.
 const FACTION_NAMES: Record<number, string> = {
-  0: "NONE",
-  1: "COMBAT",
-  2: "SUPPORT",
-  3: "DEFENSE",
-  4: "TECH",
+  0: "COMBAT",
+  1: "DEFENSE",
+  2: "TECHNOLOGY",
 };
 
 const FACTION_COLORS: Record<number, string> = {
-  0: "bg-[#808080] text-white",
-  1: "bg-[#ff0000] text-white",
-  2: "bg-[#00ff00] text-[#000000]",
-  3: "bg-[#0000ff] text-white",
-  4: "bg-[#ffff00] text-[#000000]",
+  0: "bg-[#cc0000] text-white",
+  1: "bg-[#0000cc] text-white",
+  2: "bg-[#800080] text-white",
 };
 
 const fetcher = (url: string) => fetch(url).then(res => {
@@ -221,9 +219,9 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
             const rarityName = RARITY_NAMES[rarity] || "Common";
             const rarityColor = RARITY_COLORS[rarity] || RARITY_COLORS[0];
             const name = info?.name || `Gotchipus #${id}`;
-            const primaryFaction = info?.faction ?? 0;
-            const factionName = FACTION_NAMES[primaryFaction] || "NONE";
-            const factionColor = FACTION_COLORS[primaryFaction] || FACTION_COLORS[0];
+            const primaryFaction = info?.faction ?? -1;
+            const factionName = FACTION_NAMES[primaryFaction] ?? "—";
+            const factionColor = FACTION_COLORS[primaryFaction] ?? "bg-[#808080] text-white";
 
             return (
               <div

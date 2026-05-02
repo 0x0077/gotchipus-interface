@@ -56,6 +56,10 @@ export const WINDOW_SIZE = {
   "terminal": {
     "width": 1300,
     "height": 800
+  },
+  "pharos-world": {
+    "width": 1300,
+    "height": 800
   }
 };
 
@@ -93,5 +97,6 @@ export const WINDOW_MAX_CONTENT_WIDTH: Record<string, number> = {
   "all-gotchi": 1200,
   "hook-rank": 1200,
   "terminal": 9999,
+  "pharos-world": 9999,
   "default": 1200
 };

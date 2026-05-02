@@ -10,6 +10,7 @@ import { useSvgLayers, WearableIndices } from "@/hooks/useSvgLayers"
 import { TOKEN_ID_TO_LOCAL_INDEX } from "@/components/gotchiSvg/config"
 import { getWearablePngUrl } from "@/src/utils/wearableMapping"
 import { GotchipusInfo } from "@/lib/types"
+import { factionLabel } from "@/lib/faction"
 import { WearableItem, RARITY } from "./types"
 
 /* ─── types ─── */
@@ -20,7 +21,6 @@ interface ListApiData {
 }
 
 const RARITY_NAMES: Record<number, string> = { 0: 'Common', 1: 'Rare', 2: 'Epic', 3: 'Legendary' };
-const FACTION_NAMES: Record<number, string> = { 0: 'NONE', 1: 'COMBAT', 2: 'SUPPORT', 3: 'DEFENSE', 4: 'TECH' };
 
 /** Map WearableItem.category to WearableIndices key */
 const CATEGORY_TO_INDEX_KEY: Record<string, keyof WearableIndices> = {
@@ -144,14 +144,13 @@ export const GotchiPreviewPanel = observer(({ tryOnItems, onClearTryOn, onRemove
   const level = Math.floor(currentExp / 100);
   const expInLevel = Math.floor(((currentExp / 100) % 1) * 100);
   const rarityName = RARITY_NAMES[activeInfo?.rarity ?? 0] || 'Common';
-  const factionName = FACTION_NAMES[activeInfo?.faction ?? 0] || 'NONE';
+  const factionName = factionLabel(activeInfo?.faction) ?? 'UNKNOWN';
   const pusName = activeInfo?.name || (activeId ? `Gotchipus #${activeId}` : 'No Gotchi');
 
   const factionColor =
     factionName === 'COMBAT' ? '#cc0000' :
-    factionName === 'SUPPORT' ? '#008000' :
     factionName === 'DEFENSE' ? '#0000cc' :
-    factionName === 'TECH' ? '#800080' : '#808080';
+    factionName === 'TECHNOLOGY' ? '#800080' : '#808080';
 
   const rarityColor =
     rarityName === 'Rare' ? '#0000aa' :

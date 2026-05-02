@@ -149,7 +149,7 @@ function Window({ window, isActive, onClose, onMinimize, onActivate, onMove, onR
         width={window.size.width}
       >
         <div className="scrollbar-hide h-[calc(100%-var(--titlebar-h))] overflow-auto">
-          {window.id === 'terminal' ? (
+          {window.id === 'terminal' || window.id === 'pharos-world' ? (
             <div
               className={`h-full transition-all ${isWiderThanMax ? 'mx-auto' : ''}`}
               style={{
