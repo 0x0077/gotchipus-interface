@@ -108,15 +108,8 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const tokenInfo = detailsData?.info;
   const tbaAddress = detailsData?.tokenBoundAccount || "";
 
-  const portfolioApiUrl = !portfolioProp && tbaAddress
-    ? `/api/tokens/portfolio?tba=${tbaAddress}`
-    : null;
-  const { data: portfolioRaw, error: portfolioError } = useSWR<{ code: number; data: PortfolioApiData }>(
-    portfolioApiUrl,
-    fetcher,
-    { refreshInterval: 60000 }
-  );
-  const portfolio = portfolioProp || (portfolioRaw?.code === 0 ? portfolioRaw.data : undefined);
+  const portfolio = portfolioProp;
+  const portfolioError = false;
 
   const { data: networkStatsRes } = useSWR<{ data: { price: number } }>(
     '/api/tokens/network-stats',
