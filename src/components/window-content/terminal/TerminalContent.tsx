@@ -13,6 +13,10 @@ import ChatIcon from "@assets/icons/ChatIcon";
 import { GotchiCollection, SessionMap } from "./gotchi/GotchiCollection";
 import { GotchiDetail } from "./gotchi/GotchiDetail";
 import type { PortfolioApiData } from "./gotchi/GotchiDetailHelpers";
+import {
+  batchEntriesToPortfolio,
+  type BatchBalanceResponse,
+} from "@/lib/portfolio-shape";
 import useChat from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { SessionWizard, SessionWizardData } from "./session/SessionWizard";
@@ -62,89 +66,6 @@ interface ListApiData {
   balance: string;
   ids: string[];
   tbaAddresses: string[];
-}
-
-interface BatchBalanceEntry {
-  address: string;
-  token_address: string;
-  token_id: number;
-  balance: string;  
-  updated_block: number;
-  updated_tx_hash: string;
-  created_at: string;
-  updated_at: string;
-  token_type?: string;       // "ERC20" | "ERC721" | "ERC1155"
-  name?: string;
-  symbol?: string;
-  decimals?: number | null;  // null for NFTs
-}
-
-interface BatchBalanceResponse {
-  code: number;
-  status: string;
-  data: {
-    total: number;
-    balances: Record<string, BatchBalanceEntry[]>;
-  };
-}
-
-// Known token metadata on Pharos testnet — used to classify batch balance entries
-const KNOWN_TOKENS: Record<string, { symbol: string; name: string; decimals: number; type: "erc20" | "nft"; logo?: string; nftType?: string }> = {
-  "0x9d34ff8428bdedf591be7ed9021fca87adb6ac46": { symbol: "GOTCHI", name: "Gotchipus", type: "nft", decimals: 0, nftType: "ERC1155" },
-  "0x8a027bc33e180ac2a61fb1e68f40c0c7f76a46df": { symbol: "CHI", name: ".chi Names", type: "nft", decimals: 0, nftType: "ERC721" },
-  "0xC879C018dB60520F4355C26eD1a6D572cdAC1815": { symbol: "USDC", name: "USD Coin", type: "erc20", decimals: 6, logo: "/tokens/usdc.png" },
-  "0xe7e84b8b4f39c507499c40b4ac199b050e2882d5": { symbol: "USDT", name: "Tether USD", type: "erc20", decimals: 6, logo: "/tokens/usdt.png" },
-  "0x0c64f03eea5c30946d5c55b4b532d08ad74638a4": { symbol: "WBTC", name: "Wrapped Bitcoin", type: "erc20", decimals: 8, logo: "/tokens/wbtc.png" },
-  "0x1f4b7011Ee3d53969bb67F59428a9ec0477856E9": { symbol: "WETH", name: "Wrapped Ether", type: "erc20", decimals: 18, logo: "/tokens/weth.png" },
-  "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": { symbol: "WPROS", name: "Wrapped Pharos", type: "erc20", decimals: 18, logo: "/tokens/pros.png" },
-};
-
-function batchEntriesToPortfolio(entries: BatchBalanceEntry[]): PortfolioApiData {
-  const erc20s: PortfolioApiData["erc20s"] = [];
-  const nfts: PortfolioApiData["nfts"] = [];
-
-  for (const entry of entries) {
-    const addr = entry.token_address.toLowerCase();
-    const known = KNOWN_TOKENS[addr];
-    const isNftFromBackend = entry.token_type === "ERC721" || entry.token_type === "ERC1155";
-    const isNft = known ? known.type === "nft"
-                : entry.token_type ? isNftFromBackend
-                : entry.token_id > 0;
-
-    if (isNft) {
-      nfts.push({
-        token_address: entry.token_address,
-        token_type: known?.nftType || entry.token_type || "ERC721",
-        name: known?.name || entry.name || "Unknown",
-        symbol: known?.symbol || entry.symbol || "???",
-        token_id: entry.token_id,
-        amount: entry.balance,
-      });
-    } else {
-      const decimals = known?.decimals ?? entry.decimals ?? 18;
-      const formatted = (Number(entry.balance) / Math.pow(10, decimals)).toString();
-      erc20s.push({
-        token_address: entry.token_address,
-        name: known?.name || entry.name || "Unknown Token",
-        symbol: known?.symbol || entry.symbol || addr.slice(0, 6),
-        balance: formatted,
-        balance_raw: entry.balance,
-        decimals,
-        usd: 0,
-        logo: known?.logo,
-      });
-    }
-  }
-
-  return {
-    tba_address: entries[0]?.address || "",
-    token_contract: "",
-    token_id: 0,
-    total_usd: 0,
-    native: { symbol: "PHRS", balance: "0", balance_raw: "0", decimals: 18, usd: 0 },
-    erc20s,
-    nfts,
-  };
 }
 
 const listFetcher = (url: string) => fetch(url).then(res => {
@@ -258,20 +179,28 @@ const TerminalContent = observer(() => {
     return result;
   }, [tbaBalanceData, listData, tbaAddressList]);
 
-  // Batch fetch token balances (ERC20/ERC721/ERC1155) for all TBAs
+  // Batch fetch token balances (ERC20/ERC721/ERC1155) for all TBAs.
+  // We seed `result` with every requested account up-front so a TBA that
+  // happens to hold zero tokens still gets a placeholder PortfolioApiData
+  // (empty erc20s + nfts) — without this, GotchiDetail's `portfolioProp`
+  // is undefined for empty TBAs and falls through to the single-TBA
+  // proxy fetch, which is wasteful even if it works.
   const batchBalanceFetcher = useCallback(async (accounts: string[]) => {
+    const result: Record<string, PortfolioApiData> = {};
+    for (const acc of accounts) {
+      result[acc.toLowerCase()] = batchEntriesToPortfolio([], acc);
+    }
     const res = await fetch("/api/balances/batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ accounts }),
     });
-    if (!res.ok) return {};
+    if (!res.ok) return result;
     const json: BatchBalanceResponse = await res.json();
-    if (json.code !== 0 || !json.data?.balances) return {};
-    const result: Record<string, PortfolioApiData> = {};
+    if (json.code !== 0 || !json.data?.balances) return result;
     for (const [addr, entries] of Object.entries(json.data.balances)) {
       if (entries.length > 0) {
-        result[addr.toLowerCase()] = batchEntriesToPortfolio(entries);
+        result[addr.toLowerCase()] = batchEntriesToPortfolio(entries, addr);
       }
     }
     return result;

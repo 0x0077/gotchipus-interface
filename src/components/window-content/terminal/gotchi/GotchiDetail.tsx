@@ -108,9 +108,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const tokenInfo = detailsData?.info;
   const tbaAddress = detailsData?.tokenBoundAccount || "";
 
-  // Same-origin proxy — see `src/app/api/tokens/portfolio/route.ts`. The
-  // actual portfolio backend lives under server-only `PORTFOLIO_BACKEND_URL`
-  // and is intentionally not exposed in the client bundle.
   const portfolioApiUrl = !portfolioProp && tbaAddress
     ? `/api/tokens/portfolio?tba=${tbaAddress}`
     : null;
@@ -335,7 +332,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
       return Object.values(grouped).map(g => ({ type: g.type, label: g.name, items: g.items }));
     }
 
-    // Fallback: use on-chain reads (wearableBalanceOfBatch + chi namesOfOwner)
     const collections: NftCollection[] = [];
     if (tbaWearableBalances && Array.isArray(tbaWearableBalances)) {
       const wearableItems: NftCollection["items"] = [];

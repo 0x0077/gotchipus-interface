@@ -26,36 +26,29 @@ export const useAuth = () => {
   const { signTypedDataAsync } = useSignTypedData();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const loginPromiseRef = useRef<Promise<boolean> | null>(null);
-  // Stabilize signTypedDataAsync via ref to prevent login from being recreated every render
   const signTypedDataRef = useRef(signTypedDataAsync);
   signTypedDataRef.current = signTypedDataAsync;
-  // Track failed login attempts to prevent infinite signature popup loops
   const loginFailedRef = useRef(false);
 
   const isAuthenticated = !!walletStore.token && !!walletStore.userId;
 
   const login = useCallback(async (): Promise<boolean> => {
-    // Already authenticated
     if (isAuthenticated) return true;
 
-    // If a login is already in progress, wait for it
     if (loginPromiseRef.current) return loginPromiseRef.current;
 
-    // Don't retry automatically after a failed/rejected attempt
     if (loginFailedRef.current) return false;
 
     if (!walletStore.isConnected || !walletStore.address) {
       return false;
     }
 
-    // Check cached token first
     const existingToken = getToken();
     const cacheKey = `userId_${walletStore.address.toLowerCase()}`;
     const cachedUserId = localStorage.getItem(cacheKey);
 
     if (existingToken && cachedUserId) {
-      walletStore.setToken(existingToken);
-      walletStore.setUserId(cachedUserId);
+      walletStore.setAuth(existingToken, cachedUserId);
       return true;
     }
 
@@ -90,8 +83,7 @@ export const useAuth = () => {
           if (result.code === 0 && result.data) {
             const { token, user_id } = result.data;
             setToken(token);
-            walletStore.setToken(token);
-            walletStore.setUserId(user_id);
+            walletStore.setAuth(token, user_id);
             localStorage.setItem(cacheKey, user_id);
             loginFailedRef.current = false;
             return true;
@@ -119,7 +111,6 @@ export const useAuth = () => {
     loginFailedRef.current = false;
   }, [walletStore]);
 
-  // Allow manual retry after a failed login (e.g., user clicks a "Sign In" button)
   const retryLogin = useCallback(() => {
     loginFailedRef.current = false;
   }, []);

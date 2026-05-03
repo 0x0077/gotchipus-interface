@@ -13,24 +13,20 @@ import {
 
 const EXPLORER_URL = "https://pharosscan.xyz";
 
-// Known contract addresses for transaction classification
 const KNOWN_CONTRACTS: Record<string, string> = {
   // Diamond (Gotchipus)
-  "0x5A3AFa97584Fa8cdEc4be2a6aB86Ceed05600C5e": "Gotchipus",
+  "0x5a3afa97584fa8cdec4be2a6ab86ceed05600c5e": "Gotchipus",
   // DEX - DODO
-  "0x6F1142F4BF632E4877497c05818492824F540Ad5": "DODO Swap",
-  "0xBF105f4ffBD3825f5433d074008B9A76237d849c": "DODO Approve",
-  "0xc3A335d1C83f9b92E36C0323c58809d19c9DB63C": "DODO DSP",
+  "0x6f1142f4bf632e4877497c05818492824f540ad5": "DODO Swap",
+  "0xbf105f4ffbd3825f5433d074008b9a76237d849c": "DODO Approve",
+  "0xc3a335d1c83f9b92e36c0323c58809d19c9db63c": "DODO DSP",
   // DEX - UniswapV2
-  "0xd285E37678F07631f33EB99927EB3fF0591a12d7": "UniV2 Router",
-  "0x18Fab7d7027E9FB33Fa90ca607439449209F7B09": "UniV2 Factory",
+  "0xd285e37678f07631f33eb99927eb3ff0591a12d7": "UniV2 Router",
+  "0x18fab7d7027e9fb33fa90ca607439449209f7b09": "UniV2 Factory",
   // DEX - UniswapV3
-  "0xf38d34c8382b9079b0f85309578b43b8479Cd875": "UniV3 Router",
-  // Tokens
-  "0xC879C018dB60520F4355C26eD1a6D572cdAC1815": "USDC",
-  "0xe7e84b8b4f39c507499c40b4ac199b050e2882d5": "USDT",
-  "0x0c64f03eea5c30946d5c55b4b532d08ad74638a4": "WBTC",
-  "0x1f4b7011Ee3d53969bb67F59428a9ec0477856E9": "WETH",
+  "0xf38d34c8382b9079b0f85309578b43b8479cd875": "UniV3 Router",
+  // Tokens (mainnet only — see comment above)
+  "0xc879c018db60520f4355c26ed1a6d572cdac1815": "USDC",
   "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": "WPHRS",
 };
 
@@ -93,7 +89,7 @@ function classifyTx(tx: Transaction, tba: string): ClassifiedTx {
   }
 
   // Token contract (approve/transfer)
-  if (toName && ["USDC", "USDT", "WBTC", "WETH", "WPHRS"].includes(toName)) {
+  if (toName && ["USDC", "WPHRS"].includes(toName)) {
     return { ...tx, category: "contract", label: `${toName} token`, contractName: toName };
   }
 

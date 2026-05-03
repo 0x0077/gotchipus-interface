@@ -57,6 +57,13 @@ class WalletStore {
     });
   }
 
+  setAuth(token: string, userId: string) {
+    runInAction(() => {
+      this.token = token;
+      this.userId = userId;
+    });
+  }
+
   setTokenBoundAccount(tokenId: string, address: string) {
     runInAction(() => {
       this.tokenBoundAccounts[tokenId] = address;
@@ -83,6 +90,18 @@ class WalletStore {
       this.chainId = undefined;
       this.userId = undefined;
       this.token = undefined;
+      this.resetTokenBoundAccounts();
+    });
+  }
+
+  setDisconnected() {
+    runInAction(() => {
+      this.address = undefined;
+      this.isConnected = false;
+      this.isConnecting = false;
+      this.balance = undefined;
+      this.symbol = undefined;
+      this.chainId = undefined;
       this.resetTokenBoundAccounts();
     });
   }
