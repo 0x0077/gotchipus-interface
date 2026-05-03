@@ -22,7 +22,6 @@ import {
 } from '@/lib/pharos-world-api'
 import { factionKey } from '@/lib/faction'
 
-// ── style atoms ────────────────────────────────────────────────────────
 
 const MONO = 'font-mono'
 const W98_BTN =
@@ -33,7 +32,6 @@ const W98_BTN =
   'active:shadow-[inset_1px_1px_0_#808080,inset_-1px_-1px_0_#DFDFDF] ' +
   'px-3 py-1 text-xs text-black select-none disabled:opacity-50 disabled:cursor-not-allowed'
 
-// ── static lookup tables (mirrors gotchi-rs/data/pharos_world/*) ──────
 
 const ROOM_NAMES: Record<string, string> = {
   wharf_plaza: 'Wharf Plaza',
@@ -43,9 +41,6 @@ const ROOM_NAMES: Record<string, string> = {
   anchor_tavern: 'The Anchor Tavern',
 }
 
-/** Per-room ambient loop (looping gif). Filenames are kebab-case under
- *  `/public/desktop/pharosworld/`. Used by both the place focus card and
- *  the NPC focus card (where the NPC's home room shows behind their badge). */
 const ROOM_GIF: Record<string, string> = {
   wharf_plaza:        '/desktop/pharosworld/wharf-plaza.gif',
   the_tide_forge:     '/desktop/pharosworld/the-tide-forge.gif',
@@ -70,15 +65,10 @@ const FACTION_COPY: Record<PharosFaction, { label: string; tagline: string; acce
   technology: { label: 'Technology', tagline: '+15% MIND · Lightning · Water · Void', accent: '#86E1FC' },
 }
 
-// Authoritative on-chain faction encoding lives in `@/lib/faction` (mirrors
-// Solidity LibFaction.sol — uint8 0/1/2 → combat/defense/technology). The
-// PharosWorld API enum happens to be a superset (adds `neutral` for NPC use)
-// but every player faction is exactly one of the three on-chain values.
 function chainFactionToPharos(n: number | undefined | null): PharosFaction | null {
   return factionKey(n) as PharosFaction | null
 }
 
-// ── mode helpers ──────────────────────────────────────────────────────
 
 type DisplayMode = 'DO' | 'SAY' | 'STORY' | 'LOOK'
 const DISPLAY_TO_API: Record<DisplayMode, PharosMode> = {
@@ -95,7 +85,6 @@ function modePlaceholder(mode: DisplayMode, room: string | null): string {
   }
 }
 
-// ── primitives ────────────────────────────────────────────────────────
 
 function Dot({ tone = 'active' }: { tone?: 'active' | 'warn' | 'bad' }) {
   const color = tone === 'active' ? '#4ADE5C' : tone === 'warn' ? '#FFB86C' : '#FF6B6B'
@@ -145,19 +134,10 @@ function PlayerAvatar({ size = 32 }: { size?: number }) {
   )
 }
 
-// ── story bubble + row primitives ─────────────────────────────────────
-
-/** Split prose into paragraphs on blank lines. Single newlines are kept as
- *  soft line breaks within a paragraph (rare in narration but possible). */
 function paragraphsOf(text: string): string[] {
   return text.split(/\n\s*\n+/).map((p) => p.replace(/\n/g, ' ').trim()).filter(Boolean)
 }
 
-/** Lightweight inline-markdown renderer for narration prose. Recognizes
- *  `**bold**` / `*italic*` / `__bold__` / `_italic_` / `` `code` `` only —
- *  no block-level (paragraphs are handled by `paragraphsOf`). The full
- *  react-markdown stack is overkill for prose dialogue and adds visible
- *  asterisks while streaming partial tokens. */
 function renderInline(text: string): React.ReactNode {
   if (!text) return text
   const re = /`([^`]+)`|\*\*([^*]+)\*\*|__([^_]+)__|\*([^*\n]+)\*|(?<![A-Za-z0-9_])_([^_\n]+)_(?![A-Za-z0-9_])/g
@@ -180,8 +160,6 @@ function renderInline(text: string): React.ReactNode {
   return out.length === 1 ? out[0] : <>{out}</>
 }
 
-/** Narrator avatar — a small lighthouse-beam glyph. Square, same size as the
- *  player avatar so the chat-style two-column rhythm holds. */
 function NarratorAvatar({ size = 32 }: { size?: number }) {
   return (
     <div
@@ -209,9 +187,6 @@ function NarrativeRow({
   time: string
   text: string
   trailing?: React.ReactNode
-  /** Room id this narration is set in. Shown as a small chip after the
-   *  narrator's name to anchor the player visually — replaces the
-   *  redundant "narrator" label. */
   location?: string | null
 }) {
   const paragraphs = paragraphsOf(text)
@@ -272,8 +247,6 @@ function SystemBubble({ children }: { children: React.ReactNode }) {
   )
 }
 
-// ── tool-result cards (rendered only at "important moments") ──────────
-
 function ScanCard({ data, mode }: { data: any; mode: PharosMode | undefined }) {
   // Only render for explicit player LOOK; auto-look from the engine should be silent.
   if (mode !== 'look') return null
@@ -319,12 +292,11 @@ function ScanCard({ data, mode }: { data: any; mode: PharosMode | undefined }) {
 }
 
 function ThresholdCard({ data }: { data: any }) {
-  // Only render when rapport actually crosses 5/7/9.
-  const before = Number(data?.before)
-  const after = Number(data?.after)
+  const before = Number(data?.rapport_before)
+  const after = Number(data?.rapport_after)
+  const crossed = data?.threshold_crossed
   if (!Number.isFinite(before) || !Number.isFinite(after)) return null
-  const crossed = [5, 7, 9].find((t) => before < t && after >= t)
-  if (crossed === undefined) return null
+  if (typeof crossed !== 'number') return null
 
   const npcId = data?.npc_id as string | undefined
   const display = npcId ? NPC_DISPLAY[npcId] : undefined
@@ -412,10 +384,6 @@ function ToolResultCard({ ev, turnMode }: { ev: PharosToolResultEvent; turnMode:
   }
 }
 
-// ── focus cards (sidebar) ─────────────────────────────────────────────
-
-/** Clickable exits — bypass the LLM via /pharos-world/move. The buttons
- *  are the player's escape hatch when the model forgets to call pw_move. */
 function ExitsBlock({
   exits, onMove, disabled, currentRoomId,
 }: {
@@ -594,8 +562,6 @@ function PlaceFocusCard({
   )
 }
 
-// ── breadcrumb + status bar ───────────────────────────────────────────
-
 function Breadcrumb({
   roomName, lastActiveAt,
 }: { roomName: string; lastActiveAt: string | null }) {
@@ -652,7 +618,6 @@ function StatusBar({
   )
 }
 
-// ── mode tabs ─────────────────────────────────────────────────────────
 
 function ModeTabs({ mode, setMode }: { mode: DisplayMode; setMode: (m: DisplayMode) => void }) {
   const modes: DisplayMode[] = ['DO', 'SAY', 'STORY', 'LOOK']
@@ -679,7 +644,6 @@ function ModeTabs({ mode, setMode }: { mode: DisplayMode; setMode: (m: DisplayMo
   )
 }
 
-// ── timestamp helper ──────────────────────────────────────────────────
 
 function formatTime(iso: string | null | undefined): string {
   if (!iso) return '--:--:--'
@@ -690,17 +654,9 @@ function formatTime(iso: string | null | undefined): string {
   }
 }
 
-// ── BootstrapForm ─────────────────────────────────────────────────────
-
-/** Shared "not yet in the world" backdrop for await-wallet / await-auth /
- *  bootstrap / loading phases. Pharos Town blurred behind a dark overlay.
- *  Keeps the four gate screens visually continuous so the player feels they
- *  are already standing at the edge of the town, just not inside it yet. */
 function GateBackground({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative flex-1 flex flex-col overflow-hidden">
-      {/* blurred background — scale up so the blur halo doesn't reveal the
-          window's grey chrome at the edges */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
@@ -711,11 +667,8 @@ function GateBackground({ children }: { children: React.ReactNode }) {
           transform: 'scale(1.08)',
         }}
       />
-      {/* dark overlay for legibility — narration is mostly small text */}
       <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/60 to-black/70" />
-      {/* faint blue tint to push the image toward Pharos's cold sea palette */}
       <div aria-hidden className="absolute inset-0 bg-[#1A2A3A]/15 mix-blend-overlay" />
-      {/* foreground */}
       <div className="relative flex-1 flex flex-col">{children}</div>
     </div>
   )
@@ -747,17 +700,8 @@ function BootstrapForm({
     [gotchis, selectedGotchi],
   )
   const chainFaction = chainFactionToPharos(selectedMeta?.faction)
-  // Faction is *bonded on chain* — every minted gotchi has uint8 0/1/2.
-  // The player cannot pick. If the metadata fetch hasn't yielded a faction
-  // yet (unsynced / mid-load / stale cache), we silently fall back to
-  // combat at submit time; we never expose a picker, because doing so
-  // would imply a choice the player doesn't actually have.
   const effectiveFaction: PharosFaction = chainFaction ?? 'combat'
   const canStart = !!selectedGotchi && !isStarting
-
-  // Per-gotchi resume detection — drives the entry button label so the
-  // player knows whether they're picking up an ongoing world or stepping
-  // into Pharos for the first time with this gotchi.
   const isResuming = !!(selectedGotchi && loadStoredConversationId(address, selectedGotchi))
 
   return (
@@ -804,11 +748,6 @@ function BootstrapForm({
           )}
         </GroupBox>
 
-        {/* Faction is bonded on chain — render the readout only when we
-            actually have it. While gotchis are still loading, or for
-            an out-of-sync metadata edge case, the box is omitted entirely
-            rather than showing a picker (which would falsely imply a
-            choice). The submit handler silently falls back to combat. */}
         {chainFaction && (
           <GroupBox title="faction.from-chain" className="mb-6">
             <div className="flex items-center gap-3">
@@ -854,7 +793,6 @@ function BootstrapForm({
   )
 }
 
-// ── PlayingView ───────────────────────────────────────────────────────
 
 interface PlayingProps {
   session: PharosSession
@@ -881,7 +819,6 @@ function PlayingView({
   const scrollRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-scroll on new messages or streaming text.
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
@@ -893,8 +830,6 @@ function PlayingView({
     if (!text || isStreaming) return
     onSubmit(mode, text)
     setInput('')
-    // Collapse the textarea back to single-line height after submit; without
-    // this, the inline `height` style set during auto-resize keeps it tall.
     if (inputRef.current) inputRef.current.style.height = 'auto'
   }, [input, mode, isStreaming, onSubmit])
 
@@ -930,10 +865,6 @@ function PlayingView({
               if (m.role === 'player') return <PlayerRow key={m.id ?? idx} time={t} mode={m.mode ?? null} content={m.content} />
               if (m.role === 'system') return <SystemBubble key={m.id ?? idx}>{m.content}</SystemBubble>
               if (m.role === 'tool_result') {
-                // tool_result messages are client-side synthetic — `content`
-                // packs `{ ev, turnMode }` so AwardCard / ThresholdCard /
-                // ScanCard can re-render exactly as they did during the live
-                // stream, instead of disappearing the moment onComplete fires.
                 try {
                   const parsed = JSON.parse(m.content) as { ev: PharosToolResultEvent; turnMode?: PharosMode }
                   return <ToolResultCard key={m.id ?? idx} ev={parsed.ev} turnMode={parsed.turnMode} />
@@ -944,7 +875,6 @@ function PlayingView({
               return <NarrativeRow key={m.id ?? idx} time={t} text={m.content} location={m.location} />
             })}
 
-            {/* live streaming surface */}
             {streamingTools.map((ev, i) => (
               <ToolResultCard key={`tool-${i}`} ev={ev} turnMode={currentTurnMode} />
             ))}
@@ -970,13 +900,10 @@ function PlayingView({
               value={input}
               onChange={(e) => {
                 setInput(e.target.value)
-                // Auto-resize: grow with content up to ~6 lines, then scroll.
                 e.target.style.height = 'auto'
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`
               }}
               onKeyDown={(e) => {
-                // Enter submits; Shift+Enter inserts a newline (lets the
-                // player write a multi-line STORY beat or longer SAY).
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
                   handleSubmit()
@@ -1002,7 +929,6 @@ function PlayingView({
   )
 }
 
-// ── PharosWorldContent (orchestrator) ─────────────────────────────────
 
 type Phase = 'await-wallet' | 'await-auth' | 'bootstrap' | 'loading' | 'playing'
 
@@ -1010,10 +936,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
   const { walletStore } = useStores()
   const address = walletStore.address ?? ''
 
-  // Auth — JWT login is lazy in this app: terminal triggers it on mount, but
-  // PharosWorld can be opened independently, so we mirror that behavior here.
-  // Without this, /api/pharos-world/start hits 401 because no token has ever
-  // been signed.
   const { login, retryLogin, isAuthenticated, isLoggingIn } = useAuth()
   useEffect(() => {
     if (walletStore.isConnected && !isAuthenticated && !isLoggingIn) {
@@ -1030,34 +952,24 @@ const PharosWorldContent = observer(function PharosWorldContent() {
   const [bootstrapError, setBootstrapError] = useState<string | null>(null)
   const [isStarting, setIsStarting] = useState(false)
 
-  // streaming state
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingText, setStreamingText] = useState('')
   const [streamingTools, setStreamingTools] = useState<PharosToolResultEvent[]>([])
   const [currentTurnMode, setCurrentTurnMode] = useState<PharosMode | undefined>(undefined)
-  // separate from isStreaming — exit clicks shouldn't be blocked while a
-  // streaming turn is mid-flight (player may want to bail out), but the
-  // exit button itself should reflect "request in flight" so the user gets
-  // immediate visual feedback on click.
+
   const [isMoving, setIsMoving] = useState(false)
 
   const { stream, stop } = usePharosStream()
 
-  // ── phase decision based on wallet + auth ─────
   useEffect(() => {
     if (!address) {
       setPhase('await-wallet')
       return
     }
     if (!isAuthenticated) {
-      // Wallet connected but JWT hasn't been signed yet — block bootstrap so
-      // we don't fire /start without an Authorization header (→ 401).
       setPhase('await-auth')
       return
     }
-    // Always go through the gotchi picker first. Resume vs. create is
-    // decided per-gotchi inside the picker callback (no more "fresh start"
-    // button — the world is meant to be persistent).
     setPhase((prev) => {
       if (prev === 'playing' || prev === 'loading') return prev
       return 'bootstrap'
@@ -1072,12 +984,13 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     setCurrentRoom(data.current_room)
   }, [])
 
-  /** Bootstrap entry: this gotchi either has an ongoing world (resume) or
-   *  is stepping into Pharos for the first time (create). Both flows land
-   *  in `'playing'` — the player never sees a "continue or restart" prompt
-   *  because restarting is incoherent with the on-chain Bond. If the
-   *  server has lost the session (404), we transparently /start a new
-   *  one for this gotchi as recovery. */
+  const hydrateLiveState = useCallback(async (convId: string) => {
+    const data = await fetchPharosState(convId)
+    setSession(data.session)
+    setNpcStates(data.npc_states)
+    setCurrentRoom(data.current_room)
+  }, [])
+
   const handleStart = useCallback(async (
     gotchiId: string,
     faction: PharosFaction,
@@ -1087,9 +1000,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     setIsStarting(true)
     setBootstrapError(null)
     try {
-      // Try to resume the stored session; if the server lost it (404),
-      // fall through to a fresh /start as silent recovery. The world is
-      // persistent — there is no player-facing reset.
       const stored = loadStoredConversationId(address, gotchiId)
       if (stored) {
         try {
@@ -1118,14 +1028,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     }
   }, [address, hydrateState])
 
-  /** Deterministic move triggered by the sidebar's exit buttons. Bypasses
-   *  the LLM via `/pharos-world/move`. The endpoint returns session +
-   *  current_room + the new transition message inline, so we update local
-   *  state directly — no follow-up `/state` round-trip. NPC rapport is
-   *  unaffected by movement, so npc_states stays untouched. This exists
-   *  because the LLM occasionally narrates a location change but forgets
-   *  to call pw_move; without this escape hatch the player ends up
-   *  trapped in the wrong room with no way to recover. */
   const handleQuickMove = useCallback(async (targetRoomId: string) => {
     if (!conversationId || isMoving) return
     setIsMoving(true)
@@ -1137,8 +1039,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
         setMessages((prev) => [...prev, res.transition_message as PharosMessage])
       }
     } catch (e) {
-      // Surface as a transient system message in the chat feed so the
-      // player knows the click registered and what blocked it.
       if (session) {
         setMessages((prev) => [
           ...prev,
@@ -1157,12 +1057,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     }
   }, [conversationId, session, isMoving])
 
-  /** Switching Gotchipus steps back to the bootstrap picker — the world
-   *  keeps existing on the server; reopening the same gotchi resumes from
-   *  the exact beat we left. The breadcrumb's old "Leave" button was
-   *  removed because it visually conflicted with the in-game verb "leave"
-   *  (e.g. "leave the forge"); this is now a discreet "switch" affordance
-   *  in the bottom status bar. */
   const handleSwitchGotchi = useCallback(() => {
     stop()
     setIsStreaming(false)
@@ -1180,7 +1074,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     if (!conversationId || !session) return
     const apiMode = DISPLAY_TO_API[displayMode]
 
-    // Optimistically append the player message.
     setMessages((prev) => [
       ...prev,
       {
@@ -1199,11 +1092,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     setCurrentTurnMode(apiMode)
     setIsStreaming(true)
 
-    // Token-by-token typewriter pacing: every text_delta lands on a buffered
-    // string ref. A single requestAnimationFrame drains it into setState ~60
-    // times/second instead of once per token. Without this, large chunks
-    // flood React with re-renders and the UI stutters because each render
-    // re-runs `paragraphsOf` and re-lays out the story column.
     let buffered = ''
     let pending = ''
     let raf: number | null = null
@@ -1229,8 +1117,6 @@ const PharosWorldContent = observer(function PharosWorldContent() {
           scheduleFlush()
         },
         onTextReplace: (t) => {
-          // Backend asked us to drop everything streamed so far this turn —
-          // typically because round 1 leaked preamble before a tool call.
           if (raf !== null) { cancelAnimationFrame(raf); raf = null }
           pending = ''
           buffered = t
@@ -1259,19 +1145,12 @@ const PharosWorldContent = observer(function PharosWorldContent() {
           setCurrentTurnMode(undefined)
         },
         onComplete: async () => {
-          // Drain any pending tokens first so we capture the full final text.
           if (raf !== null) {
             cancelAnimationFrame(raf)
             raf = null
             if (pending) { buffered += pending; pending = '' }
           }
-          // Flush both tool result cards (fired first) and the narrator
-          // text (fired after tools) into the permanent messages list, in
-          // turn order. Without this, AwardCard / ThresholdCard / ScanCard
-          // appear during the stream and vanish the instant onComplete
-          // fires — that's not the right UX, the cards are part of the
-          // record of what happened and should persist alongside the
-          // narrator paragraph.
+
           const finalText = buffered
           const capturedTools = tools.slice()
           const capturedTurnMode = apiMode
@@ -1302,18 +1181,16 @@ const PharosWorldContent = observer(function PharosWorldContent() {
           setCurrentTurnMode(undefined)
           setIsStreaming(false)
 
-          // Refresh canonical state — covers room moves + npc rapport mutations.
           try {
-            await hydrateState(conversationId)
+            await hydrateLiveState(conversationId)
           } catch {
             // best-effort — local optimistic state is still usable
           }
         },
       },
     )
-  }, [conversationId, session, stream, hydrateState])
+  }, [conversationId, session, stream, hydrateLiveState])
 
-  // ── render by phase ───────────────────────────────────
   if (phase === 'await-wallet') {
     return (
       <div className="w-full h-full flex flex-col bg-[#C0C0C0]">
