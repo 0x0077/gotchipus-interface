@@ -52,10 +52,10 @@ export const TaskbarMobile = observer(({
 
   return (
     <>
-      <div className="absolute bottom-0 left-0 w-full bg-win98-face border-t-2 border-win98-highlight shadow-win98-outer flex items-center justify-between px-2 z-50 h-12">
+      <div className="absolute bottom-0 left-0 w-full bg-win98-face border-t-2 border-win98-highlight shadow-win98-outer flex items-center px-2 z-50 h-12 gap-2 min-w-0">
         <button
           type="button"
-          className={`px-3 h-8 font-bold text-sm flex items-center justify-center text-white border border-[#808080] min-w-[50px] ${
+          className={`px-2 h-8 font-bold text-sm flex items-center justify-center text-white border border-[#808080] flex-shrink-0 ${
             isStartPressed
               ? "bg-uni-bg-01 shadow-win98-inner"
               : "bg-uni-bg-01 shadow-win98-outer"
@@ -65,27 +65,31 @@ export const TaskbarMobile = observer(({
           onMouseUp={() => setIsStartPressed(false)}
           onMouseLeave={() => setIsStartPressed(false)}
         >
-          <Menu size={16} className="mr-1" />
-          <span className="text-xs">{t("taskbar.mobileMenu")}</span>
+          <Menu size={16} />
+          <span className="text-xs ml-1 hidden xs:inline">{t("taskbar.mobileMenu")}</span>
         </button>
 
-        <div className="flex-1 mx-2 overflow-hidden">
+        <div className="flex-1 min-w-0 overflow-hidden">
           {active && (
-            <div className="bg-win98-face border border-[#808080] shadow-win98-inner px-2 py-1 h-8 flex items-center gap-1">
+            <div className="bg-win98-face border border-[#808080] shadow-win98-inner px-2 py-1 h-8 flex items-center gap-1 min-w-0">
               {active.icon && (
                 <Image src={active.icon} alt="" width={12} height={12} className="flex-shrink-0" />
               )}
-              <span className="text-xs truncate">{active.title || active.id}</span>
+              <span className="text-xs truncate min-w-0">{active.title || active.id}</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <div className="bg-win98-face border border-[#808080] shadow-win98-outer h-8 px-2 flex items-center">
             <CustomConnectButton />
           </div>
-          <NetworkStats variant="mobile" />
-          <BlockIndicator variant="mobile" />
+          <div className="hidden sm:flex">
+            <NetworkStats variant="mobile" />
+          </div>
+          <div className="hidden sm:flex">
+            <BlockIndicator variant="mobile" />
+          </div>
         </div>
       </div>
 

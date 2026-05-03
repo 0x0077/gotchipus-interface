@@ -22,15 +22,15 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
 
   return (
     <div className="mb-4">
-      <div className="flex items-end justify-between gap-4 mb-3">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h4 className="text-xl font-bold text-[#000080] uppercase">
+      <div className="flex flex-wrap items-end justify-between gap-3 mb-3 min-w-0">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-2 min-w-0">
+            <h4 className="text-xl font-bold text-[#000080] uppercase truncate">
               {metadata.name || `Gotchipus #${metadata.token_id}`}
             </h4>
-            <span className="text-sm text-[#808080]">#{metadata.token_id}</span>
+            <span className="text-sm text-[#808080] flex-shrink-0">#{metadata.token_id}</span>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-[#808080]">{t('gotchiDetailView.owner')}</span>
               {metadata.owner ? (

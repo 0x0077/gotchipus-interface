@@ -242,7 +242,6 @@
       "badgeLive": "ネイティブ",
       "badgePrompt": "プロンプト",
       "cmd": {
-        "summon": "ID で Gotchi を召喚",
         "balance": "ウォレット残高を表示",
         "swap": "トークン交換",
         "send": "トークン送金",

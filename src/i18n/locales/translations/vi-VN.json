@@ -242,7 +242,6 @@
       "badgeLive": "gốc",
       "badgePrompt": "gợi ý",
       "cmd": {
-        "summon": "Triệu hồi Gotchi theo ID",
         "balance": "Hiện số dư ví",
         "swap": "Swap giữa các token",
         "send": "Chuyển token",

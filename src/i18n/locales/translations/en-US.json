@@ -242,7 +242,6 @@
       "badgeLive": "live",
       "badgePrompt": "prompt",
       "cmd": {
-        "summon": "Summon Gotchi by ID",
         "balance": "Show wallet balances",
         "swap": "Swap between tokens",
         "send": "Transfer tokens",

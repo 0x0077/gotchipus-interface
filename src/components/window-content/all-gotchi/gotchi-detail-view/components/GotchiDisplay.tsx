@@ -16,11 +16,9 @@ export const GotchiDisplay: React.FC<GotchiDisplayProps> = ({
 }) => {
   return (
     <div
-      className="border-2 border-[#808080] shadow-win98-outer rounded-sm p-8 bg-cover bg-center"
+      className="border-2 border-[#808080] shadow-win98-outer rounded-sm p-4 sm:p-8 bg-cover bg-center w-full max-w-[400px] aspect-square"
       style={{
         ...backgroundStyle,
-        width: '400px',
-        height: '400px',
         backgroundColor: backgroundStyle.backgroundImage ? 'transparent' : '#ffffff'
       }}
     >
@@ -30,8 +28,8 @@ export const GotchiDisplay: React.FC<GotchiDisplayProps> = ({
       >
         <EnhancedGotchiSvg
           wearableIndices={wearableIndices}
-          width={320}
-          height={320}
+          width="100%"
+          height="100%"
         />
       </motion.div>
     </div>

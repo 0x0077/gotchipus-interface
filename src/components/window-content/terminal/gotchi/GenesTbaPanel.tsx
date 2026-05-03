@@ -17,9 +17,9 @@ export function GenesTbaPanel({ tbaAddress, copiedField, onCopy }: GenesTbaPanel
   return (
     <div className="flex flex-col gap-1.5">
       <Win98GroupBox label={t('terminal.detail.tba')}>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 min-w-0">
           <div
-            className="flex-1 px-1 py-1 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-white text-xs truncate font-courier"
+            className="flex-1 min-w-0 px-1 py-1 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-white text-xs truncate font-courier"
           >
             {tbaAddress || t('terminal.detail.notAvailable')}
           </div>

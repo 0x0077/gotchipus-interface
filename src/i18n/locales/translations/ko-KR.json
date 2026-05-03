@@ -242,7 +242,6 @@
       "badgeLive": "네이티브",
       "badgePrompt": "프롬프트",
       "cmd": {
-        "summon": "ID로 Gotchi 소환",
         "balance": "지갑 잔액 표시",
         "swap": "토큰 교환",
         "send": "토큰 전송",

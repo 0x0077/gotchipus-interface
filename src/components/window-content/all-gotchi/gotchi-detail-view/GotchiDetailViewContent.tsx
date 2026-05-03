@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { GotchiMetadata } from "@/lib/types";
 import { useAllEquipLayers } from "@/hooks/useAllEquipLayers";
+import { useWindowMode } from "@/hooks/useWindowMode";
 import {
   useGotchiNavigation,
   useBackgroundSvg,
@@ -38,6 +39,7 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
   onNavigate,
 }) => {
   const { t } = useTranslation();
+  const { isMobile } = useWindowMode();
   const isSummoned = metadata.status !== 0;
   const wearableIndices = useAllEquipLayers(metadata.all_equip);
 
@@ -84,12 +86,18 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
           </div>
         </div>
 
-        <div className="flex-1 flex overflow-hidden">
+        <div className={`flex-1 overflow-hidden ${isMobile ? 'flex flex-col overflow-y-auto scrollbar-hide' : 'flex'}`}>
           {!isSummoned ? (
             <UnsummonedView tokenId={metadata.token_id} />
           ) : (
             <>
-              <div className="w-2/5 border-r-2 border-[#808080] bg-win98-face p-6 flex flex-col">
+              <div
+                className={
+                  isMobile
+                    ? 'border-b-2 border-[#808080] bg-win98-face p-3 flex flex-col items-center'
+                    : 'w-2/5 border-r-2 border-[#808080] bg-win98-face p-6 flex flex-col'
+                }
+              >
                 <NavigationBar
                   hasPrev={hasPrev}
                   hasNext={hasNext}
@@ -105,7 +113,7 @@ export const GotchiDetailViewContent: React.FC<GotchiDetailViewContentProps> = (
                 />
               </div>
 
-              <div className="w-3/5 overflow-auto scrollbar-hide p-6 bg-win98-face">
+              <div className={isMobile ? 'p-3 bg-win98-face' : 'w-3/5 overflow-auto scrollbar-hide p-6 bg-win98-face'}>
                 <DetailHeader
                   metadata={metadata}
                   calculatedLevel={calculatedLevel}

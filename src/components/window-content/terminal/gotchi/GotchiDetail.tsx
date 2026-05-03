@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useStores } from "@stores/context";
 import { observer } from "mobx-react-lite";
 import useSWR from "swr";
+import { useWindowMode } from "@/hooks/useWindowMode";
 import { Win98Loading } from "@/components/ui/win98-loading";
 import { GotchipusInfo, EquipWearableType } from "@/lib/types";
 import { useContractRead, useContractWrite, useChiRegistryRead } from "@/hooks/useContract";
@@ -69,13 +70,14 @@ const EQUIPMENT_SLOTS_DEF = [
 ] as const;
 
 const RARITY_NAMES: Record<number, string> = { 0: "Common", 1: "Rare", 2: "Epic", 3: "Legendary" };
-// On-chain faction encoding (LibFaction.sol — uint8 0/1/2 only).
 const FACTION_NAMES: Record<number, string> = { 0: "COMBAT", 1: "DEFENSE", 2: "TECHNOLOGY" };
 
 export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHooks, sessionStatus, sessionDaysLeft, sessionInfo, pharosBalance: pharosBalanceProp, portfolioData: portfolioProp }: GotchiDetailProps) => {
   const { t } = useTranslation();
   const { walletStore, wearableStore } = useStores();
   const { toast } = useToast();
+  const { width } = useWindowMode();
+  const compact = width !== null && width < 720;
 
   const [pusName, setPusName] = useState("");
   const [showRenameModal, setShowRenameModal] = useState(false);
@@ -106,8 +108,11 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const tokenInfo = detailsData?.info;
   const tbaAddress = detailsData?.tokenBoundAccount || "";
 
+  // Same-origin proxy — see `src/app/api/tokens/portfolio/route.ts`. The
+  // actual portfolio backend lives under server-only `PORTFOLIO_BACKEND_URL`
+  // and is intentionally not exposed in the client bundle.
   const portfolioApiUrl = !portfolioProp && tbaAddress
-    ? `http://120.26.254.74:3000/api/portfolio/${tbaAddress}`
+    ? `/api/tokens/portfolio?tba=${tbaAddress}`
     : null;
   const { data: portfolioRaw, error: portfolioError } = useSWR<{ code: number; data: PortfolioApiData }>(
     portfolioApiUrl,
@@ -154,7 +159,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const tokenIds = Array.from({ length: TOTAL_WEARABLES }, (_, i) => i);
   const { data: balancesData } = useContractRead("wearableBalanceOfBatch", [owners, tokenIds]);
 
-  // TBA asset queries: wearable NFTs owned by TBA + chi name NFTs
   const tbaOwners = useMemo(() => tbaAddress ? new Array(TOTAL_WEARABLES).fill(tbaAddress) : [], [tbaAddress]);
   const tbaTokenIds = useMemo(() => Array.from({ length: TOTAL_WEARABLES }, (_, i) => i), []);
   const { data: tbaWearableBalances } = useContractRead(
@@ -162,7 +166,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
     [tbaOwners, tbaTokenIds],
     { enabled: !!tbaAddress }
   );
-  // On-chain attributes for ShareCard
   const { data: rawAttrs } = useContractRead("getAttributes", [tokenId], { enabled: !!tokenId });
   const onChainAttrs = useMemo(() => {
     if (!rawAttrs) return undefined;
@@ -311,7 +314,6 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   }, [totalValue, totalUsd, portfolio, prosPrice]);
 
   const nftCollections: NftCollection[] = useMemo(() => {
-    // If portfolio API succeeded and has nft data, use it
     if (portfolio && !portfolioError) {
       const grouped: Record<string, { type: string; name: string; items: NftCollection["items"] }> = {};
       for (const nft of portfolio.nfts) {
@@ -373,49 +375,58 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-win98-face">
       {/* Header Bar */}
-      <div className="px-2 py-1.5 flex items-center gap-2 border-b border-[#808080] bg-win98-face">
+      <div className={`py-1.5 flex items-center border-b border-[#808080] bg-win98-face min-w-0 ${compact ? 'px-1.5 gap-1' : 'px-2 gap-2'}`}>
         <button
           onClick={onBack}
-          className="px-4 py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1"
+          aria-label={t('common.back')}
+          className={`py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1 flex-shrink-0 ${compact ? 'px-2' : 'px-4'}`}
         >
           <RightIcon width={14} height={14} color="#000000" style={{ transform: "rotate(180deg)" }} />
-          {t('common.back')}
+          {!compact && t('common.back')}
         </button>
         <div className="flex-1" />
-        <div className="px-2 py-0.5 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-win98-face text-xs">
-          {t('taskbar.viewing', { name: `Gotchipus`, id: tokenId })}
-        </div>
+        {!compact && (
+          <div className="px-2 py-0.5 border border-t-[#404040] border-l-[#404040] border-r-white border-b-white shadow-[inset_1px_1px_0_#808080] bg-win98-face text-xs">
+            {t('taskbar.viewing', { name: `Gotchipus`, id: tokenId })}
+          </div>
+        )}
         <button
           onClick={() => setShowAvatarModal(true)}
-          className="px-3 py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1"
+          aria-label={t('terminal.detail.downloadPfp')}
+          title={t('terminal.detail.downloadPfp')}
+          className={`py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1 flex-shrink-0 ${compact ? 'px-2' : 'px-3'}`}
         >
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="1" y="1" width="14" height="14" rx="1" stroke="#000" strokeWidth="1.5"/>
             <circle cx="5.5" cy="5.5" r="1.5" fill="#000"/>
             <path d="M1 12l4-4 2 2 3-3 5 5" stroke="#000" strokeWidth="1.2" fill="none"/>
           </svg>
-          {t('terminal.detail.downloadPfp')}
+          {!compact && t('terminal.detail.downloadPfp')}
         </button>
         <button
           onClick={() => setShowShareCard(true)}
-          className="px-3 py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1"
+          aria-label={t('terminal.detail.shareCard', { defaultValue: 'Share Card' })}
+          title={t('terminal.detail.shareCard', { defaultValue: 'Share Card' })}
+          className={`py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1 flex-shrink-0 ${compact ? 'px-2' : 'px-3'}`}
         >
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 1v9M5 4l3-3 3 3M2 10v4h12v-4" stroke="#000" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          {t('terminal.detail.shareCard', { defaultValue: 'Share Card' })}
+          {!compact && t('terminal.detail.shareCard', { defaultValue: 'Share Card' })}
         </button>
         {detailsData?.tokenName && (
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button
               onClick={() => setShowChiMenu(prev => !prev)}
-              className="px-3 py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1"
+              aria-label="chi.page"
+              title="chi.page"
+              className={`py-1 text-xs border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face text-[#000000] hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center gap-1 ${compact ? 'px-2' : 'px-3'}`}
             >
               <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="8" cy="8" r="6.5" stroke="#000" strokeWidth="1.5"/>
                 <path d="M2 8h12M8 2c-2 2-2 4-2 6s0 4 2 6M8 2c2 2 2 4 2 6s0 4-2 6" stroke="#000" strokeWidth="1" fill="none"/>
               </svg>
-              chi.page ▾
+              {compact ? '▾' : 'chi.page ▾'}
             </button>
             {showChiMenu && (
               <>
@@ -464,8 +475,7 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-1.5">
-        {/* Row 1: Gotchi Preview | Wallet Overview */}
-        <div className="grid grid-cols-[1fr_1.5fr] items-start gap-1.5 mb-1.5">
+        <div className={`grid items-start gap-1.5 mb-1.5 ${compact ? 'grid-cols-1' : 'grid-cols-[1fr_1.5fr]'}`}>
           <div className="self-start">
           <GotchiPreviewPanel
             tokenId={tokenId}
@@ -501,8 +511,7 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
           />
         </div>
 
-        {/* Row 2: Attributes | Genes + TBA */}
-        <div className="grid grid-cols-2 gap-1.5 mb-1.5">
+        <div className={`grid gap-1.5 mb-1.5 ${compact ? 'grid-cols-1' : 'grid-cols-2'}`}>
           <AttributesPanel tokenId={tokenId} />
           <GenesTbaPanel
             tbaAddress={tbaAddress}

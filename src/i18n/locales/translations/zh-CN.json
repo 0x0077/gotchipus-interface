@@ -242,7 +242,6 @@
       "badgeLive": "原生",
       "badgePrompt": "提示",
       "cmd": {
-        "summon": "通过 ID 召唤 Gotchi",
         "balance": "显示钱包余额",
         "swap": "代币互换",
         "send": "转账代币",

@@ -31,13 +31,10 @@ export interface Turn {
   assistants: Message[];
 }
 
-/** Slash-command palette entry. `/summon` and `/clear` are live (agent/local
- *  handling); the rest pass through as natural-language prompts. */
 export interface SlashCommand {
   cmd: string;
   descKey: string;
   hint: string;
-  /** True = backend recognizes the literal command; false = passed through as text. */
   native: boolean;
 }
 
@@ -58,7 +55,6 @@ export interface ChatTabProps {
   sessionDaysLeft?: number;
   sessionExpiresAt?: number;
   onOpenSetup?: () => void;
-  // Conversation management
   conversations?: Conversation[];
   currentConversationId?: string;
   onSwitchConversation?: (id: string) => void;

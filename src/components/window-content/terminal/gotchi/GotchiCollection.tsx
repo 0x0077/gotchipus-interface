@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useStores } from "@stores/context";
 import { observer } from "mobx-react-lite";
 import useSWR from "swr";
+import { useWindowMode } from "@/hooks/useWindowMode";
 import { Win98Loading } from "@/components/ui/win98-loading";
 import Image from "next/image";
 import { GotchipusInfo } from "@/lib/types";
@@ -88,8 +89,6 @@ const RARITY_COLORS: Record<number, string> = {
   3: "text-[#ff9900]",     // Legendary - Orange
 };
 
-// On-chain faction encoding (LibFaction.sol — uint8 0/1/2 only).
-// Source-of-truth helpers in `@/lib/faction`.
 const FACTION_NAMES: Record<number, string> = {
   0: "COMBAT",
   1: "DEFENSE",
@@ -111,6 +110,8 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
   const { t } = useTranslation();
   const { walletStore } = useStores();
   const walletAddress = walletStore.address;
+  const { width } = useWindowMode();
+  const compact = width !== null && width < 720;
 
   const listApiUrl = walletAddress ? `/api/tokens/gotchipus?owner=${walletAddress}&includeGotchipusInfo=true` : null;
 
@@ -196,22 +197,24 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
         <PharosBanner pharosIds={pharosIds} isLoading={pharosLoading} onSummon={onSummonPharos} />
 
         <div className="bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-inner overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-[40px_2fr_1fr_100px_100px_90px_80px_60px] px-2 py-2 border-b-2 border-[#808080] bg-win98-face text-[#000000] text-xs uppercase tracking-wide font-bold">
-            <span></span>
-            <span>{t('terminal.collection.headers.gotchipus')}</span>
-            <span>{t('terminal.collection.headers.levelXp')}</span>
-            <span className="text-center">{t('terminal.collection.headers.faction')}</span>
-            <span className="text-center">{t('terminal.collection.headers.rarity')}</span>
-            <span className="text-center">{t('terminal.collection.headers.session')}</span>
-            <span className="text-right">{t('terminal.collection.headers.phrs')}</span>
-            <span className="text-center">{t('terminal.collection.headers.id')}</span>
-          </div>
+          {/* Table Header — desktop only; compact rows label themselves
+              inline via the stacked layout below. */}
+          {!compact && (
+            <div className="grid grid-cols-[40px_2fr_1fr_100px_100px_90px_80px_60px] px-2 py-2 border-b-2 border-[#808080] bg-win98-face text-[#000000] text-xs uppercase tracking-wide font-bold">
+              <span></span>
+              <span>{t('terminal.collection.headers.gotchipus')}</span>
+              <span>{t('terminal.collection.headers.levelXp')}</span>
+              <span className="text-center">{t('terminal.collection.headers.faction')}</span>
+              <span className="text-center">{t('terminal.collection.headers.rarity')}</span>
+              <span className="text-center">{t('terminal.collection.headers.session')}</span>
+              <span className="text-right">{t('terminal.collection.headers.phrs')}</span>
+              <span className="text-center">{t('terminal.collection.headers.id')}</span>
+            </div>
+          )}
 
-          {/* Table Rows */}
+          {/* Rows */}
           {ids.slice(0, 10).map((id, i) => {
             const info = gotchipusInfo[i];
-            // Use the same fields as DashboardTab
             const currentExp = Number(info?.currentExp || 0);
             const level = Math.floor(currentExp / 100);
             const expInLevel = Math.floor(((currentExp / 100) % 1) * 100);
@@ -222,6 +225,52 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
             const primaryFaction = info?.faction ?? -1;
             const factionName = FACTION_NAMES[primaryFaction] ?? "—";
             const factionColor = FACTION_COLORS[primaryFaction] ?? "bg-[#808080] text-white";
+            const sessionLabel =
+              sessionMap[id]?.status === "active"
+                ? <span className="text-xs font-bold text-[#008000]">{t('terminal.collection.sessionActive')}</span>
+                : sessionMap[id]?.status === "expired"
+                ? <span className="text-xs font-bold text-[#cc6600]">{t('terminal.collection.sessionExpired')}</span>
+                : <span className="text-xs text-[#808080]">{t('terminal.collection.sessionNone')}</span>
+            const phrsLabel = pharosBalances?.[id] !== undefined
+              ? parseFloat(pharosBalances[id]).toFixed(4)
+              : "--"
+
+            if (compact) {
+              return (
+                <div
+                  key={id}
+                  onClick={() => onSelectGotchi(id)}
+                  className="px-2 py-2 border-b border-[#808080] cursor-pointer hover:bg-[#e6e2da] transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <GotchiThumbnail id={id} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-2 min-w-0">
+                        <span className="text-xs font-bold text-[#000080] truncate">{name}</span>
+                        <span className="text-[10px] text-[#808080] font-mono ml-auto flex-shrink-0">#{id}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="font-mono text-[10px] font-bold text-[#000080] flex-shrink-0">Lv.{level}</span>
+                        <div className="w-[120px] h-2.5 win98-bezel-inset shadow-win98-inner bg-white p-px flex-shrink-0">
+                          <div className="h-full bg-[#000080]" style={{ width: `${expInLevel}%` }} />
+                        </div>
+                        <span className="text-[10px] text-[#808080] flex-shrink-0">{expInLevel}/100</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                    <span className={`text-[10px] px-1.5 py-0.5 border border-[#808080] shadow-win98-outer font-bold ${factionColor}`}>
+                      {factionName}
+                    </span>
+                    <span className={`text-[10px] font-bold ${rarityColor}`}>{rarityName}</span>
+                    <span className="ml-auto flex items-center gap-2">
+                      {sessionLabel}
+                      <span className="text-[10px] text-[#000080] font-bold font-mono">{phrsLabel}</span>
+                    </span>
+                  </div>
+                </div>
+              )
+            }
 
             return (
               <div
@@ -252,21 +301,9 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
                   <span className={`text-xs font-bold ${rarityColor}`}>{rarityName}</span>
                 </div>
                 <div className="text-center">
-                  {sessionMap[id]?.status === "active" && (
-                    <span className="text-xs font-bold text-[#008000]">{t('terminal.collection.sessionActive')}</span>
-                  )}
-                  {sessionMap[id]?.status === "expired" && (
-                    <span className="text-xs font-bold text-[#cc6600]">{t('terminal.collection.sessionExpired')}</span>
-                  )}
-                  {(!sessionMap[id] || sessionMap[id]?.status === "none") && (
-                    <span className="text-xs text-[#808080]">{t('terminal.collection.sessionNone')}</span>
-                  )}
+                  {sessionLabel}
                 </div>
-                <div className="text-right text-xs text-[#000080] font-bold font-mono">
-                  {pharosBalances?.[id] !== undefined
-                    ? parseFloat(pharosBalances[id]).toFixed(4)
-                    : "--"}
-                </div>
+                <div className="text-right text-xs text-[#000080] font-bold font-mono">{phrsLabel}</div>
                 <div className="text-center text-xs text-[#808080] font-bold">#{id}</div>
               </div>
             );

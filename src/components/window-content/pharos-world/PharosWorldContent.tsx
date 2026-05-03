@@ -5,7 +5,21 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStores } from '@stores/context'
 import { useAuth } from '@/hooks/useAuth'
 import { useOwnerGotchis } from '@/hooks/useOwnerGotchis'
+import { useWindowMode } from '@/hooks/useWindowMode'
 import usePharosStream, { PharosToolResultEvent } from '@/hooks/usePharosStream'
+
+// Internal layout breakpoint for the PharosWorld window. Driven by the
+// host window's measured width (provided via WindowModeProvider) NOT the
+// browser viewport — the same desktop user dragging the window narrow
+// triggers the same compact layout as a phone with a 600px viewport.
+// 720px is the smallest width at which the 280px sidebar + a comfortable
+// 400px chat column both fit; below that we collapse the sidebar.
+const COMPACT_W = 720
+
+function useIsCompact(): boolean {
+  const { width } = useWindowMode()
+  return width !== null && width < COMPACT_W
+}
 import {
   PharosFaction,
   PharosMessage,
@@ -563,16 +577,36 @@ function PlaceFocusCard({
 }
 
 function Breadcrumb({
-  roomName, lastActiveAt,
-}: { roomName: string; lastActiveAt: string | null }) {
+  roomName, lastActiveAt, sceneOpen, onToggleScene,
+}: {
+  roomName: string
+  lastActiveAt: string | null
+  sceneOpen?: boolean
+  onToggleScene?: () => void
+}) {
   const clock = lastActiveAt ? new Date(lastActiveAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'
+  const compact = useIsCompact()
   return (
-    <div className="bg-[#C0C0C0] border border-[#808080] border-b-white border-r-white shadow-[inset_-1px_-1px_0_#FFFFFF,inset_1px_1px_0_#808080] flex items-center gap-2 px-2 py-1">
-      <span className="text-[11px] text-black">
+    <div className="bg-[#C0C0C0] border border-[#808080] border-b-white border-r-white shadow-[inset_-1px_-1px_0_#FFFFFF,inset_1px_1px_0_#808080] flex items-center gap-2 px-2 py-1 min-w-0">
+      <span className="text-[11px] text-black truncate min-w-0">
         Scene: <strong>{roomName}</strong>
       </span>
-      <span className="text-[11px] text-[#444]">· Pharos Town · {clock}</span>
+      {!compact && (
+        <span className="text-[11px] text-[#444] truncate">· Pharos Town · {clock}</span>
+      )}
       <div className="flex-1" />
+      {/* Sidebar replacement on compact — exposes the focus card as an
+          accordion above the chat. Only shown when the parent has wired
+          up the toggle (i.e., we're in compact playing mode). */}
+      {onToggleScene && (
+        <button
+          onClick={onToggleScene}
+          aria-pressed={sceneOpen}
+          className="text-[11px] text-black px-2 py-[1px] border border-[#808080] border-b-white border-r-white bg-[#C0C0C0] hover:bg-[#b8b8b8] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white flex-shrink-0"
+        >
+          {sceneOpen ? '▴ scene' : '▾ scene'}
+        </button>
+      )}
     </div>
   )
 }
@@ -585,22 +619,32 @@ function StatusBar({
   npcStates: PharosNpcState[]
   onSwitchGotchi?: () => void
 }) {
+  const compact = useIsCompact()
   const engaged = npcStates.filter((s) => s.rapport > 0).length
   const room = session?.location ?? '--'
   const dot = isStreaming ? <Dot tone="warn" /> : <Dot />
-  const cells = [
-    { node: <>{dot} {isStreaming ? 'Streaming' : 'Connected'}</>, w: 'min-w-[120px]' },
-    { node: <>HP <strong className="ml-1">{session?.hp ?? 100}/100</strong></>, w: 'min-w-[90px]' },
-    { node: <>Rapport <strong className="ml-1">{engaged} npc{engaged === 1 ? '' : 's'}</strong></>, w: 'min-w-[120px]' },
-    { node: <>Room <span className="ml-1 text-[#444]">{ROOM_NAMES[room] ?? room}</span></>, w: 'flex-1' },
-    { node: <>{session?.last_active_at ? new Date(session.last_active_at).toLocaleTimeString() : '--:--:--'}</>, w: 'min-w-[100px] justify-center' },
-  ]
+  // On compact we drop the long "Streaming/Connected" label, the redundant
+  // Room cell (already in the breadcrumb), and the trailing clock — leaves
+  // room for HP + Rapport + switch on a single line at ~360px.
+  const cells = compact
+    ? [
+        { node: <>{dot}</>, w: 'flex-shrink-0' },
+        { node: <>HP <strong className="ml-1">{session?.hp ?? 100}/100</strong></>, w: 'min-w-[78px]' },
+        { node: <>Rapport <strong className="ml-1">{engaged}</strong></>, w: 'min-w-[78px] flex-1' },
+      ]
+    : [
+        { node: <>{dot} {isStreaming ? 'Streaming' : 'Connected'}</>, w: 'min-w-[120px]' },
+        { node: <>HP <strong className="ml-1">{session?.hp ?? 100}/100</strong></>, w: 'min-w-[90px]' },
+        { node: <>Rapport <strong className="ml-1">{engaged} npc{engaged === 1 ? '' : 's'}</strong></>, w: 'min-w-[120px]' },
+        { node: <>Room <span className="ml-1 text-[#444]">{ROOM_NAMES[room] ?? room}</span></>, w: 'flex-1' },
+        { node: <>{session?.last_active_at ? new Date(session.last_active_at).toLocaleTimeString() : '--:--:--'}</>, w: 'min-w-[100px] justify-center' },
+      ]
   return (
-    <div className="bg-[#C0C0C0] flex gap-0.5 p-0.5 flex-shrink-0">
+    <div className="bg-[#C0C0C0] flex gap-0.5 p-0.5 flex-shrink-0 min-w-0">
       {cells.map((c, i) => (
         <div
           key={i}
-          className={`${c.w} flex items-center gap-1.5 border border-[#808080] border-b-white border-r-white px-2 py-0.5 text-[11px] text-black`}
+          className={`${c.w} flex items-center gap-1.5 border border-[#808080] border-b-white border-r-white px-2 py-0.5 text-[11px] text-black overflow-hidden whitespace-nowrap`}
         >
           {c.node}
         </div>
@@ -609,9 +653,9 @@ function StatusBar({
         <button
           onClick={onSwitchGotchi}
           title="Switch to a different Gotchipus (this one keeps its world; you can return any time)"
-          className={`${MONO} text-[10px] tracking-wider px-2 py-0.5 border border-[#808080] border-b-white border-r-white bg-[#C0C0C0] hover:bg-[#b8b8b8] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white text-black`}
+          className={`${MONO} text-[10px] tracking-wider px-2 py-0.5 border border-[#808080] border-b-white border-r-white bg-[#C0C0C0] hover:bg-[#b8b8b8] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white text-black flex-shrink-0`}
         >
-          ⇄ switch
+          {compact ? '⇄' : '⇄ switch'}
         </button>
       )}
     </div>
@@ -620,6 +664,7 @@ function StatusBar({
 
 
 function ModeTabs({ mode, setMode }: { mode: DisplayMode; setMode: (m: DisplayMode) => void }) {
+  const compact = useIsCompact()
   const modes: DisplayMode[] = ['DO', 'SAY', 'STORY', 'LOOK']
   return (
     <div className="flex bg-[#2A2A2A] border-t border-[#3A3A3A]">
@@ -629,7 +674,7 @@ function ModeTabs({ mode, setMode }: { mode: DisplayMode; setMode: (m: DisplayMo
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`${MONO} border-r border-[#3A3A3A] px-3.5 py-1.5 text-[11px] tracking-widest cursor-pointer ${
+            className={`${MONO} border-r border-[#3A3A3A] py-1.5 text-[11px] tracking-widest cursor-pointer ${compact ? 'px-2.5' : 'px-3.5'} ${
               active
                 ? 'bg-[#2A6E33] text-[#E8E8E8] border-b-2 border-b-[#4ADE5C]'
                 : 'text-[#7A7A7A] hover:text-[#E8E8E8]'
@@ -704,13 +749,14 @@ function BootstrapForm({
   const canStart = !!selectedGotchi && !isStarting
   const isResuming = !!(selectedGotchi && loadStoredConversationId(address, selectedGotchi))
 
+  const compact = useIsCompact()
   return (
-    <div className="flex-1 flex items-center justify-center text-[#E8E8E8] p-6 overflow-y-auto">
-      <div className="max-w-[480px] w-full bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#3A3A3A] shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6">
+    <div className={`flex-1 flex items-center justify-center text-[#E8E8E8] overflow-y-auto ${compact ? 'p-3' : 'p-6'}`}>
+      <div className={`max-w-[480px] w-full bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#3A3A3A] shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${compact ? 'p-4' : 'p-6'}`}>
         <div className={`${MONO} text-[#FFCB6B] text-sm tracking-widest mb-1`}>PHAROS TOWN</div>
-        <h2 className="text-xl text-[#E8E8E8] mb-6 leading-snug">
+        <h2 className={`text-[#E8E8E8] leading-snug ${compact ? 'text-lg mb-4' : 'text-xl mb-6'}`}>
           The lighthouse waits.<br />
-          <span className="text-[#B5B5B5] text-base italic">Choose your guardian.</span>
+          <span className={`text-[#B5B5B5] italic ${compact ? 'text-sm' : 'text-base'}`}>Choose your guardian.</span>
         </h2>
 
         <GroupBox title="select.gotchi" className="mb-4">
@@ -817,6 +863,14 @@ function PlayingView({
   const [mode, setMode] = useState<DisplayMode>('DO')
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const compact = useIsCompact()
+  // Sidebar collapse state for compact layout. We let the user keep it
+  // open or closed independently; default closed on compact (chat-first)
+  // and irrelevant on standard (always-shown left rail). Re-syncs on
+  // mode flip so switching from compact→standard never leaves a hidden
+  // panel pinned shut, and back-flipping keeps the user's last choice.
+  const [sceneOpen, setSceneOpen] = useState(false)
+  useEffect(() => { if (!compact) setSceneOpen(false) }, [compact])
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -837,29 +891,46 @@ function PlayingView({
   const focusNpcState = focusNpcId ? npcStates.find((s) => s.npc_id === focusNpcId) : undefined
   const roomName = currentRoom?.name ?? ROOM_NAMES[session.location] ?? session.location
 
+  const focusCard = focusNpcId
+    ? <NpcFocusCard
+        npcId={focusNpcId}
+        npcState={focusNpcState}
+        room={currentRoom}
+        onMove={onQuickMove}
+        disabled={isMoving}
+      />
+    : (currentRoom && <PlaceFocusCard
+        room={currentRoom}
+        onMove={onQuickMove}
+        disabled={isMoving}
+      />)
+
   return (
     <div className="w-full h-full flex flex-col bg-[#C0C0C0] overflow-hidden">
-      <Breadcrumb roomName={roomName} lastActiveAt={session.last_active_at} />
+      <Breadcrumb
+        roomName={roomName}
+        lastActiveAt={session.last_active_at}
+        sceneOpen={compact ? sceneOpen : undefined}
+        onToggleScene={compact ? () => setSceneOpen((s) => !s) : undefined}
+      />
 
       <div className="flex-1 flex bg-[#1F1F1F] text-[#E8E8E8] min-h-0">
-        <aside className="w-[280px] flex-shrink-0 p-3.5 flex flex-col gap-3.5 border-r border-[#3A3A3A] overflow-y-auto scrollbar-hide">
-          {focusNpcId
-            ? <NpcFocusCard
-                npcId={focusNpcId}
-                npcState={focusNpcState}
-                room={currentRoom}
-                onMove={onQuickMove}
-                disabled={isMoving}
-              />
-            : (currentRoom && <PlaceFocusCard
-                room={currentRoom}
-                onMove={onQuickMove}
-                disabled={isMoving}
-              />)}
-        </aside>
+        {!compact && (
+          <aside className="w-[280px] flex-shrink-0 p-3.5 flex flex-col gap-3.5 border-r border-[#3A3A3A] overflow-y-auto scrollbar-hide">
+            {focusCard}
+          </aside>
+        )}
 
         <main className="flex-1 flex flex-col min-w-0">
-          <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-hide px-5 py-4 flex flex-col gap-2.5">
+          {compact && sceneOpen && (
+            // Capped at 45% of the host height so the chat / input always
+            // remain reachable; inner scroll handles overflow when the focus
+            // card grows (long awarded list, multi-exit room).
+            <div className="border-b border-[#3A3A3A] p-2.5 max-h-[45%] overflow-y-auto scrollbar-hide bg-[#1A1A1A]">
+              {focusCard}
+            </div>
+          )}
+          <div ref={scrollRef} className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-2.5 ${compact ? 'px-3 py-3' : 'px-5 py-4'}`}>
             {messages.map((m, idx) => {
               const t = formatTime(m.created_at)
               if (m.role === 'player') return <PlayerRow key={m.id ?? idx} time={t} mode={m.mode ?? null} content={m.content} />
@@ -893,7 +964,7 @@ function PlayingView({
 
           <ModeTabs mode={mode} setMode={setMode} />
 
-          <div className="flex items-start gap-2.5 bg-[#2A2A2A] border-t border-[#3A3A3A] px-3 py-2">
+          <div className={`flex items-start gap-2.5 bg-[#2A2A2A] border-t border-[#3A3A3A] py-2 ${compact ? 'px-2' : 'px-3'}`}>
             <span className={`${MONO} text-[#4ADE5C] text-sm pt-[2px] flex-shrink-0`}>&gt; {mode.toLowerCase()}_</span>
             <textarea
               ref={inputRef}
@@ -914,7 +985,21 @@ function PlayingView({
               rows={1}
               className={`${MONO} flex-1 bg-transparent border-none outline-none text-[#E8E8E8] text-sm leading-snug placeholder:text-[#7A7A7A] disabled:opacity-50 resize-none overflow-y-auto py-[2px] scrollbar-hide`}
             />
-            <span className={`${MONO} text-[#7A7A7A] text-[10px] tracking-wider pt-[4px] flex-shrink-0`}>⏎ SEND · ⇧⏎ NEWLINE</span>
+            {compact ? (
+              // On phone the on-screen keyboard already shows a Return key,
+              // and the desktop hint is just visual noise — replace with a
+              // tappable Send button so single-tap submission works.
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isStreaming || !input.trim()}
+                className={`${MONO} text-[#4ADE5C] text-[11px] tracking-wider pt-[3px] flex-shrink-0 disabled:opacity-30`}
+              >
+                SEND ⏎
+              </button>
+            ) : (
+              <span className={`${MONO} text-[#7A7A7A] text-[10px] tracking-wider pt-[4px] flex-shrink-0`}>⏎ SEND · ⇧⏎ NEWLINE</span>
+            )}
           </div>
         </main>
       </div>

@@ -224,8 +224,16 @@ export default function Home() {
     }
   }, [handleOpenWindow])
 
+  // `min-w-[800px]` reserves a fixed virtual desktop on real desktop so
+  // the OS98 windows + taskbar always have a predictable canvas. On
+  // mobile we drop the floor and clamp horizontal overflow at the page
+  // root — any oversized child (a draggable window snapped past the
+  // viewport edge, a content tile that didn't quite shrink) won't be
+  // able to widen `<main>` past 100vw. Without `overflow-x-hidden` the
+  // taskbar's `w-full` measures to the scrollable width, not the visible
+  // one, which is what pushed Connect/Price/Block off-screen earlier.
   return (
-    <main className={`w-full min-w-[800px] min-h-screen overflow-auto bg-uni-bg-01 relative ${isMobile ? 'touch-manipulation' : ''}`}>
+    <main className={`w-full min-h-screen overflow-y-auto bg-uni-bg-01 relative ${isMobile ? 'touch-manipulation overflow-x-hidden' : 'overflow-x-auto min-w-[800px]'}`}>
       <Desktop
         onOpenWindow={handleOpenWindow}
         activeWindow={windowRouter.activeWindow}

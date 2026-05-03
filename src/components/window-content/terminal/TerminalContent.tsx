@@ -8,6 +8,8 @@ import { CustomConnectButton } from "@/components/footer/CustomConnectButton";
 import { useWindowMode } from "@/hooks/useWindowMode";
 import useSWR from "swr";
 import { TerminalSidebar } from "./sidebar/TerminalSidebar";
+import CloseIcon from "@assets/icons/CloseIcon";
+import ChatIcon from "@assets/icons/ChatIcon";
 import { GotchiCollection, SessionMap } from "./gotchi/GotchiCollection";
 import { GotchiDetail } from "./gotchi/GotchiDetail";
 import type { PortfolioApiData } from "./gotchi/GotchiDetailHelpers";
@@ -62,18 +64,15 @@ interface ListApiData {
   tbaAddresses: string[];
 }
 
-// Batch balance API types
 interface BatchBalanceEntry {
   address: string;
   token_address: string;
   token_id: number;
-  balance: string;  // raw on-chain value; divide by 10^decimals for display
+  balance: string;  
   updated_block: number;
   updated_tx_hash: string;
   created_at: string;
   updated_at: string;
-  // Enriched from `tokens` table (backend join). May be absent for tokens
-  // missing in the tokens table — frontend falls back to KNOWN_TOKENS.
   token_type?: string;       // "ERC20" | "ERC721" | "ERC1155"
   name?: string;
   symbol?: string;
@@ -106,10 +105,6 @@ function batchEntriesToPortfolio(entries: BatchBalanceEntry[]): PortfolioApiData
 
   for (const entry of entries) {
     const addr = entry.token_address.toLowerCase();
-    // KNOWN_TOKENS has richer fields (logo, per-project overrides), so use it
-    // when present; otherwise fall through to backend-enriched metadata from
-    // the `tokens` table so USDC-class (6-decimal) tokens no longer get
-    // misrendered as if they were 18-decimal.
     const known = KNOWN_TOKENS[addr];
     const isNftFromBackend = entry.token_type === "ERC721" || entry.token_type === "ERC1155";
     const isNft = known ? known.type === "nft"
@@ -173,9 +168,9 @@ const TerminalContent = observer(() => {
   const { isMobile } = useWindowMode();
   const { activeWindow } = useWindowRouter();
   const { login, isAuthenticated, isLoggingIn } = useAuth();
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  useEffect(() => { if (!isMobile) setMobileChatOpen(false); }, [isMobile]);
 
-  // Trigger JWT login when terminal opens and wallet is connected
-  // Only depend on wallet address (not login ref) to avoid re-triggering on every render
   useEffect(() => {
     if (walletStore.isConnected && !isAuthenticated && !isLoggingIn) {
       login();
@@ -471,8 +466,6 @@ const TerminalContent = observer(() => {
           { id: "system", role: "system", content: "You are Gotchipus, an AI assistant." },
         ];
         for (const m of res.data) {
-          // Restore toolSteps from attachments.tool_steps (persisted by
-          // chat_engine on stream end and on user-cancelled stops).
           const persisted = m.attachments?.tool_steps;
           const toolSteps = Array.isArray(persisted)
             ? persisted.map(s => ({
@@ -624,9 +617,6 @@ const TerminalContent = observer(() => {
     setMessages((prev) => [...prev, errorMessage]);
   }, []);
 
-  /** Prefer the real error text from backend SSE `error` events / thrown
-   *  exceptions. Fall back to the generic i18n network-error string only when
-   *  no usable message is present. */
   const formatChatError = useCallback((error: unknown): string => {
     if (error instanceof Error && error.message) return error.message;
     if (typeof error === "string" && error) return error;
@@ -808,21 +798,6 @@ const TerminalContent = observer(() => {
   const handleSendChat = (msg?: string) => {
     const text = msg || chatInput;
     if (!text.trim()) return;
-
-    // Intercept /summon command
-    const summonMatch = text.trim().match(/^\/summon\s+#?(\d+)$/i);
-    if (summonMatch) {
-      const id = summonMatch[1];
-      setChatInput("");
-      if (pharosIds?.includes(id)) {
-        setSummonPharosId(id);
-      } else {
-        const available = pharosIds?.map(p => `#${p}`).join(", ") || "none";
-        addErrorMessage(`Pharos #${id} not found in your collection. Available: ${available}`);
-      }
-      return;
-    }
-
     sendMessage(text);
   };
 
@@ -980,10 +955,6 @@ const TerminalContent = observer(() => {
     }
   }, [regenerateChatEvent, syncLastUserMsgId, createTextHandler, updateMessage, addErrorMessage, formatChatError, walletStore.userId, walletStore.address, currentChatId, selectedGotchi, sessionMap, listData, tbaAddressList]);
 
-  /** Edit a past user message: truncate local state from that row onward, kick
-   *  off the `/api/chat/edit` SSE stream with the new content. Backend deletes
-   *  the old row + all subsequent messages, then re-inserts at the same index
-   *  and streams a fresh assistant reply. */
   const handleEditChat = useCallback(async (messageId: string, newContent: string) => {
     if (isProcessingRef.current) return;
     if (!walletStore.userId) {
@@ -1153,40 +1124,75 @@ const TerminalContent = observer(() => {
         )}
       </div>
 
-      {/* Right: Sidebar - 1/3 width */}
-      {!isMobile && (
-        <TerminalSidebar
-          messages={messages}
-          chatInput={chatInput}
-          setChatInput={setChatInput}
-          handleSendChat={handleSendChat}
-          chatEndRef={chatEndRef}
-          status={status}
-          selectedGotchi={selectedGotchi}
-          selectedGotchiName={selectedGotchiName}
-          selectedTbaAddress={selectedTbaAddress || null}
-          sessionStatus={selectedGotchi ? (sessionMap[selectedGotchi]?.status ?? null) : null}
-          sessionDaysLeft={selectedGotchi ? (sessionMap[selectedGotchi]?.daysLeft ?? 0) : 0}
-          sessionExpiresAt={selectedGotchi ? (sessionMap[selectedGotchi]?.expiresAt ?? 0) : 0}
-          onOpenSetup={selectedGotchi ? () => setShowSetupWizard(true) : undefined}
-          onRegenerate={handleRegenerate}
-          onEditMessage={handleEditChat}
-          onStopStreaming={handleStopStreaming}
-          currentConversationName={currentConversationName}
-          conversations={conversations}
-          currentConversationId={currentChatId}
-          onSwitchConversation={handleSwitchConversation}
-          onNewConversation={handleNewConversation}
-          onRenameConversation={handleRenameConversation}
-          onDeleteConversation={handleDeleteConversation}
-          onStarConversation={handleStarConversation}
-          onPinConversation={handlePinConversation}
-          onDeleteMessage={handleDeleteMessage}
-          onLoadConversations={loadConversations}
-          onLoadMoreConversations={loadMoreConversations}
-          hasMoreConversations={hasMoreConversations}
-          isLoadingConversations={isLoadingConversations}
-        />
+      {(!isMobile || mobileChatOpen) && (
+        <div
+          className={
+            isMobile
+              ? "absolute inset-0 z-40 bg-win98-face flex flex-col"
+              : "flex-[1] flex flex-col flex-shrink-0 overflow-hidden"
+          }
+        >
+          {isMobile && (
+            <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between flex-shrink-0">
+              <span className="text-xs font-bold">{t('terminal.sidebar.chat')}</span>
+              <button
+                type="button"
+                onClick={() => setMobileChatOpen(false)}
+                aria-label="Close chat"
+                className="w-6 h-6 flex items-center justify-center bg-win98-face border border-t-white border-l-white border-r-[#404040] border-b-[#404040] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white"
+              >
+                <CloseIcon width={10} height={10} color="#000000" />
+              </button>
+            </div>
+          )}
+
+          <div className="flex-1 flex min-h-0">
+            <TerminalSidebar
+              messages={messages}
+              chatInput={chatInput}
+              setChatInput={setChatInput}
+              handleSendChat={handleSendChat}
+              chatEndRef={chatEndRef}
+              status={status}
+              selectedGotchi={selectedGotchi}
+              selectedGotchiName={selectedGotchiName}
+              selectedTbaAddress={selectedTbaAddress || null}
+              sessionStatus={selectedGotchi ? (sessionMap[selectedGotchi]?.status ?? null) : null}
+              sessionDaysLeft={selectedGotchi ? (sessionMap[selectedGotchi]?.daysLeft ?? 0) : 0}
+              sessionExpiresAt={selectedGotchi ? (sessionMap[selectedGotchi]?.expiresAt ?? 0) : 0}
+              onOpenSetup={selectedGotchi ? () => setShowSetupWizard(true) : undefined}
+              onRegenerate={handleRegenerate}
+              onEditMessage={handleEditChat}
+              onStopStreaming={handleStopStreaming}
+              currentConversationName={currentConversationName}
+              conversations={conversations}
+              currentConversationId={currentChatId}
+              onSwitchConversation={handleSwitchConversation}
+              onNewConversation={handleNewConversation}
+              onRenameConversation={handleRenameConversation}
+              onDeleteConversation={handleDeleteConversation}
+              onStarConversation={handleStarConversation}
+              onPinConversation={handlePinConversation}
+              onDeleteMessage={handleDeleteMessage}
+              onLoadConversations={loadConversations}
+              onLoadMoreConversations={loadMoreConversations}
+              hasMoreConversations={hasMoreConversations}
+              isLoadingConversations={isLoadingConversations}
+            />
+          </div>
+        </div>
+      )}
+
+      {isMobile && !mobileChatOpen && (
+        <button
+          type="button"
+          onClick={() => setMobileChatOpen(true)}
+          aria-label={t('terminal.sidebar.chat')}
+          className="absolute bottom-3 right-3 z-30 px-3 py-2 bg-[#000080] text-white text-xs font-bold border-2 border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[2px_2px_0_#000] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-none flex items-center gap-1.5"
+        >
+          <ChatIcon width={12} height={12} color="#FFFFFF" />
+          <span>{t('terminal.sidebar.chat')}</span>
+        </button>
       )}
 
       {/* Session Setup Wizard modal */}
