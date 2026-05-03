@@ -2,11 +2,12 @@
 
 import { useWalletStore } from "@/hooks/useWalletStore";
 import { useEffect } from "react";
-import { getToken } from "@/lib/auth";
+import { getToken, removeToken } from "@/lib/auth";
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   const { isConnected, walletStore } = useWalletStore();
 
+  // Restore cached token and userId on reconnect
   useEffect(() => {
     if (!isConnected || !walletStore.address) return;
 
@@ -19,9 +20,11 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isConnected, walletStore]);
 
+  // Clean up on disconnect
   useEffect(() => {
     if (!isConnected) {
-      walletStore.setDisconnected();
+      removeToken();
+      walletStore.reset();
     }
   }, [isConnected, walletStore]);
 

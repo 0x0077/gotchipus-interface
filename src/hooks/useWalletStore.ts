@@ -28,7 +28,7 @@ export const useWalletStore = () => {
         chainId,
       });
     } else {
-      walletStore.setDisconnected();
+      walletStore.reset();
     }
   }, [
     address,
@@ -42,7 +42,7 @@ export const useWalletStore = () => {
   useEffect(() => {
     const checkConnection = () => {
       if (!isConnected) {
-        walletStore.setDisconnected();
+        walletStore.reset();
       }
     };
 

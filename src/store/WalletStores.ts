@@ -94,18 +94,6 @@ class WalletStore {
     });
   }
 
-  setDisconnected() {
-    runInAction(() => {
-      this.address = undefined;
-      this.isConnected = false;
-      this.isConnecting = false;
-      this.balance = undefined;
-      this.symbol = undefined;
-      this.chainId = undefined;
-      this.resetTokenBoundAccounts();
-    });
-  }
-
   get shortAddress() {
     if (!this.address) return '';
     return `${this.address.slice(0, 6)}...${this.address.slice(-4)}`;
