@@ -8,6 +8,7 @@ import Taskbar from "@/components/home/Taskbar"
 import Window from "@/components/home/Window"
 import NFTSalesPopup from "@/components/home/NFTSalesPopup"
 import AnnounceModal from "@/components/home/AnnounceModal"
+import MigrationModal from "@/components/home/MigrationModal"
 import type { WindowType } from "@/lib/types"
 import type { JSX } from "react/jsx-runtime"
 import { WINDOW_SIZE } from "@/lib/constant"
@@ -20,7 +21,6 @@ export default function Home() {
   const isMobile = useResponsive()
   const windowRouter = useWindowRouter()
 
-  // Refs mirror current values so callbacks below can stay referentially stable (empty deps)
   const routerRef = useRef(windowRouter)
   routerRef.current = windowRouter
   const openWindowsRef = useRef(openWindows)
@@ -224,14 +224,6 @@ export default function Home() {
     }
   }, [handleOpenWindow])
 
-  // `min-w-[800px]` reserves a fixed virtual desktop on real desktop so
-  // the OS98 windows + taskbar always have a predictable canvas. On
-  // mobile we drop the floor and clamp horizontal overflow at the page
-  // root — any oversized child (a draggable window snapped past the
-  // viewport edge, a content tile that didn't quite shrink) won't be
-  // able to widen `<main>` past 100vw. Without `overflow-x-hidden` the
-  // taskbar's `w-full` measures to the scrollable width, not the visible
-  // one, which is what pushed Connect/Price/Block off-screen earlier.
   return (
     <main className={`w-full min-h-screen overflow-y-auto bg-uni-bg-01 relative ${isMobile ? 'touch-manipulation overflow-x-hidden' : 'overflow-x-auto min-w-[800px]'}`}>
       <Desktop
@@ -269,6 +261,7 @@ export default function Home() {
 
       {/* <NFTSalesPopup /> */}
       <AnnounceModal />
+      <MigrationModal />
     </main>
   )
 }

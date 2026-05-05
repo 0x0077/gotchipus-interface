@@ -23,37 +23,37 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
     id: "mint",
     title: "Mint",
     icon: "/desktop/mint.png",
-    enabled: true,
+    enabled: false,
   },
   {
     id: "wearable",
     title: "Wearable Marketplace",
     icon: "/desktop/wearable.png",
-    enabled: true,
+    enabled: false,
   },
   {
     id: "all-gotchi",
     title: "All Gotchi",
     icon: "/desktop/all-gotchi.png",
-    enabled: true,
+    enabled: false,
   },
   {
     id: "hook-rank",
     title: "HookRank",
     icon: "/desktop/hook.png",
-    enabled: true,
+    enabled: false,
   },
   {
     id: "terminal",
     title: "Gotchipus Terminal",
     icon: "/desktop/dashboard.png",
-    enabled: true,
+    enabled: false,
   },
   {
     id: "pharos-world",
     title: "PharosWorld",
     icon: "/desktop/pharos.png",
-    enabled: true,
+    enabled: false,
   },
 ]
 

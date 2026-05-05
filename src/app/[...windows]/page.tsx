@@ -6,6 +6,7 @@ import useResponsive from "@/hooks/useResponsive"
 import Desktop from "@/components/home/Desktop"
 import Taskbar from "@/components/home/Taskbar"
 import Window from "@/components/home/Window"
+import MigrationModal from "@/components/home/MigrationModal"
 import type { WindowType } from "@/lib/types"
 import type { JSX } from "react/jsx-runtime"
 import { WINDOW_SIZE } from "@/lib/constant"
@@ -223,6 +224,8 @@ export default function CatchAllPage() {
         onRestoreWindow={handleRestoreWindow}
         isMobile={isMobile}
       />
+
+      <MigrationModal />
     </main>
   )
 }
