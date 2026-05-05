@@ -38,6 +38,9 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   metadataBase: new URL('https://gotchipus.com'),
+  other: {
+    'base:app_id': '69f9a1b342d4fe010f1c294d',
+  },
 };
 
 export const viewport: Viewport = {
