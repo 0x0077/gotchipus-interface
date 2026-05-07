@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, isAddress } from 'viem';
 import { PUS_ABI, PUS_ADDRESS } from '@/src/app/blockchain';
-import { pharos } from '@/src/app/blockchain/config';
+import { chain } from '@/src/app/blockchain/config';
 import { GotchipusInfo } from '@/lib/types';
 
 export const runtime = 'edge';
@@ -87,7 +87,7 @@ function flattenGotchipusInfo(info: any): GotchipusInfo {
   };
 }
 
-const publicClient = createPublicClient({ chain: pharos, transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!) });
+const publicClient = createPublicClient({ chain, transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!) });
 
 export async function GET(request: NextRequest) {
   try {

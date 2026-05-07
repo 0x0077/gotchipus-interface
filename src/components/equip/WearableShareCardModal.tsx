@@ -415,7 +415,7 @@ function renderWearableCard(
 
   ctx.font = `500 ${15 * s}px ${ft}`;
   ctx.fillStyle = theme.bottomTextColor; ctx.textBaseline = "middle";
-  ctx.fillText("Pharos Network", 56 * s, bottomY + 8 * s);
+  ctx.fillText("Base Network", 56 * s, bottomY + 8 * s);
 
   ctx.font = `600 ${16 * s}px ${ft}`;
   ctx.fillStyle = theme.bottomTextColor;

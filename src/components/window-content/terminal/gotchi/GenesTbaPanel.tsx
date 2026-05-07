@@ -34,7 +34,7 @@ export function GenesTbaPanel({ tbaAddress, copiedField, onCopy }: GenesTbaPanel
           )}
           {tbaAddress && (
             <Link
-              href={`https://pharosscan.xyz/address/${tbaAddress}`}
+              href={`https://basescan.org/address/${tbaAddress}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-1.5 py-1 border border-t-white border-l-white border-r-[#404040] border-b-[#404040] shadow-[1px_1px_0_#000] bg-win98-face hover:bg-[#b0b0b0] active:border-t-[#404040] active:border-l-[#404040] active:border-r-white active:border-b-white active:shadow-[inset_1px_1px_0_#808080] flex items-center flex-shrink-0"

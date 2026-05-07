@@ -1,15 +1,15 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { useCallback, useRef } from 'react';
 import { getAuthHeaders } from '@/lib/auth';
-import type { PharosMode } from '@/lib/pharos-world-api';
+import type { LighthavenMode } from '@/lib/lighthaven-api';
 
-export interface PharosToolResultEvent {
+export interface LighthavenToolResultEvent {
   tool: string;
   success: boolean;
   data: Record<string, unknown> & { outcome?: string };
 }
 
-export interface PharosStreamCallbacks {
+export interface LighthavenStreamCallbacks {
   onMessageStart?: (messageId: string) => void;
   onTextDelta?: (text: string) => void;
   /** Server tells us to replace the entire streaming text buffer (not append).
@@ -17,14 +17,14 @@ export interface PharosStreamCallbacks {
    *  emits `text_replace` with empty string, then round 2 streams the real
    *  narration via `text_delta`. */
   onTextReplace?: (text: string) => void;
-  onToolResult?: (ev: PharosToolResultEvent) => void;
+  onToolResult?: (ev: LighthavenToolResultEvent) => void;
   onError?: (err: unknown) => void;
   onComplete?: (stopReason?: string) => void;
 }
 
-export interface PharosStreamPayload {
+export interface LighthavenStreamPayload {
   conversation_id: string;
-  mode: PharosMode;
+  mode: LighthavenMode;
   text: string;
 }
 
@@ -78,11 +78,11 @@ function makeThinkFilter() {
   };
 }
 
-const usePharosStream = () => {
+const useLighthavenStream = () => {
   const abortRef = useRef<AbortController | null>(null);
 
   const stream = useCallback(
-    async (payload: PharosStreamPayload, callbacks?: PharosStreamCallbacks) => {
+    async (payload: LighthavenStreamPayload, callbacks?: LighthavenStreamCallbacks) => {
       abortRef.current?.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;
@@ -90,7 +90,7 @@ const usePharosStream = () => {
       let hasError = false;
       const filterThink = makeThinkFilter();
 
-      // `onComplete` is non-idempotent in PharosWorldContent (it appends a
+      // `onComplete` is non-idempotent in LighthavenContent (it appends a
       // narrator message). The fetchEventSource lifecycle naturally calls
       // it twice — once on the `message_stop` SSE event, once again in the
       // `finally` block when the Promise resolves — so we gate it locally.
@@ -104,7 +104,7 @@ const usePharosStream = () => {
       };
 
       try {
-        await fetchEventSource('/api/pharos-world/stream', {
+        await fetchEventSource('/api/lighthaven/stream', {
           signal: ctrl.signal,
           method: 'POST',
           headers: {
@@ -189,4 +189,4 @@ const usePharosStream = () => {
   return { stream, stop };
 };
 
-export default usePharosStream;
+export default useLighthavenStream;

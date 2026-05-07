@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { compactStyles } from "./styles";
 import { groupMessagesIntoTurns } from "./helpers";
 import { SLASH_COMMAND_DEFS } from "./commands";
@@ -11,6 +12,9 @@ import { WelcomeCard } from "./WelcomeCard";
 import { UserRow } from "./UserRow";
 import { AssistantRow } from "./AssistantRow";
 import { InputArea } from "./InputArea";
+
+// Flip to false once the agent is wired up to Base.
+const AGENT_DISABLED = true;
 
 // Re-export the message types so the rest of the app can import from
 // `./ChatTab` transparently (unchanged from pre-split).
@@ -45,6 +49,7 @@ export function ChatTab({
   hasMoreConversations,
   isLoadingConversations,
 }: ChatTabProps) {
+  const { t } = useTranslation();
   const [showHistory, setShowHistory] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -158,6 +163,7 @@ export function ChatTab({
 
   /* Submit gate — intercepts local-only commands (currently just `/clear`). */
   const submitChat = useCallback(() => {
+    if (AGENT_DISABLED) return;
     const trimmed = chatInput.trim();
     if (!trimmed || isStreaming || !selectedGotchi) return;
     if (trimmed === "/clear") {
@@ -210,11 +216,30 @@ export function ChatTab({
         ref={scrollRef}
         className="flex-1 overflow-auto px-2 pt-[3px] pb-3 bg-[#d4d0c8] border-x border-[#808080] shadow-win98-inner w98s"
       >
-        <WelcomeCard
-          selectedGotchi={selectedGotchi}
-          selectedGotchiName={selectedGotchiName}
-          onHintClick={fillToInput}
-        />
+        {AGENT_DISABLED && (
+          <div
+            role="status"
+            className="mt-2 mb-2 px-3 py-2 bg-[#fffbe6] border border-[#c8a200] shadow-win98-outer text-[#5a4500]"
+          >
+            <div className="text-[12px] font-bold mb-1">
+              {t("terminal.chat.integrationTitle", "Agent integration in progress")}
+            </div>
+            <div className="text-[11px] leading-snug">
+              {t(
+                "terminal.chat.integrationBody",
+                "Gotchi Assistant is being wired up to Base. The agent is temporarily unavailable — Activity, Hooks, and onchain actions still work as usual.",
+              )}
+            </div>
+          </div>
+        )}
+
+        {!AGENT_DISABLED && (
+          <WelcomeCard
+            selectedGotchi={selectedGotchi}
+            selectedGotchiName={selectedGotchiName}
+            onHintClick={fillToInput}
+          />
+        )}
 
         {turns.map((turn, ti) => (
           <div key={turn.id}>
@@ -257,6 +282,7 @@ export function ChatTab({
         onResize={resize}
         isStreaming={isStreaming}
         selectedGotchi={selectedGotchi}
+        agentDisabled={AGENT_DISABLED}
         slashOpen={slashOpen}
         slashFiltered={slashFiltered}
         slashIdx={slashIdx}

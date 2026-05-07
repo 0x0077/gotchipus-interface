@@ -1,12 +1,12 @@
 import { defineChain } from "viem";
 
-export const pharos = defineChain({
-  id: 1672,
-  name: 'Pharos Mainnet',
+export const chain = defineChain({
+  id: 8453,
+  name: 'Base Mainnet',
   nativeCurrency: {
     decimals: 18,
-    name: 'Pharos',
-    symbol: 'PROS',
+    name: 'Ether',
+    symbol: 'ETH',
   },
   rpcUrls: {
     default: {
@@ -17,9 +17,7 @@ export const pharos = defineChain({
     },
   },
   blockExplorers: {
-    default: { name: 'PharosScan', url: 'https://pharosscan.xyz' },
+    default: { name: 'Basescan', url: 'https://mainnet.basescan.org' },
   },
-  contracts: {
-    multicall3: undefined,
-  },
+  testnet: true,
 });

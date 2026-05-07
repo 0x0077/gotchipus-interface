@@ -3,8 +3,6 @@
 import { Tokens } from "@/lib/constant";
 
 const FALLBACK_LOGOS_BY_SYMBOL: Record<string, string> = {
-  PROS: "/tokens/pros.png",
-  WPROS: "/tokens/pros.png",
   ETH: "/tokens/eth.png",
   WETH: "/tokens/eth.png",
   USDC: "/tokens/usdc.png",

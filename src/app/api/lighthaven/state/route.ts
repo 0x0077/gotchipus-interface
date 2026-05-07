@@ -5,7 +5,7 @@ export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const upstream = `${getBackendUrl()}/pharos-world/state`;
+  const upstream = `${getBackendUrl()}/lighthaven/state`;
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const auth = req.headers.get('authorization');

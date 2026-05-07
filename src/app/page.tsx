@@ -8,7 +8,6 @@ import Taskbar from "@/components/home/Taskbar"
 import Window from "@/components/home/Window"
 import NFTSalesPopup from "@/components/home/NFTSalesPopup"
 import AnnounceModal from "@/components/home/AnnounceModal"
-import MigrationModal from "@/components/home/MigrationModal"
 import type { WindowType } from "@/lib/types"
 import type { JSX } from "react/jsx-runtime"
 import { WINDOW_SIZE } from "@/lib/constant"
@@ -261,7 +260,6 @@ export default function Home() {
 
       {/* <NFTSalesPopup /> */}
       <AnnounceModal />
-      <MigrationModal />
     </main>
   )
 }

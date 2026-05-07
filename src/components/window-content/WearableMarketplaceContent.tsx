@@ -30,7 +30,7 @@ import {
   GotchiPreviewPanel,
 } from "@/components/equip"
 
-const PHAROS_TX_URL = 'https://pharosscan.xyz/tx/';
+const EXPLORER_TX_URL = 'https://basescan.org/tx/';
 const MAX_ACTIVITY_RECORDS = 30;
 
 interface ActivityRecord {
@@ -559,7 +559,7 @@ const WearableMarketplaceContent = observer(() => {
                 return (
                   <Link
                     key={a.id}
-                    href={`${PHAROS_TX_URL}${a.hash}`}
+                    href={`${EXPLORER_TX_URL}${a.hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-[3px] py-[2px] border-b border-win98-highlight text-[9px] flex items-center gap-[3px] leading-[1.3] no-underline text-inherit cursor-pointer hover:bg-[#d0d0ff]"

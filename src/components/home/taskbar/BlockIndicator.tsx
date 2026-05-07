@@ -11,7 +11,7 @@ interface BlockIndicatorProps {
 function BlockIndicatorBase({ variant }: BlockIndicatorProps) {
   const { data: blockNumber } = useBlockNumber({
     watch: true,
-    chainId: 1672,
+    chainId: 8453,
   })
 
   if (variant === "mobile") {
@@ -30,7 +30,7 @@ function BlockIndicatorBase({ variant }: BlockIndicatorProps) {
         <div className="absolute top-0 left-0 w-2 h-2 mr-2 rounded-full animate-ping bg-[#008000]" />
       </div>
       <Link
-        href={`https://pharosscan.xyz/block/${blockNumber?.toString()}`}
+        href={`https://basescan.org/block/${blockNumber?.toString()}`}
         target="_blank"
         rel="noopener noreferrer"
         className="text-base text-[#000080] hover:underline break-all"

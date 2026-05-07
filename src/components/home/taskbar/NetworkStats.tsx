@@ -33,7 +33,7 @@ function NetworkStatsBase({ variant }: NetworkStatsProps) {
   if (variant === "mobile") {
     return (
       <div className="bg-win98-face border border-[#808080] shadow-win98-inner h-8 px-2 flex items-center gap-1">
-        <Image src="/tokens/pros.png" alt="PROS" width={11} height={11} className="flex-shrink-0" />
+        <Image src="/tokens/eth.png" alt="ETH" width={11} height={11} className="flex-shrink-0" />
         <span className="text-[10px] text-[#000080] font-courier">${formatPrice(stats?.price)}</span>
       </div>
     )
@@ -43,9 +43,9 @@ function NetworkStatsBase({ variant }: NetworkStatsProps) {
     <div className="flex items-center gap-2">
       <div
         className="flex items-center bg-win98-face h-10 px-2.5 border border-[#808080] shadow-win98-inner gap-1.5"
-        title="PROS price"
+        title="ETH price"
       >
-        <Image src="/tokens/pros.png" alt="PROS" width={13} height={13} className="flex-shrink-0" />
+        <Image src="/tokens/eth.png" alt="ETH" width={13} height={13} className="flex-shrink-0" />
         <span className="text-xs text-[#000080] font-courier">${formatPrice(stats?.price)}</span>
       </div>
 

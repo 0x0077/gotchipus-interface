@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, isAddress } from 'viem';
 import { PUS_ABI, PUS_ADDRESS } from '@/src/app/blockchain';
 import { GotchipusInfo } from '@/lib/types';
-import { pharos } from '@/src/app/blockchain/config';
+import { chain } from '@/src/app/blockchain/config';
 
 interface GotchipusResponse {
   balance: string;
@@ -15,14 +15,14 @@ interface GotchipusResponse {
 export const runtime = 'edge';
 
 const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
-const publicClient = createPublicClient({ chain: pharos, transport: http(rpcUrl) });
+const publicClient = createPublicClient({ chain, transport: http(rpcUrl) });
 
 async function getGotchipusTokens(ownerAddress: string, includeGotchipusInfo: boolean): Promise<GotchipusResponse> {
   try {
     const tokenIds = await publicClient.readContract({
       address: PUS_ADDRESS,
       abi: PUS_ABI,
-      functionName: 'getGotchiOrPharosInfo',
+      functionName: 'getGotchiOrBeaconInfo',
       args: [ownerAddress, 1]
     }) as bigint[];
 

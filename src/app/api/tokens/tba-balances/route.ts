@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, formatEther, isAddress } from 'viem';
-import { pharos } from '@/src/app/blockchain/config';
+import { chain } from '@/src/app/blockchain/config';
 
 export const runtime = 'edge';
 
 const publicClient = createPublicClient({
-  chain: pharos,
+  chain,
   transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!),
 });
 

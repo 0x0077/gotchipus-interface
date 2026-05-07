@@ -57,7 +57,7 @@ export default function NFTSalesPopup() {
           <div className="flex justify-between mb-1">
             <span className="text-black">{t('mint.price')}</span>
             <span className="font-bold text-[#008000]">
-              {salesData.price} PROS
+              {salesData.price} ETH
             </span>
           </div>
         </div>

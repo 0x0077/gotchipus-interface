@@ -12,7 +12,7 @@ import { useSvgLayers } from "@/hooks/useSvgLayers";
 import EnhancedGotchiSvg from "@/components/gotchiSvg/EnhancedGotchiSvg";
 import { getWearablePngUrl } from "@/src/utils/wearableMapping";
 import { dispatchWindowOpenEvent } from "@/lib/windowEvents";
-import { PharosBanner } from "../pharos/PharosBanner";
+import { BeaconBanner } from "../beacon/BeaconBanner";
 
 type SessionStatus = "none" | "active" | "expired" | null;
 
@@ -27,10 +27,10 @@ export type SessionMap = Record<string, GotchiSessionInfo>;
 interface GotchiCollectionProps {
   onSelectGotchi: (tokenId: string) => void;
   sessionMap: SessionMap;
-  pharosBalances?: Record<string, string>;
-  pharosIds: string[];
-  pharosLoading: boolean;
-  onSummonPharos: (id: string) => void;
+  nativeBalances?: Record<string, string>;
+  beaconIds: string[];
+  beaconLoading: boolean;
+  onSummonBeacon: (id: string) => void;
 }
 
 interface GotchiThumbnailProps {
@@ -106,7 +106,7 @@ const fetcher = (url: string) => fetch(url).then(res => {
   return res.json();
 });
 
-export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBalances, pharosIds, pharosLoading, onSummonPharos }: GotchiCollectionProps) => {
+export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, nativeBalances, beaconIds, beaconLoading, onSummonBeacon }: GotchiCollectionProps) => {
   const { t } = useTranslation();
   const { walletStore } = useStores();
   const walletAddress = walletStore.address;
@@ -134,10 +134,10 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
   if (ids.length === 0) {
     return (
       <div className="flex-1 flex flex-col bg-win98-face p-2">
-        <PharosBanner pharosIds={pharosIds} isLoading={pharosLoading} onSummon={onSummonPharos} />
+        <BeaconBanner beaconIds={beaconIds} isLoading={beaconLoading} onSummon={onSummonBeacon} />
         <div className="flex-1 flex items-center justify-center relative">
-          {/* Arrow guide pointing to PharosBanner */}
-          {pharosIds.length > 0 && (
+          {/* Arrow guide pointing to BeaconBanner */}
+          {beaconIds.length > 0 && (
             <div className="absolute top-2 left-4 flex flex-col items-start pointer-events-none select-none">
               <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="mb-1">
                 {/* Arrowhead pointing up-left */}
@@ -158,9 +158,9 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
             <p className="text-sm text-[#000080] mb-6">
               {t('terminal.collection.noGotchi')}
             </p>
-            {pharosIds.length > 0 ? (
+            {beaconIds.length > 0 ? (
               <button
-                onClick={() => onSummonPharos(pharosIds[0])}
+                onClick={() => onSummonBeacon(beaconIds[0])}
                 className="win98-bezel shadow-[2px_2px_0_#000] bg-[#000080] text-white px-6 py-2 text-sm font-bold hover:bg-[#1a3a99] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 {t('terminal.collection.goToSummon')}
@@ -194,7 +194,7 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
             </span>
           </div>
         </div>
-        <PharosBanner pharosIds={pharosIds} isLoading={pharosLoading} onSummon={onSummonPharos} />
+        <BeaconBanner beaconIds={beaconIds} isLoading={beaconLoading} onSummon={onSummonBeacon} />
 
         <div className="bg-[#d4d0c8] border-2 border-[#808080] shadow-win98-inner overflow-hidden">
           {/* Table Header — desktop only; compact rows label themselves
@@ -231,8 +231,8 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
                 : sessionMap[id]?.status === "expired"
                 ? <span className="text-xs font-bold text-[#cc6600]">{t('terminal.collection.sessionExpired')}</span>
                 : <span className="text-xs text-[#808080]">{t('terminal.collection.sessionNone')}</span>
-            const phrsLabel = pharosBalances?.[id] !== undefined
-              ? parseFloat(pharosBalances[id]).toFixed(4)
+            const nativeLabel = nativeBalances?.[id] !== undefined
+              ? parseFloat(nativeBalances[id]).toFixed(4)
               : "--"
 
             if (compact) {
@@ -265,7 +265,7 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
                     <span className={`text-[10px] font-bold ${rarityColor}`}>{rarityName}</span>
                     <span className="ml-auto flex items-center gap-2">
                       {sessionLabel}
-                      <span className="text-[10px] text-[#000080] font-bold font-mono">{phrsLabel}</span>
+                      <span className="text-[10px] text-[#000080] font-bold font-mono">{nativeLabel}</span>
                     </span>
                   </div>
                 </div>
@@ -303,7 +303,7 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, pharosBa
                 <div className="text-center">
                   {sessionLabel}
                 </div>
-                <div className="text-right text-xs text-[#000080] font-bold font-mono">{phrsLabel}</div>
+                <div className="text-right text-xs text-[#000080] font-bold font-mono">{nativeLabel}</div>
                 <div className="text-center text-xs text-[#808080] font-bold">#{id}</div>
               </div>
             );

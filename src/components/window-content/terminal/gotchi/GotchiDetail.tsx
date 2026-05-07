@@ -11,7 +11,7 @@ import { GotchipusInfo, EquipWearableType } from "@/lib/types";
 import { useContractRead, useContractWrite, useChiRegistryRead } from "@/hooks/useContract";
 import { useToast } from "@/hooks/use-toast";
 import { useSvgLayers } from "@/hooks/useSvgLayers";
-import { getPharosNativeBalance } from "@/src/utils/contractHepler";
+import { getNativeBalance } from "@/src/utils/contractHepler";
 import { ethers } from "ethers";
 import { TOKEN_ID_TO_IMAGE, KEY_TO_CONFIG_MAP, WearableCategoryKey, TOTAL_WEARABLES } from "@/components/gotchiSvg/config";
 import { BG_BYTES32, BODY_BYTES32, EYE_BYTES32, HAND_BYTES32, HEAD_BYTES32, CLOTHES_BYTES32, FACE_BYTES32, MOUTH_BYTES32 } from "@/lib/constant";
@@ -37,7 +37,7 @@ interface GotchiDetailProps {
   sessionStatus?: "none" | "active" | "expired" | null;
   sessionDaysLeft?: number;
   sessionInfo?: SessionWizardData | null;
-  pharosBalance?: string;
+  nativeBalance?: string;
   portfolioData?: PortfolioApiData;
 }
 
@@ -72,7 +72,7 @@ const EQUIPMENT_SLOTS_DEF = [
 const RARITY_NAMES: Record<number, string> = { 0: "Common", 1: "Rare", 2: "Epic", 3: "Legendary" };
 const FACTION_NAMES: Record<number, string> = { 0: "COMBAT", 1: "DEFENSE", 2: "TECHNOLOGY" };
 
-export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHooks, sessionStatus, sessionDaysLeft, sessionInfo, pharosBalance: pharosBalanceProp, portfolioData: portfolioProp }: GotchiDetailProps) => {
+export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHooks, sessionStatus, sessionDaysLeft, sessionInfo, nativeBalance: nativeBalanceProp, portfolioData: portfolioProp }: GotchiDetailProps) => {
   const { t } = useTranslation();
   const { walletStore, wearableStore } = useStores();
   const { toast } = useToast();
@@ -85,7 +85,7 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const [isUnequipping, setIsUnequipping] = useState(false);
   const [unequippingSlotIndex, setUnequippingSlotIndex] = useState<number | null>(null);
   const [wearableBalances, setWearableBalances] = useState<string[]>([]);
-  const [pharosBalance, setPharosBalance] = useState<string>("0");
+  const [nativeBalance, setNativeBalance] = useState<string>("0");
   const [copiedField, setCopiedField] = useState<"tba" | null>(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
@@ -218,21 +218,21 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   }, [petError, toast]);
 
   useEffect(() => {
-    if (pharosBalanceProp !== undefined) {
-      setPharosBalance(pharosBalanceProp);
+    if (nativeBalanceProp !== undefined) {
+      setNativeBalance(nativeBalanceProp);
       return;
     }
     if (!tbaAddress) return;
     const fetchBalance = async () => {
       try {
-        const balance = await getPharosNativeBalance(tbaAddress);
-        setPharosBalance(ethers.formatEther(balance));
+        const balance = await getNativeBalance(tbaAddress);
+        setNativeBalance(ethers.formatEther(balance));
       } catch {
-        setPharosBalance("0");
+        setNativeBalance("0");
       }
     };
     fetchBalance();
-  }, [tbaAddress, pharosBalanceProp]);
+  }, [tbaAddress, nativeBalanceProp]);
 
   const handlePet = () => {
     petWrite("pet", [tokenId]);
@@ -269,26 +269,26 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const rarityName = RARITY_NAMES[tokenInfo?.rarity ?? 0] || "Common";
   const factionName = FACTION_NAMES[tokenInfo?.faction ?? -1] ?? "—";
 
-  const totalValue = parseFloat(pharosBalance) || 0;
+  const totalValue = parseFloat(nativeBalance) || 0;
   const totalUsd = totalValue * prosPrice;
 
   const tokens: TokenItem[] = useMemo(() => {
     const list: TokenItem[] = [
-      { symbol: "PROS", name: "Pharos Token", amount: totalValue, usd: totalUsd, logoPath: "/tokens/pros.png", contract: "native" },
+      { symbol: "ETH", name: "Ether", amount: totalValue, usd: totalUsd, logoPath: "/tokens/eth.png", contract: "native" },
     ];
     const STABLES = new Set(["USDC", "USDT", "DAI", "USDE"]);
     if (portfolio?.erc20s) {
       for (const erc20 of portfolio.erc20s) {
         const sym = (erc20.symbol || "").toUpperCase();
-        const isNativePros =
-          sym === "PROS" ||
+        const isNative =
+          sym === "ETH" ||
           erc20.token_address?.toLowerCase() === "0x0000000000000000000000000000000000000000";
-        if (isNativePros) continue;
+        if (isNative) continue;
 
         const amount = parseFloat(erc20.balance) || 0;
         let usd = erc20.usd || 0;
         if (STABLES.has(sym)) usd = amount;
-        else if (sym === "WPROS") usd = amount * prosPrice;
+        else if (sym === "WETH") usd = amount * prosPrice;
 
         list.push({
           symbol: erc20.symbol,
@@ -446,7 +446,7 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
                   <button
                     onClick={() => {
                       const url = `https://${detailsData!.tokenName}.chi.page`;
-                      const text = `Check out my Gotchipus profile on {.chi}!\n\n${url}\n\n #NFT #Web3 #Pharos`;
+                      const text = `Check out my Gotchipus profile on {.chi}!\n\n${url}\n\n #NFT #Web3 #Base`;
                       window.open(`https://x.com/intent/post?text=${encodeURIComponent(text)}`, '_blank');
                       setShowChiMenu(false);
                     }}

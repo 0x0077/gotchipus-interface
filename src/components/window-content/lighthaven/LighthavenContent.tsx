@@ -6,9 +6,9 @@ import { useStores } from '@stores/context'
 import { useAuth } from '@/hooks/useAuth'
 import { useOwnerGotchis } from '@/hooks/useOwnerGotchis'
 import { useWindowMode } from '@/hooks/useWindowMode'
-import usePharosStream, { PharosToolResultEvent } from '@/hooks/usePharosStream'
+import useLighthavenStream, { LighthavenToolResultEvent } from '@/hooks/useLighthavenStream'
 
-// Internal layout breakpoint for the PharosWorld window. Driven by the
+// Internal layout breakpoint for the Lighthaven window. Driven by the
 // host window's measured width (provided via WindowModeProvider) NOT the
 // browser viewport — the same desktop user dragging the window narrow
 // triggers the same compact layout as a phone with a 600px viewport.
@@ -21,19 +21,19 @@ function useIsCompact(): boolean {
   return width !== null && width < COMPACT_W
 }
 import {
-  PharosFaction,
-  PharosMessage,
-  PharosMode,
-  PharosNpcState,
-  PharosRoomBrief,
-  PharosSession,
+  LighthavenFaction,
+  LighthavenMessage,
+  LighthavenMode,
+  LighthavenNpcState,
+  LighthavenRoomBrief,
+  LighthavenSession,
   clearStoredConversationId,
-  fetchPharosState,
+  fetchLighthavenState,
   loadStoredConversationId,
-  movePharosTo,
+  movePlayerTo,
   saveStoredConversationId,
-  startPharosSession,
-} from '@/lib/pharos-world-api'
+  startLighthavenSession,
+} from '@/lib/lighthaven-api'
 import { factionKey } from '@/lib/faction'
 
 
@@ -51,16 +51,16 @@ const ROOM_NAMES: Record<string, string> = {
   wharf_plaza: 'Wharf Plaza',
   the_tide_forge: 'The Tide Forge',
   salt_and_spire: 'Salt and Spire',
-  lighthouse_chapel: 'The Pharos Chapel',
+  lighthouse_chapel: 'The Old Pharos Chapel',
   anchor_tavern: 'The Anchor Tavern',
 }
 
 const ROOM_GIF: Record<string, string> = {
-  wharf_plaza:        '/desktop/pharosworld/wharf-plaza.gif',
-  the_tide_forge:     '/desktop/pharosworld/the-tide-forge.gif',
-  salt_and_spire:     '/desktop/pharosworld/salt-and-spire.gif',
-  lighthouse_chapel:  '/desktop/pharosworld/lighthouse-chapel.gif',
-  anchor_tavern:      '/desktop/pharosworld/anchor-tavern.gif',
+  wharf_plaza:        '/desktop/lighthaven/wharf-plaza.gif',
+  the_tide_forge:     '/desktop/lighthaven/the-tide-forge.gif',
+  salt_and_spire:     '/desktop/lighthaven/salt-and-spire.gif',
+  lighthouse_chapel:  '/desktop/lighthaven/lighthouse-chapel.gif',
+  anchor_tavern:      '/desktop/lighthaven/anchor-tavern.gif',
 }
 
 const NPC_DISPLAY: Record<
@@ -73,19 +73,19 @@ const NPC_DISPLAY: Record<
   halyard: { name: 'Brother Halyard', title: 'Custodian of the Chapel',    faction: 'defense',    element: 'light',    color: '#FFCB6B', home_room: 'lighthouse_chapel'  },
 }
 
-const FACTION_COPY: Record<PharosFaction, { label: string; tagline: string; accent: string }> = {
+const FACTION_COPY: Record<LighthavenFaction, { label: string; tagline: string; accent: string }> = {
   combat:     { label: 'Combat',     tagline: '+15% STR · Flame · Storm · Shadow', accent: '#FF6B6B' },
   defense:    { label: 'Defense',    tagline: '+15% DEF · Ice · Earth · Light',    accent: '#FFCB6B' },
   technology: { label: 'Technology', tagline: '+15% MIND · Lightning · Water · Void', accent: '#86E1FC' },
 }
 
-function chainFactionToPharos(n: number | undefined | null): PharosFaction | null {
-  return factionKey(n) as PharosFaction | null
+function chainFactionToLighthaven(n: number | undefined | null): LighthavenFaction | null {
+  return factionKey(n) as LighthavenFaction | null
 }
 
 
 type DisplayMode = 'DO' | 'SAY' | 'STORY' | 'LOOK'
-const DISPLAY_TO_API: Record<DisplayMode, PharosMode> = {
+const DISPLAY_TO_API: Record<DisplayMode, LighthavenMode> = {
   DO: 'do', SAY: 'say', STORY: 'story', LOOK: 'look',
 }
 
@@ -210,7 +210,7 @@ function NarrativeRow({
       <NarratorAvatar size={32} />
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 items-baseline">
-          <span className="font-bold text-sm text-[#C792EA]">PHAROS</span>
+          <span className="font-bold text-sm text-[#C792EA]">LIGHTHAVEN</span>
           {place && (
             <span className={`${MONO} text-[#7A7A7A] text-[10px] tracking-wide uppercase`}>
               · {place}
@@ -235,7 +235,7 @@ function NarrativeRow({
 
 function PlayerRow({
   time, mode, content,
-}: { time: string; mode: PharosMode | null | undefined; content: string }) {
+}: { time: string; mode: LighthavenMode | null | undefined; content: string }) {
   return (
     <div className="flex gap-2.5 items-start">
       <PlayerAvatar size={32} />
@@ -261,7 +261,7 @@ function SystemBubble({ children }: { children: React.ReactNode }) {
   )
 }
 
-function ScanCard({ data, mode }: { data: any; mode: PharosMode | undefined }) {
+function ScanCard({ data, mode }: { data: any; mode: LighthavenMode | undefined }) {
   // Only render for explicit player LOOK; auto-look from the engine should be silent.
   if (mode !== 'look') return null
   const room = data?.room
@@ -389,7 +389,7 @@ function AwardCard({ data }: { data: any }) {
   return null
 }
 
-function ToolResultCard({ ev, turnMode }: { ev: PharosToolResultEvent; turnMode: PharosMode | undefined }) {
+function ToolResultCard({ ev, turnMode }: { ev: LighthavenToolResultEvent; turnMode: LighthavenMode | undefined }) {
   switch (ev.tool) {
     case 'pw_look_around': return <ScanCard data={ev.data} mode={turnMode} />
     case 'pw_talk':         return <ThresholdCard data={ev.data} />
@@ -437,8 +437,8 @@ function NpcFocusCard({
   npcId, npcState, room, onMove, disabled,
 }: {
   npcId: string
-  npcState: PharosNpcState | undefined
-  room: PharosRoomBrief | null
+  npcState: LighthavenNpcState | undefined
+  room: LighthavenRoomBrief | null
   onMove: (targetRoomId: string) => void
   disabled?: boolean
 }) {
@@ -521,7 +521,7 @@ function NpcFocusCard({
 function PlaceFocusCard({
   room, onMove, disabled,
 }: {
-  room: PharosRoomBrief
+  room: LighthavenRoomBrief
   onMove: (targetRoomId: string) => void
   disabled?: boolean
 }) {
@@ -592,7 +592,7 @@ function Breadcrumb({
         Scene: <strong>{roomName}</strong>
       </span>
       {!compact && (
-        <span className="text-[11px] text-[#444] truncate">· Pharos Town · {clock}</span>
+        <span className="text-[11px] text-[#444] truncate">· Lighthaven · {clock}</span>
       )}
       <div className="flex-1" />
       {/* Sidebar replacement on compact — exposes the focus card as an
@@ -615,8 +615,8 @@ function StatusBar({
   isStreaming, session, npcStates, onSwitchGotchi,
 }: {
   isStreaming: boolean
-  session: PharosSession | null
-  npcStates: PharosNpcState[]
+  session: LighthavenSession | null
+  npcStates: LighthavenNpcState[]
   onSwitchGotchi?: () => void
 }) {
   const compact = useIsCompact()
@@ -706,7 +706,7 @@ function GateBackground({ children }: { children: React.ReactNode }) {
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: 'url(/desktop/pharosworld-bg.png)',
+          backgroundImage: 'url(/desktop/lighthaven-bg.png)',
           backgroundColor: '#0A0F1A',
           filter: 'blur(10px) saturate(1.1)',
           transform: 'scale(1.08)',
@@ -725,13 +725,21 @@ function BootstrapForm({
   address: string
   onStart: (
     gotchiId: string,
-    faction: PharosFaction,
+    faction: LighthavenFaction,
     gotchiName: string | null,
   ) => void
   isStarting: boolean
   error: string | null
 }) {
-  const { gotchis, isLoading } = useOwnerGotchis(address)
+  const { gotchis: rawGotchis, isLoading } = useOwnerGotchis(address)
+  // status === 0 means an unsummoned Beacon. Lighthaven requires a soul-
+  // bound Gotchipus, so the entry list excludes those — the BeaconBanner
+  // in Terminal is the right place for unsummoned tokens.
+  const gotchis = useMemo(
+    () => rawGotchis.filter((g) => (g.status ?? 0) > 0),
+    [rawGotchis],
+  )
+  const beaconCount = rawGotchis.length - gotchis.length
   const [selectedGotchi, setSelectedGotchi] = useState<string | null>(null)
 
   useEffect(() => {
@@ -744,8 +752,8 @@ function BootstrapForm({
     () => gotchis.find((g) => String(g.token_id) === selectedGotchi),
     [gotchis, selectedGotchi],
   )
-  const chainFaction = chainFactionToPharos(selectedMeta?.faction)
-  const effectiveFaction: PharosFaction = chainFaction ?? 'combat'
+  const chainFaction = chainFactionToLighthaven(selectedMeta?.faction)
+  const effectiveFaction: LighthavenFaction = chainFaction ?? 'combat'
   const canStart = !!selectedGotchi && !isStarting
   const isResuming = !!(selectedGotchi && loadStoredConversationId(address, selectedGotchi))
 
@@ -753,9 +761,9 @@ function BootstrapForm({
   return (
     <div className={`flex-1 flex items-center justify-center text-[#E8E8E8] overflow-y-auto ${compact ? 'p-3' : 'p-6'}`}>
       <div className={`max-w-[480px] w-full bg-[#1F1F1F]/80 backdrop-blur-sm border border-[#3A3A3A] shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${compact ? 'p-4' : 'p-6'}`}>
-        <div className={`${MONO} text-[#FFCB6B] text-sm tracking-widest mb-1`}>PHAROS TOWN</div>
+        <div className={`${MONO} text-[#FFCB6B] text-sm tracking-widest mb-1`}>LIGHTHAVEN</div>
         <h2 className={`text-[#E8E8E8] leading-snug ${compact ? 'text-lg mb-4' : 'text-xl mb-6'}`}>
-          The lighthouse waits.<br />
+          The Beacon waits to be lit.<br />
           <span className={`text-[#B5B5B5] italic ${compact ? 'text-sm' : 'text-base'}`}>Choose your guardian.</span>
         </h2>
 
@@ -763,15 +771,17 @@ function BootstrapForm({
           {isLoading ? (
             <div className={`${MONO} text-[#7A7A7A] text-xs py-2`}>loading your gotchis…</div>
           ) : gotchis.length === 0 ? (
-            <div className={`${MONO} text-[#FF6B6B] text-xs py-2`}>
-              no gotchis owned by this wallet — summon one first
+            <div className={`${MONO} text-[#FF6B6B] text-xs py-2 leading-relaxed`}>
+              {beaconCount > 0
+                ? `you hold ${beaconCount} Beacon${beaconCount > 1 ? 's' : ''} — summon one in Terminal to enter Lighthaven. a Beacon is a dormant ember; the bond is forged at summon.`
+                : 'no gotchis owned by this wallet — mint a Beacon and summon it to enter Lighthaven.'}
             </div>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {gotchis.map((g) => {
                 const id = String(g.token_id)
                 const active = selectedGotchi === id
-                const f = chainFactionToPharos(g.faction)
+                const f = chainFactionToLighthaven(g.faction)
                 const accent = f ? FACTION_COPY[f].accent : '#7A7A7A'
                 return (
                   <button
@@ -832,7 +842,7 @@ function BootstrapForm({
         >
           {isStarting
             ? (isResuming ? 'returning…' : 'opening the gate…')
-            : (isResuming ? '▶  Return to Pharos Town' : '▶  Step into Pharos Town')}
+            : (isResuming ? '▶  Return to Lighthaven' : '▶  Step into Lighthaven')}
         </button>
       </div>
     </div>
@@ -841,15 +851,15 @@ function BootstrapForm({
 
 
 interface PlayingProps {
-  session: PharosSession
-  messages: PharosMessage[]
-  npcStates: PharosNpcState[]
-  currentRoom: PharosRoomBrief | null
+  session: LighthavenSession
+  messages: LighthavenMessage[]
+  npcStates: LighthavenNpcState[]
+  currentRoom: LighthavenRoomBrief | null
   isStreaming: boolean
   isMoving: boolean
   streamingText: string
-  streamingTools: PharosToolResultEvent[]
-  currentTurnMode: PharosMode | undefined
+  streamingTools: LighthavenToolResultEvent[]
+  currentTurnMode: LighthavenMode | undefined
   onSubmit: (mode: DisplayMode, text: string) => void
   onQuickMove: (targetRoomId: string) => void
   onSwitchGotchi: () => void
@@ -937,7 +947,7 @@ function PlayingView({
               if (m.role === 'system') return <SystemBubble key={m.id ?? idx}>{m.content}</SystemBubble>
               if (m.role === 'tool_result') {
                 try {
-                  const parsed = JSON.parse(m.content) as { ev: PharosToolResultEvent; turnMode?: PharosMode }
+                  const parsed = JSON.parse(m.content) as { ev: LighthavenToolResultEvent; turnMode?: LighthavenMode }
                   return <ToolResultCard key={m.id ?? idx} ev={parsed.ev} turnMode={parsed.turnMode} />
                 } catch {
                   return null
@@ -1017,7 +1027,7 @@ function PlayingView({
 
 type Phase = 'await-wallet' | 'await-auth' | 'bootstrap' | 'loading' | 'playing'
 
-const PharosWorldContent = observer(function PharosWorldContent() {
+const LighthavenContent = observer(function LighthavenContent() {
   const { walletStore } = useStores()
   const address = walletStore.address ?? ''
 
@@ -1030,21 +1040,21 @@ const PharosWorldContent = observer(function PharosWorldContent() {
 
   const [phase, setPhase] = useState<Phase>('await-wallet')
   const [conversationId, setConversationId] = useState<string | null>(null)
-  const [session, setSession] = useState<PharosSession | null>(null)
-  const [messages, setMessages] = useState<PharosMessage[]>([])
-  const [npcStates, setNpcStates] = useState<PharosNpcState[]>([])
-  const [currentRoom, setCurrentRoom] = useState<PharosRoomBrief | null>(null)
+  const [session, setSession] = useState<LighthavenSession | null>(null)
+  const [messages, setMessages] = useState<LighthavenMessage[]>([])
+  const [npcStates, setNpcStates] = useState<LighthavenNpcState[]>([])
+  const [currentRoom, setCurrentRoom] = useState<LighthavenRoomBrief | null>(null)
   const [bootstrapError, setBootstrapError] = useState<string | null>(null)
   const [isStarting, setIsStarting] = useState(false)
 
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingText, setStreamingText] = useState('')
-  const [streamingTools, setStreamingTools] = useState<PharosToolResultEvent[]>([])
-  const [currentTurnMode, setCurrentTurnMode] = useState<PharosMode | undefined>(undefined)
+  const [streamingTools, setStreamingTools] = useState<LighthavenToolResultEvent[]>([])
+  const [currentTurnMode, setCurrentTurnMode] = useState<LighthavenMode | undefined>(undefined)
 
   const [isMoving, setIsMoving] = useState(false)
 
-  const { stream, stop } = usePharosStream()
+  const { stream, stop } = useLighthavenStream()
 
   useEffect(() => {
     if (!address) {
@@ -1062,7 +1072,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
   }, [address, isAuthenticated])
 
   const hydrateState = useCallback(async (convId: string) => {
-    const data = await fetchPharosState(convId)
+    const data = await fetchLighthavenState(convId)
     setSession(data.session)
     setMessages(data.messages)
     setNpcStates(data.npc_states)
@@ -1070,7 +1080,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
   }, [])
 
   const hydrateLiveState = useCallback(async (convId: string) => {
-    const data = await fetchPharosState(convId)
+    const data = await fetchLighthavenState(convId)
     setSession(data.session)
     setNpcStates(data.npc_states)
     setCurrentRoom(data.current_room)
@@ -1078,7 +1088,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
 
   const handleStart = useCallback(async (
     gotchiId: string,
-    faction: PharosFaction,
+    faction: LighthavenFaction,
     gotchiName: string | null,
   ) => {
     if (!address) return
@@ -1096,7 +1106,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
           clearStoredConversationId(address, gotchiId)
         }
       }
-      const start = await startPharosSession({
+      const start = await startLighthavenSession({
         gotchi_id: gotchiId,
         faction,
         gotchi_name: gotchiName,
@@ -1117,11 +1127,11 @@ const PharosWorldContent = observer(function PharosWorldContent() {
     if (!conversationId || isMoving) return
     setIsMoving(true)
     try {
-      const res = await movePharosTo(conversationId, targetRoomId)
+      const res = await movePlayerTo(conversationId, targetRoomId)
       setSession(res.session)
       setCurrentRoom(res.current_room)
       if (res.transition_message) {
-        setMessages((prev) => [...prev, res.transition_message as PharosMessage])
+        setMessages((prev) => [...prev, res.transition_message as LighthavenMessage])
       }
     } catch (e) {
       if (session) {
@@ -1134,7 +1144,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
             tool_calls: [],
             location: session.location,
             created_at: new Date().toISOString(),
-          } as PharosMessage,
+          } as LighthavenMessage,
         ])
       }
     } finally {
@@ -1169,7 +1179,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
         tool_calls: [],
         location: session.location,
         created_at: new Date().toISOString(),
-      } as PharosMessage,
+      } as LighthavenMessage,
     ])
 
     setStreamingText('')
@@ -1191,7 +1201,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
       if (raf !== null) return
       raf = requestAnimationFrame(flushPending)
     }
-    const tools: PharosToolResultEvent[] = []
+    const tools: LighthavenToolResultEvent[] = []
 
     stream(
       { conversation_id: conversationId, mode: apiMode, text },
@@ -1223,7 +1233,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
               tool_calls: [],
               location: session.location,
               created_at: new Date().toISOString(),
-            } as PharosMessage,
+            } as LighthavenMessage,
           ])
           setStreamingText('')
           setStreamingTools([])
@@ -1260,7 +1270,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
                   created_at: now,
                 }]
               : []),
-          ] as PharosMessage[])
+          ] as LighthavenMessage[])
           setStreamingText('')
           setStreamingTools([])
           setCurrentTurnMode(undefined)
@@ -1281,7 +1291,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
       <div className="w-full h-full flex flex-col bg-[#C0C0C0]">
         <GateBackground>
           <div className="flex-1 flex items-center justify-center text-[#E8E8E8] text-sm">
-            connect your wallet to enter Pharos Town
+            connect your wallet to enter Lighthaven
           </div>
         </GateBackground>
       </div>
@@ -1305,7 +1315,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
               <>
                 <div className={`${MONO} text-[#FF6B6B] text-xs tracking-widest`}>SIGN-IN REQUIRED</div>
                 <div className="text-[#B5B5B5] text-xs max-w-[360px]">
-                  Pharos Town needs a JWT to talk to the backend. sign once with your wallet to continue.
+                  Lighthaven needs a JWT to talk to the backend. sign once with your wallet to continue.
                 </div>
                 <button
                   className={`${W98_BTN} !py-2 !text-sm`}
@@ -1341,7 +1351,7 @@ const PharosWorldContent = observer(function PharosWorldContent() {
       <div className="w-full h-full flex flex-col bg-[#C0C0C0]">
         <GateBackground>
           <div className="flex-1 flex items-center justify-center text-[#E8E8E8] text-sm">
-            opening Pharos Town…
+            opening Lighthaven…
           </div>
         </GateBackground>
       </div>
@@ -1366,4 +1376,4 @@ const PharosWorldContent = observer(function PharosWorldContent() {
   )
 })
 
-export default PharosWorldContent
+export default LighthavenContent

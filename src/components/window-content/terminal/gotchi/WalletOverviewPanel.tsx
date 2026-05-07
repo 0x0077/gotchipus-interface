@@ -48,7 +48,7 @@ function MiniChart({ baseValue = 0 }: { baseValue?: number }) {
       <div className="flex items-center justify-between px-2 pt-1.5 pb-0.5">
         {hoveredValue !== null ? (
           <span className="text-[10px] text-[#c0c0c0] font-courier">
-            {displayVal.toFixed(4)} PROS
+            {displayVal.toFixed(4)} ETH
           </span>
         ) : (
           <span />
@@ -226,22 +226,22 @@ function SessionOverlay({
           <div className="space-y-0.5">
             <div className="flex items-center justify-between text-xs py-px border-b border-dotted border-win98-face">
               <span className="text-[#000000]"><span className="text-[#000080] mr-1">◆</span>Max per transaction</span>
-              <span className="font-bold text-[#000080] font-courier">{sessionInfo.maxPerTx.toLocaleString()} PROS</span>
+              <span className="font-bold text-[#000080] font-courier">{sessionInfo.maxPerTx.toLocaleString()} ETH</span>
             </div>
             <div className="flex items-center justify-between text-xs py-px border-b border-dotted border-win98-face">
               <span className="text-[#000000]"><span className="text-[#000080] mr-1">◆</span>Max per session (total)</span>
-              <span className="font-bold text-[#000080] font-courier">{sessionInfo.maxPerSession.toLocaleString()} PROS</span>
+              <span className="font-bold text-[#000080] font-courier">{sessionInfo.maxPerSession.toLocaleString()} ETH</span>
             </div>
             {sessionInfo.enabledOptions?.dailyTransferLimit && (
               <div className="flex items-center justify-between text-xs py-px border-b border-dotted border-win98-face">
                 <span className="text-[#000000]"><span className="text-[#cc8800] mr-1">◆</span>Max daily spending</span>
-                <span className="font-bold text-[#000080] font-courier">{sessionInfo.dailyLimit.toLocaleString()} PROS</span>
+                <span className="font-bold text-[#000080] font-courier">{sessionInfo.dailyLimit.toLocaleString()} ETH</span>
               </div>
             )}
             {sessionInfo.enabledOptions?.singleTxLimit && (
               <div className="flex items-center justify-between text-xs py-px">
                 <span className="text-[#000000]"><span className="text-[#cc8800] mr-1">◆</span>Cumulative tx limit</span>
-                <span className="font-bold text-[#000080] font-courier">{sessionInfo.singleTxLimit.toLocaleString()} PROS</span>
+                <span className="font-bold text-[#000080] font-courier">{sessionInfo.singleTxLimit.toLocaleString()} ETH</span>
               </div>
             )}
           </div>
@@ -336,7 +336,7 @@ export function WalletOverviewPanel({
           <span className="text-2xl font-bold text-[#000000] font-courier">
             {totalValue.toFixed(4)}
           </span>
-          <span className="text-sm font-bold text-[#000080]">PROS</span>
+          <span className="text-sm font-bold text-[#000080]">ETH</span>
           <span className="text-xs text-[#444444]">
             ≈ ${totalUsd.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
@@ -387,7 +387,7 @@ export function WalletOverviewPanel({
           >
             <span className="text-xs text-[#aa6600] flex-1">
               {t('terminal.session.expired')}
-              {sessionInfo && ` — ${sessionInfo.maxPerTx} PROS/tx`}
+              {sessionInfo && ` — ${sessionInfo.maxPerTx} ETH/tx`}
             </span>
             <span className="text-xs text-[#0000ff] underline">{t('terminal.session.renew')}</span>
           </div>
@@ -404,7 +404,7 @@ export function WalletOverviewPanel({
               <span className="text-xs text-[#000000]">{t('terminal.session.aiSession')}</span>
               {sessionInfo && (
                 <span className="text-xs font-bold text-[#000080] font-courier">
-                  {sessionInfo.maxPerTx}/{sessionInfo.maxPerSession} PROS
+                  {sessionInfo.maxPerTx}/{sessionInfo.maxPerSession} ETH
                 </span>
               )}
               <span className="text-xs text-[#808080]">· {sessionDaysLeft}d</span>

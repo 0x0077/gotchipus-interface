@@ -65,7 +65,7 @@ const RARITY_QUOTES: Record<Rarity, string[]> = {
     "Epic by nature, unstoppable by design.",
   ],
   legendary: [
-    "A living legend of the Pharos depths.",
+    "A living legend of the Beacon depths.",
     "Born once in a thousand tides.",
   ],
 };

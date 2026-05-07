@@ -234,7 +234,7 @@ export function RenameModal({ tokenId, currentName, onClose, onSuccess }: Rename
             <span>
               Mints a new <strong>.chi</strong> name NFT to your vault and sets it as primary.
               Your current name <strong>{currentName}.chi</strong> stays in the vault — you can switch back anytime.
-              Cost: <strong>{feeDisplay} PROS</strong>{registerFee !== undefined && " (shorter names cost more)"}.
+              Cost: <strong>{feeDisplay} ETH</strong>{registerFee !== undefined && " (shorter names cost more)"}.
             </span>
           </div>
         </div>
@@ -256,7 +256,7 @@ export function RenameModal({ tokenId, currentName, onClose, onSuccess }: Rename
           >
             {isPending
               ? t('common.confirming', { defaultValue: 'Confirming...' })
-              : t('terminal.detail.rename', { defaultValue: 'Rename' }) + ` (${feeDisplay} PROS)`}
+              : t('terminal.detail.rename', { defaultValue: 'Rename' }) + ` (${feeDisplay} ETH)`}
           </button>
         </div>
       </div>

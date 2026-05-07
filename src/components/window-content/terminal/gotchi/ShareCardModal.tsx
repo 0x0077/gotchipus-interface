@@ -516,12 +516,12 @@ function renderCard(pet: PetData, targetW: number, targetH: number, assets: Rend
 
   ctx.font = `500 ${15 * s}px ${ft}`;
   ctx.fillStyle = theme.bottomTextColor; ctx.textBaseline = "middle";
-  ctx.fillText("Pharos Network", LX, bottomY + 8 * s);
-  const dotX = LX + ctx.measureText("Pharos Network").width + 8 * s;
+  ctx.fillText("Base Network", LX, bottomY + 8 * s);
+  const dotX = LX + ctx.measureText("Base Network").width + 8 * s;
   ctx.fillStyle = theme.id === "minimal" ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.15)";
   ctx.fillText("·", dotX, bottomY + 8 * s);
   ctx.fillStyle = theme.bottomTextColor;
-  const chain1W = ctx.measureText("Pharos Network").width + 18 * s;
+  const chain1W = ctx.measureText("Base Network").width + 18 * s;
   ctx.fillText("Account", LX + chain1W, bottomY + 8 * s);
   const chain2W = ctx.measureText("Account").width;
   ctx.fillStyle = theme.id === "minimal" ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)";

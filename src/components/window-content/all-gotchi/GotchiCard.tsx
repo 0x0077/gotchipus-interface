@@ -88,7 +88,7 @@ const GotchiCard: React.FC<GotchiCardProps> = ({ metadata, onClick }) => {
         {!isSummoned ? (
           <div className="w-full h-full flex items-center justify-center">
             <Image
-              src="/pharos-summon.gif"
+              src="/beacon-summon.gif"
               alt="Unsummoned Gotchipus"
               width={100}
               height={100}

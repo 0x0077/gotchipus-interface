@@ -45,7 +45,7 @@ export const HookCard = ({ hook, onClick }: HookCardProps) => {
 
   const handleAddressClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`https://pharosscan.xyz/address/${hook.address}`, '_blank');
+    window.open(`https://basescan.org/address/${hook.address}`, '_blank');
   };
 
   return (

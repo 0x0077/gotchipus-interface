@@ -5,7 +5,7 @@ import WearableMarketplaceContent from "@/src/components/window-content/Wearable
 import AllGotchiContent from "@/components/window-content/AllGotchiContent"
 import HookRankContent from "@/components/window-content/HookRankContent"
 import TerminalContent from "@/components/window-content/terminal/TerminalContent"
-import PharosWorldContent from "@/components/window-content/pharos-world/PharosWorldContent"
+import LighthavenContent from "@/components/window-content/lighthaven/LighthavenContent"
 
 export interface WindowIconConfig {
   id: string
@@ -23,37 +23,37 @@ export const WINDOW_ICONS: WindowIconConfig[] = [
     id: "mint",
     title: "Mint",
     icon: "/desktop/mint.png",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "wearable",
     title: "Wearable Marketplace",
     icon: "/desktop/wearable.png",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "all-gotchi",
     title: "All Gotchi",
     icon: "/desktop/all-gotchi.png",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "hook-rank",
     title: "HookRank",
     icon: "/desktop/hook.png",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "terminal",
     title: "Gotchipus Terminal",
     icon: "/desktop/dashboard.png",
-    enabled: false,
+    enabled: true,
   },
   {
-    id: "pharos-world",
-    title: "PharosWorld",
-    icon: "/desktop/pharos.png",
-    enabled: false,
+    id: "lighthaven",
+    title: "Lighthaven",
+    icon: "/desktop/lighthaven.png",
+    enabled: true,
   },
 ]
 
@@ -80,8 +80,8 @@ export const getWindowContent = (
       return <HookRankContent />
     case "terminal":
       return <TerminalContent />
-    case "pharos-world":
-      return <PharosWorldContent />
+    case "lighthaven":
+      return <LighthavenContent />
     default:
       return <div>Unknown window: {windowId}</div>
   }

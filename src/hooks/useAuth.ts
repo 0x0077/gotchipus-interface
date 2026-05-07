@@ -7,7 +7,7 @@ import { PUS_ADDRESS } from '../app/blockchain';
 const LOGIN_DOMAIN = {
   name: 'Gotchipus',
   version: 'v0.1.0',
-  chainId: 1672,
+  chainId: 8453,
   verifyingContract: PUS_ADDRESS,
 } as const;
 

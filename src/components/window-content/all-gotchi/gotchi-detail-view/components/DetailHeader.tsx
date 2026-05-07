@@ -35,7 +35,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
               <span className="text-[#808080]">{t('gotchiDetailView.owner')}</span>
               {metadata.owner ? (
                 <a
-                  href={`https://pharosscan.xyz/address/${metadata.owner}`}
+                  href={`https://basescan.org/address/${metadata.owner}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#000080] font-mono text-xs hover:underline hover:text-[#0000ff] cursor-pointer"
@@ -50,7 +50,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
               <div className="flex items-center gap-2">
                 <span className="text-[#808080]">{t('gotchiDetailView.account')}</span>
                 <a
-                  href={`https://pharosscan.xyz/address/${metadata.singer}`}
+                  href={`https://basescan.org/address/${metadata.singer}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#000080] font-mono text-xs hover:underline hover:text-[#0000ff] cursor-pointer"

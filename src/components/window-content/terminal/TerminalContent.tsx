@@ -21,7 +21,7 @@ import useChat from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import { SessionWizard, SessionWizardData } from "./session/SessionWizard";
 import { HookWizard } from "./hook/HookWizard";
-import SummonModal from "./pharos/SummonModal";
+import SummonModal from "./beacon/SummonModal";
 import { useWindowRouter } from "@/hooks/useWindowRouter";
 import {
   Conversation,
@@ -106,7 +106,7 @@ const TerminalContent = observer(() => {
   const [showHookWizard, setShowHookWizard] = useState(false);
 
   // Summon modal state
-  const [summonPharosId, setSummonPharosId] = useState<string | null>(null);
+  const [summonBeaconId, setSummonBeaconId] = useState<string | null>(null);
 
   // Fetch gotchi list to get all token IDs for batch session query
   const walletAddress = walletStore.address;
@@ -133,12 +133,12 @@ const TerminalContent = observer(() => {
     [listData?.ids]
   );
 
-  // Fetch unsummoned Pharos NFTs
-  const pharosApiUrl = walletAddress && walletStore.isConnected
-    ? `/api/tokens/pharos?owner=${walletAddress}&includePharosInfo=false&format=simple`
+  // Fetch unsummoned Beacon NFTs
+  const beaconApiUrl = walletAddress && walletStore.isConnected
+    ? `/api/tokens/beacon?owner=${walletAddress}&includeBeaconInfo=false&format=simple`
     : null;
-  const { data: pharosIds, mutate: mutatePharos } = useSWR<string[]>(
-    pharosApiUrl, listFetcher, { refreshInterval: 30000, keepPreviousData: true }
+  const { data: beaconIds, mutate: mutateBeacons } = useSWR<string[]>(
+    beaconApiUrl, listFetcher, { refreshInterval: 30000, keepPreviousData: true }
   );
 
   // Batch session query for all gotchis
@@ -167,7 +167,7 @@ const TerminalContent = observer(() => {
   );
 
   // Remap address-keyed balances → tokenId-keyed balances
-  const pharosBalances = useMemo((): Record<string, string> | undefined => {
+  const nativeBalances = useMemo((): Record<string, string> | undefined => {
     if (!tbaBalanceData?.balances || !listData) return undefined;
     const result: Record<string, string> = {};
     listData.ids.forEach((id, i) => {
@@ -344,7 +344,7 @@ const TerminalContent = observer(() => {
     if (activeWindow === 'terminal' && walletStore.isConnected) {
       mutateList();
       mutateSession();
-      mutatePharos();
+      mutateBeacons();
     }
   }, [activeWindow]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -678,7 +678,7 @@ const TerminalContent = observer(() => {
             }));
             // Refresh session & balance data after on-chain operations
             if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutatePharos(); }, 2000);
+              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
             }
           },
           onTextReplace: (text) => {
@@ -849,7 +849,7 @@ const TerminalContent = observer(() => {
               return { ...msg, toolSteps: steps };
             }));
             if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutatePharos(); }, 2000);
+              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
             }
           },
           onTextReplace: (text) => {
@@ -976,7 +976,7 @@ const TerminalContent = observer(() => {
               return { ...msg, toolSteps: steps };
             }));
             if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutatePharos(); }, 2000);
+              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
             }
           },
           onTextReplace: (text) => {
@@ -1004,7 +1004,7 @@ const TerminalContent = observer(() => {
       setStatus("idle");
       isProcessingRef.current = false;
     }
-  }, [editChatEvent, syncLastUserMsgId, createTextHandler, updateMessage, addErrorMessage, formatChatError, walletStore.userId, currentChatId, selectedGotchi, sessionMap, listData, tbaAddressList, t, mutateSession, mutatePharos]);
+  }, [editChatEvent, syncLastUserMsgId, createTextHandler, updateMessage, addErrorMessage, formatChatError, walletStore.userId, currentChatId, selectedGotchi, sessionMap, listData, tbaAddressList, t, mutateSession, mutateBeacons]);
 
   if (!walletStore.isConnected) {
     return (
@@ -1033,10 +1033,10 @@ const TerminalContent = observer(() => {
           <GotchiCollection
             onSelectGotchi={handleSelectGotchi}
             sessionMap={sessionMap}
-            pharosBalances={pharosBalances}
-            pharosIds={pharosIds || []}
-            pharosLoading={!pharosIds && !!pharosApiUrl}
-            onSummonPharos={(id) => setSummonPharosId(id)}
+            nativeBalances={nativeBalances}
+            beaconIds={beaconIds || []}
+            beaconLoading={!beaconIds && !!beaconApiUrl}
+            onSummonBeacon={(id) => setSummonBeaconId(id)}
           />
         ) : (
           <GotchiDetail
@@ -1047,7 +1047,7 @@ const TerminalContent = observer(() => {
             sessionStatus={sessionMap[selectedGotchi]?.status ?? null}
             sessionDaysLeft={sessionMap[selectedGotchi]?.daysLeft ?? 0}
             sessionInfo={sessionDetailMap[selectedGotchi] ?? null}
-            pharosBalance={pharosBalances?.[selectedGotchi]}
+            nativeBalance={nativeBalances?.[selectedGotchi]}
             portfolioData={selectedPortfolio}
           />
         )}
@@ -1146,14 +1146,14 @@ const TerminalContent = observer(() => {
       )}
 
       {/* Summon Gotchipus modal */}
-      {summonPharosId && (
+      {summonBeaconId && (
         <SummonModal
-          pharosId={summonPharosId}
-          onClose={() => setSummonPharosId(null)}
+          beaconId={summonBeaconId}
+          onClose={() => setSummonBeaconId(null)}
           onSummonComplete={() => {
-            setSummonPharosId(null);
+            setSummonBeaconId(null);
             mutateList();
-            mutatePharos();
+            mutateBeacons();
           }}
         />
       )}

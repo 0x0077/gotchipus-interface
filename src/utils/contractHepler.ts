@@ -12,8 +12,9 @@ export function getERC6551AccountSalt(chainId: number | bigint, tokenId: number 
 }
 
 
-export async function getPharosNativeBalance(address: string) {
-  const provider = new ethers.JsonRpcProvider("https://rpc.pharos.xyz");
+export async function getNativeBalance(address: string) {
+  const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC || "https://mainnet.base.org";
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
   const balance = await provider.getBalance(address);
   return balance;
 }
@@ -23,7 +24,7 @@ export async function getPharosNativeBalance(address: string) {
 // script/Deploy.s.sol). MUST match the deployed value or the trait preview
 // computed here will diverge from what `randomTraitsIndex` produces on summon.
 const GLOBAL_SALT = BigInt(
-  "16785146710873639958811097543422045518556785791473492795158444787863316856832"
+  "46785146710873639958814449378185535879182551704685377603288035974162545639424"
 );
 
 export function getTraitsIndex(

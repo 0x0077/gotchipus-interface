@@ -5,7 +5,7 @@ export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const upstream = `${getBackendUrl()}/pharos-world/stream`;
+  const upstream = `${getBackendUrl()}/lighthaven/move`;
 
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const auth = req.headers.get('authorization');
@@ -18,19 +18,9 @@ export async function POST(req: NextRequest) {
     cache: 'no-store',
   });
 
-  if (!originResp.ok || !originResp.body) {
-    return new Response(
-      JSON.stringify({ error: 'Upstream error' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } },
-    );
-  }
-
-  return new Response(originResp.body, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
-      'X-Accel-Buffering': 'no',
-    },
+  const text = await originResp.text();
+  return new Response(text, {
+    status: originResp.status,
+    headers: { 'Content-Type': 'application/json' },
   });
 }

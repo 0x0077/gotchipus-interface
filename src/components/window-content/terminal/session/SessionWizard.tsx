@@ -671,10 +671,10 @@ export function SessionWizard({ onComplete, onClose, tokenId, existingSession }:
                   <p className="font-bold text-sm mt-2 mb-1">{t('sessionWizard.spendingLimits')}</p>
                   <Sunken className="mb-2 space-y-0.5 text-sm">
                     <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.durationLabel')}</span><span className="font-bold text-[#000080]">{expiration} {t('sessionWizard.daysUnit')}</span></div>
-                    <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryMaxPerTx')}</span><span className="font-bold text-[#000080]">{maxPerTx} PROS</span></div>
-                    <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryMaxPerSession')}</span><span className="font-bold text-[#000080]">{maxPerSession} PROS</span></div>
-                    {dailyTransferLimitEnabled && <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryDailyLimit')}</span><span className="font-bold text-[#000080]">{dailyLimit} PROS</span></div>}
-                    {singleTxLimitEnabled && <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summarySingleTxLimit')}</span><span className="font-bold text-[#000080]">{singleTxLimit} PROS</span></div>}
+                    <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryMaxPerTx')}</span><span className="font-bold text-[#000080]">{maxPerTx} ETH</span></div>
+                    <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryMaxPerSession')}</span><span className="font-bold text-[#000080]">{maxPerSession} ETH</span></div>
+                    {dailyTransferLimitEnabled && <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summaryDailyLimit')}</span><span className="font-bold text-[#000080]">{dailyLimit} ETH</span></div>}
+                    {singleTxLimitEnabled && <div className="flex justify-between"><span className="text-[#808080]">{t('sessionWizard.summarySingleTxLimit')}</span><span className="font-bold text-[#000080]">{singleTxLimit} ETH</span></div>}
                   </Sunken>
 
                   <p className="font-bold text-sm mb-1">{t('sessionWizard.security')}</p>
@@ -818,8 +818,8 @@ export function SessionWizard({ onComplete, onClose, tokenId, existingSession }:
             {step >= 2 && <span className="absolute -top-0.5 right-2 text-[#008000] text-sm">✓</span>}
             <Sunken className="space-y-0.5">
               <div className="flex justify-between text-xs"><span className="text-[#808080]">{t('sessionWizard.expirationLabel')}</span><span className="font-bold text-[#000080]">{expiration} {t('sessionWizard.daysUnit')}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-[#808080]">{t('sessionWizard.maxPerTx')}</span><span className="font-bold text-[#000080]">{maxPerTx} PROS</span></div>
-              <div className="flex justify-between text-xs"><span className="text-[#808080]">{t('sessionWizard.maxPerSession')}</span><span className="font-bold text-[#000080]">{maxPerSession} PROS</span></div>
+              <div className="flex justify-between text-xs"><span className="text-[#808080]">{t('sessionWizard.maxPerTx')}</span><span className="font-bold text-[#000080]">{maxPerTx} ETH</span></div>
+              <div className="flex justify-between text-xs"><span className="text-[#808080]">{t('sessionWizard.maxPerSession')}</span><span className="font-bold text-[#000080]">{maxPerSession} ETH</span></div>
             </Sunken>
           </GroupBox>
 

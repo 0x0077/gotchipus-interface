@@ -36,7 +36,7 @@ export const ThumbnailItem: React.FC<ThumbnailItemProps> = ({
         />
       ) : (
         <Image
-          src="/pharos-summon.gif"
+          src="/beacon-summon.gif"
           alt="Unsummoned"
           width={40}
           height={40}

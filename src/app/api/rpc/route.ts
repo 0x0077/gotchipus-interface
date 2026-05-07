@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 
-const MAINNET_BASE_URL = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://rpc.pharos.xyz';
+const MAINNET_BASE_URL = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://mainnet.base.org';
 const REQUEST_TIMEOUT = 30000;
 
 function buildTargetUrl(request: NextRequest): { targetUrl: string; path: string } {

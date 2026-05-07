@@ -103,7 +103,7 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                 </div>
                 <div className="flex items-center justify-center">
                   <Link
-                    href={tk.contract === "native" ? `https://pharosscan.xyz/address/${tbaAddress}` : `https://pharosscan.xyz/token/${tk.contract}`}
+                    href={tk.contract === "native" ? `https://basescan.org/address/${tbaAddress}` : `https://basescan.org/token/${tk.contract}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#0000ff] flex items-center"

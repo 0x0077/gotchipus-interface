@@ -14,10 +14,11 @@ import { Win98Loading } from "@/components/ui/win98-loading";
 import { useTranslation } from "react-i18next";
 import { getERC6551AccountSalt, getTraitsIndex } from "@/src/utils/contractHepler";
 import GotchiSvg from "@/src/components/gotchiSvg/GotchiSvg";
+import { findPharosResident } from "@/lib/migration/pharosResidents";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 
 interface SummonModalProps {
-  pharosId: string;
+  beaconId: string;
   onClose: () => void;
   onSummonComplete: () => void;
 }
@@ -28,7 +29,7 @@ interface GotchipusPreview {
   image: JSX.Element;
 }
 
-const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonModalProps) => {
+const SummonModal = observer(({ beaconId, onClose, onSummonComplete }: SummonModalProps) => {
   const { walletStore } = useStores();
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -41,14 +42,19 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0);
   const [showRules, setShowRules] = useState(false);
 
+  const pharosResident = useMemo(
+    () => findPharosResident(walletStore.address ?? undefined, beaconId),
+    [walletStore.address, beaconId],
+  );
+
   // Compute TBA
-  const salt = getERC6551AccountSalt(CHAIN_ID, Number(pharosId));
+  const salt = getERC6551AccountSalt(CHAIN_ID, Number(beaconId));
   const accountData = useERC6551Read("account", [
     ERC6551_ACCOUNT_IMPLEMENTATION_ADDRESS,
     salt,
     CHAIN_ID,
     PUS_ADDRESS,
-    Number(pharosId),
+    Number(beaconId),
   ]);
 
   const tokenBoundAccount = (accountData as string) || ZERO_ADDRESS;
@@ -60,13 +66,13 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
       .fill(0)
       .map((_, index) => {
         const traits = getTraitsIndex(
-          Number(pharosId),
+          Number(beaconId),
           tokenBoundAccount,
           `${walletStore.address}`,
           index
         );
         return {
-          id: `${pharosId}-${index}`,
+          id: `${beaconId}-${index}`,
           traitsIndex: traits,
           image: (
             <GotchiSvg
@@ -78,7 +84,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
           ),
         };
       });
-  }, [accountData, tokenBoundAccount, pharosId, walletStore.address]);
+  }, [accountData, tokenBoundAccount, beaconId, walletStore.address]);
 
   const currentPreview = gotchipusPreviews[selectedPreviewIndex];
 
@@ -123,6 +129,16 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, []);
 
+  // Pharos migrant: prefill the chi-name field with their old name once on
+  // mount. Hands off afterwards — user can edit or wipe freely.
+  const didPrefillRef = useRef(false);
+  useEffect(() => {
+    if (didPrefillRef.current) return;
+    if (!pharosResident) return;
+    didPrefillRef.current = true;
+    handleChiNameChange(pharosResident.oldName);
+  }, [pharosResident, handleChiNameChange]);
+
   // On-chain availability check (auto-disabled when CHI_DIAMOND_ADDRESS is empty)
   const { data: isAvailable, isLoading: isCheckingAvailability } = useChiRegistryRead(
     "isNameAvailable",
@@ -146,7 +162,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
     if (!canSummon) return;
     setIsSummoning(true);
     const args = [
-      Number(pharosId),
+      Number(beaconId),
       normalizedName,
       ZERO_ADDRESS,
       ethers.parseEther(stakeAmount),
@@ -194,7 +210,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
   const handleStakeAmountChange = (value: string) => {
     const v = value.replace(/[^0-9.]/g, "");
     setStakeAmount(v);
-    const userBalance = Number(walletStore.formattedPharos(18));
+    const userBalance = Number(walletStore.formattedNative(18));
     setIsInsufficientBalance(Number(v) > userBalance);
   };
 
@@ -206,7 +222,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
         {/* Title bar */}
         <div className="bg-[#000080] px-2 py-1 flex items-center gap-1.5 select-none">
           <span className="text-xs font-bold text-white flex-1">
-            Summon Gotchipus — Pharos #{pharosId}
+            Summon Gotchipus — Beacon #{beaconId}
           </span>
           <button
             onClick={onClose}
@@ -256,6 +272,12 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
             {/* Chi Name */}
             <div>
               <div className="text-[11px] font-bold mb-[3px]">Chi Name</div>
+              {pharosResident && (
+                <div className="win98-bezel-inset bg-[#fff8e1] px-1.5 py-1 mb-1 text-[11px] leading-snug">
+                  <span className="font-bold text-[#cc7a00]">Pharos resident.</span>{" "}
+                  Your old name <span className="font-mono font-bold">{pharosResident.oldName}.chi</span> is prefilled. Keep it or change.
+                </div>
+              )}
               <div className="flex items-center win98-bezel-inset bg-white">
                 <span className="font-mono text-[11px] text-[#808080] pl-1.5 select-none">
                   {"{"}
@@ -322,7 +344,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
                 </div>
                 <button
                   onClick={() => {
-                    setStakeAmount(walletStore.formattedPharos(18));
+                    setStakeAmount(walletStore.formattedNative(18));
                     setIsInsufficientBalance(false);
                   }}
                   className="px-2 py-0.5 bg-win98-face win98-bezel text-[10px] font-bold cursor-pointer"
@@ -330,8 +352,8 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
                   MAX
                 </button>
                 <div className="win98-bezel-inset bg-white px-2 py-0.5 flex items-center gap-1">
-                  <img src="/tokens/pros.png" alt="PROS" className="w-3 h-3" />
-                  <span className="text-[10px] font-bold">PROS</span>
+                  <img src="/tokens/eth.png" alt="ETH" className="w-3 h-3" />
+                  <span className="text-[10px] font-bold">ETH</span>
                 </div>
               </div>
               <div
@@ -341,7 +363,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
               >
                 {isInsufficientBalance
                   ? "Insufficient balance"
-                  : `Balance: ${walletStore.formattedPharos()} PROS`}
+                  : `Balance: ${walletStore.formattedNative()} ETH`}
               </div>
               {/* Soul & Legendary bonus indicator */}
               {stakeAmount && Number(stakeAmount) > 0 && !isInsufficientBalance && (() => {
@@ -395,7 +417,7 @@ const SummonModal = observer(({ pharosId, onClose, onSummonComplete }: SummonMod
               }`}
             >
               {isSummoning ? (
-                <Win98Loading text={t("pharos.summoningProgress")} />
+                <Win98Loading text={t("beacon.summoningProgress")} />
               ) : (
                 <span>Summon Gotchipus</span>
               )}

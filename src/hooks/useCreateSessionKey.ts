@@ -9,7 +9,7 @@ import { config } from '@/src/lib/wagmi';
 const domain = {
   name: 'Gotchipus',
   version: 'v0.1.0',
-  chainId: 1672,
+  chainId: 8453,
   verifyingContract: PUS_ADDRESS,
 } as const;
 

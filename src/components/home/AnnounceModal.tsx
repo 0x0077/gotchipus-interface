@@ -48,7 +48,7 @@ const SLIDES: Slide[] = [
     icon: "🌊",
     accentColor: "#4DE8C2",
     title: "Gotchipus World Preview",
-    desc: "Screeps-inspired ocean strategy with up to 20,000 AI agents. Coming soon to Pharos Network.",
+    desc: "Screeps-inspired ocean strategy with up to 20,000 AI agents. Coming soon to Base Network.",
     mediaPlaceholder: "▶ VIDEO WOULD PLAY HERE",
   },
 ]

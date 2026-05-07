@@ -2,12 +2,12 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, isAddress } from 'viem';
 import { PUS_ABI, PUS_ADDRESS } from '@/src/app/blockchain';
 import { GotchipusInfo } from '@/lib/types';
-import { pharos } from '@/src/app/blockchain/config';
+import { chain } from '@/src/app/blockchain/config';
 
-interface PharosResponse {
+interface BeaconResponse {
   balance: string;
   ids: string[];
-  pharosInfo: GotchipusInfo[];
+  beaconInfo: GotchipusInfo[];
   totalCount: number;
 }
 
@@ -16,21 +16,21 @@ export const runtime = 'edge';
 const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
 
 const publicClient = createPublicClient({
-  chain: pharos,
+  chain,
   transport: http(rpcUrl),
 });
 
 function serializeBigIntFields(obj: any): any {
   if (obj === null || obj === undefined) return obj;
-  
+
   if (typeof obj === 'bigint') {
     return obj.toString();
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(item => serializeBigIntFields(item));
   }
-  
+
   if (typeof obj === 'object') {
     const result: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -38,7 +38,7 @@ function serializeBigIntFields(obj: any): any {
     }
     return result;
   }
-  
+
   return obj;
 }
 
@@ -77,12 +77,12 @@ function serializeGotchipusInfo(raw: any): GotchipusInfo {
   };
 }
 
-async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean): Promise<PharosResponse> {
+async function getBeaconTokens(ownerAddress: string, includeBeaconInfo: boolean): Promise<BeaconResponse> {
   try {
     const tokenIds = await publicClient.readContract({
       address: PUS_ADDRESS,
       abi: PUS_ABI,
-      functionName: 'getGotchiOrPharosInfo',
+      functionName: 'getGotchiOrBeaconInfo',
       args: [ownerAddress, 0]
     }) as bigint[];
 
@@ -90,17 +90,17 @@ async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean)
       return {
         balance: '0',
         ids: [],
-        pharosInfo: [],
+        beaconInfo: [],
         totalCount: 0
       };
     }
 
     const balance = tokenIds.length.toString();
     const ids = tokenIds.map(id => id.toString());
-        
-    let pharosInfo: GotchipusInfo[] = [];
-    
-    if (includePharosInfo) {
+
+    let beaconInfo: GotchipusInfo[] = [];
+
+    if (includeBeaconInfo) {
       const infoPromises = tokenIds.map(async (tokenId) => {
         try {
           const info = await publicClient.readContract({
@@ -109,21 +109,21 @@ async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean)
             functionName: 'ownedTokenInfo',
             args: [ownerAddress, tokenId]
           }) as any;
-          
+
           return serializeGotchipusInfo(info);
         } catch (error) {
           return null;
         }
       });
-      
+
       const infoResults = await Promise.all(infoPromises);
-      pharosInfo = infoResults.filter(info => info !== null) as GotchipusInfo[];
+      beaconInfo = infoResults.filter(info => info !== null) as GotchipusInfo[];
     }
 
     return {
       balance,
       ids,
-      pharosInfo,
+      beaconInfo,
       totalCount: ids.length
     };
   } catch (error: any) {
@@ -131,7 +131,7 @@ async function getPharosTokens(ownerAddress: string, includePharosInfo: boolean)
       return {
         balance: '0',
         ids: [],
-        pharosInfo: [],
+        beaconInfo: [],
         totalCount: 0
       };
     }
@@ -143,14 +143,14 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const ownerAddress = searchParams.get('owner');
-    const includePharosInfo = searchParams.get('includePharosInfo') !== 'false';
-    const format = searchParams.get('format') || 'full'; 
+    const includeBeaconInfo = searchParams.get('includeBeaconInfo') !== 'false';
+    const format = searchParams.get('format') || 'full';
 
     if (!ownerAddress || !isAddress(ownerAddress)) {
       return NextResponse.json({ error: 'Valid owner address is required' }, { status: 400 });
     }
 
-    const response = await getPharosTokens(ownerAddress, includePharosInfo);
+    const response = await getBeaconTokens(ownerAddress, includeBeaconInfo);
 
     if (format === 'simple') {
       return NextResponse.json(response.ids, { status: 200 });

@@ -10,6 +10,7 @@ interface Props {
   onResize: (ta: HTMLTextAreaElement) => void;
   isStreaming: boolean;
   selectedGotchi: string | null;
+  agentDisabled?: boolean;
   slashOpen: boolean;
   slashFiltered: SlashCommand[];
   slashIdx: number;
@@ -30,6 +31,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, Props>(function InputAr
     onResize,
     isStreaming,
     selectedGotchi,
+    agentDisabled,
     slashOpen,
     slashFiltered,
     slashIdx,
@@ -42,6 +44,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, Props>(function InputAr
   ref,
 ) {
   const { t } = useTranslation();
+  const inputDisabled = agentDisabled || isStreaming || !selectedGotchi;
 
   return (
     <div className="relative p-[3px] border-t border-t-white bg-win98-face flex gap-[3px] items-end flex-shrink-0">
@@ -85,13 +88,13 @@ export const InputArea = forwardRef<HTMLTextAreaElement, Props>(function InputAr
 
       <div
         className={`flex-1 border border-[#808080] shadow-win98-inner px-1 py-[1px] ${
-          isStreaming || !selectedGotchi ? "bg-[#d4d0c8]" : "bg-white"
+          inputDisabled ? "bg-[#d4d0c8]" : "bg-white"
         }`}
       >
         <textarea
           ref={ref}
           value={chatInput}
-          disabled={isStreaming || !selectedGotchi}
+          disabled={inputDisabled}
           onChange={e => {
             onChatInputChange(e.target.value);
             onResize(e.target);
@@ -125,11 +128,13 @@ export const InputArea = forwardRef<HTMLTextAreaElement, Props>(function InputAr
             }
           }}
           placeholder={
-            !selectedGotchi
-              ? t("terminal.chat.selectGotchiFirst", "Select a Gotchi first...")
-              : isStreaming
-                ? t("terminal.chat.waitingResponse")
-                : `${t("terminal.chat.askAnything")} — ${t("terminal.chat.typeForCommands")}`
+            agentDisabled
+              ? t("terminal.chat.integrationPlaceholder", "Agent unavailable during integration")
+              : !selectedGotchi
+                ? t("terminal.chat.selectGotchiFirst", "Select a Gotchi first...")
+                : isStreaming
+                  ? t("terminal.chat.waitingResponse")
+                  : `${t("terminal.chat.askAnything")} — ${t("terminal.chat.typeForCommands")}`
           }
           rows={1}
           role="combobox"
@@ -155,7 +160,7 @@ export const InputArea = forwardRef<HTMLTextAreaElement, Props>(function InputAr
       ) : (
         <button
           onClick={onSubmit}
-          disabled={!chatInput.trim() || isStreaming || !selectedGotchi}
+          disabled={!chatInput.trim() || inputDisabled}
           className="rx-send"
           title={t("terminal.chat.send")}
           aria-label={t("terminal.chat.send")}

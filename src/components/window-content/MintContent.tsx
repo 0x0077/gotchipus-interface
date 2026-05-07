@@ -15,9 +15,9 @@ import { useWindowMode } from "@/hooks/useWindowMode";
 
 // ── Constants ──
 
-const NATIVE_SYMBOL = "PROS";
+const NATIVE_SYMBOL = "ETH";
 const NATIVE_DECIMALS = 18;
-const PRICE = 50; // 100 PROS
+const PRICE = 0.006; // matches LibGotchiConstants.MINT_PRICE on-chain
 const PRICE_RAW = parseEther(PRICE.toString());
 const MAX_SUPPLY = 20000;
 
@@ -120,7 +120,7 @@ const MintContent = observer(() => {
   );
   const isWhitelisted = Boolean(whitelistData);
 
-  // ── Read: native PROS balance ──
+  // ── Read: native ETH balance ──
   const { data: nativeBalance, refetch: refetchNativeBalance } = useBalance({
     address,
     query: { enabled: !!address },

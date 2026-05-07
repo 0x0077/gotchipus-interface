@@ -197,7 +197,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                         onMouseLeave={() => setHoveredButton(null)}
                       >
                         <Link
-                          href={`https://pharosscan.xyz/address/${hook.address}`}
+                          href={`https://basescan.org/address/${hook.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="border-2 border-[#808080] shadow-win98-outer bg-win98-face hover:bg-[#d4d4d4] active:shadow-win98-inner px-2 py-1.5 text-sm flex items-center justify-center"
@@ -230,7 +230,7 @@ export const HookDetail = ({ hook, onBack }: HookDetailProps) => {
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-bold min-w-[100px]">{t('hookDetail.creator')}</span>
                   <Link
-                    href={`https://pharosscan.xyz/address/${hook.creator}`}
+                    href={`https://basescan.org/address/${hook.creator}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-mono text-[#000080] hover:underline"

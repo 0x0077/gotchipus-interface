@@ -1,7 +1,7 @@
 [
     {
         "type": "function",
-        "name": "getGotchiOrPharosInfo",
+        "name": "getGotchiOrBeaconInfo",
         "inputs": [
             {
                 "name": "owner",
@@ -36,8 +36,8 @@
         "outputs": [
             {
                 "name": "indexs",
-                "type": "uint8[8]",
-                "internalType": "uint8[8]"
+                "type": "uint16[8]",
+                "internalType": "uint16[8]"
             }
         ],
         "stateMutability": "view"
@@ -223,6 +223,19 @@
             }
         ],
         "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "BaseURIUpdated",
+        "inputs": [
+            {
+                "name": "newBaseURI",
+                "type": "string",
+                "indexed": false,
+                "internalType": "string"
+            }
+        ],
+        "anonymous": false
     },
     {
         "type": "error",

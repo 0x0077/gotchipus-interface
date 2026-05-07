@@ -5,31 +5,32 @@ import { Chain } from '@rainbow-me/rainbowkit'
 import { connectors } from './walletConfig'
 
 
-const pharosMainnetCustomChain = {
-  id: 1672,
-  name: 'Pharos Mainnet',
+const baseMainnetCustomChain = {
+  id: 8453,
+  name: 'Base Mainnet',
   iconUrl: '',
   iconBackground: '#fff',
-  nativeCurrency: { name: 'Pharos', symbol: 'PROS', decimals: 18 },
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
     default: {
       http: typeof window !== 'undefined' && window.location?.origin
         ? [`${window.location.origin}/api/rpc`]
-        : ['https://rpc.pharos.xyz']
+        : ['https://mainnet.base.org']
     },
   },
   blockExplorers: {
-    default: { name: 'Pharosscan', url: 'https://pharosscan.xyz' },
+    default: { name: 'Basescan', url: 'https://basescan.org' },
   },
+  testnet: true,
 } as const satisfies Chain;
 
 
 export const config = createConfig({
-  chains: [pharosMainnetCustomChain],
+  chains: [baseMainnetCustomChain],
   multiInjectedProviderDiscovery: true,
   connectors,
   transports: {
-    [pharosMainnetCustomChain.id]: http(),
+    [baseMainnetCustomChain.id]: http(),
   },
   ssr: true
 })

@@ -15,7 +15,7 @@ export const UnsummonedView: React.FC<UnsummonedViewProps> = ({ tokenId }) => {
       <div className="text-center">
         <div className="mb-4">
           <Image
-            src="/pharos-summon.gif"
+            src="/beacon-summon.gif"
             alt="Unsummoned"
             width={200}
             height={200}

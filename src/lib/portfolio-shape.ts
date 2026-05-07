@@ -32,10 +32,10 @@ export const KNOWN_TOKENS: Record<string, {
   logo?: string;
   nftType?: string;
 }> = {
-  '0x5a3afa97584fa8cdec4be2a6ab86ceed05600c5e': { symbol: 'GOTCHI', name: 'Gotchipus', type: 'nft', decimals: 0, nftType: 'ERC1155' },
-  '0x2b441dbb56d0ee547718d4966781750e8e9df4f1': { symbol: 'CHI', name: '.chi Names', type: 'nft', decimals: 0, nftType: 'ERC721' },
-  '0xc879c018db60520f4355c26ed1a6d572cdac1815': { symbol: 'USDC', name: 'USD Coin', type: 'erc20', decimals: 6, logo: '/tokens/usdc.png' },
-  '0x52c48d4213107b20bc583832b0d951fb9ca8f0b0': { symbol: 'WPROS', name: 'Wrapped Pharos', type: 'erc20', decimals: 18, logo: '/tokens/pros.png' },
+  '0x000000007B5758541e9d94a487B83e11Cd052437': { symbol: 'GOTCHI', name: 'Gotchipus', type: 'nft', decimals: 0, nftType: 'ERC1155' },
+  '0x0F5e523eBB5861F7d2Acf4e4744B08358022720B': { symbol: 'CHI', name: '.chi Names', type: 'nft', decimals: 0, nftType: 'ERC721' },
+  '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': { symbol: 'USDC', name: 'USD Coin', type: 'erc20', decimals: 6, logo: '/tokens/usdc.png' },
+  '0x4200000000000000000000000000000000000006': { symbol: 'WETH', name: 'Wrapped Ether', type: 'erc20', decimals: 18, logo: '/tokens/eth.png' },
 };
 
 export function batchEntriesToPortfolio(
@@ -86,7 +86,7 @@ export function batchEntriesToPortfolio(
     token_contract: '',
     token_id: 0,
     total_usd: 0,
-    native: { symbol: 'PHRS', balance: '0', balance_raw: '0', decimals: 18, usd: 0 },
+    native: { symbol: 'ETH', balance: '0', balance_raw: '0', decimals: 18, usd: 0 },
     erc20s,
     nfts,
   };

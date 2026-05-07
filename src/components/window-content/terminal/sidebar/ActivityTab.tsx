@@ -11,11 +11,11 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const EXPLORER_URL = "https://pharosscan.xyz";
+const EXPLORER_URL = "https://basescan.org";
 
 const KNOWN_CONTRACTS: Record<string, string> = {
   // Diamond (Gotchipus)
-  "0x5a3afa97584fa8cdec4be2a6ab86ceed05600c5e": "Gotchipus",
+  "0x000000007B5758541e9d94a487B83e11Cd052437": "Gotchipus",
   // DEX - DODO
   "0x6f1142f4bf632e4877497c05818492824f540ad5": "DODO Swap",
   "0xbf105f4ffbd3825f5433d074008b9a76237d849c": "DODO Approve",
@@ -26,8 +26,8 @@ const KNOWN_CONTRACTS: Record<string, string> = {
   // DEX - UniswapV3
   "0xf38d34c8382b9079b0f85309578b43b8479cd875": "UniV3 Router",
   // Tokens (mainnet only — see comment above)
-  "0xc879c018db60520f4355c26ed1a6d572cdac1815": "USDC",
-  "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": "WPHRS",
+  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": "USDC",
+  "0x4200000000000000000000000000000000000006": "WETH",
 };
 
 interface Transaction {
@@ -68,8 +68,8 @@ function timeAgo(timestamp: string): string {
 function formatValue(weiStr: string): string {
   if (!weiStr || weiStr === "0") return "";
   const eth = Number(weiStr) / 1e18;
-  if (eth < 0.0001) return "<0.0001 PHRS";
-  return `${eth.toFixed(4)} PHRS`;
+  if (eth < 0.0001) return "<0.0001 ETH";
+  return `${eth.toFixed(4)} ETH`;
 }
 
 function classifyTx(tx: Transaction, tba: string): ClassifiedTx {
@@ -89,7 +89,7 @@ function classifyTx(tx: Transaction, tba: string): ClassifiedTx {
   }
 
   // Token contract (approve/transfer)
-  if (toName && ["USDC", "WPHRS"].includes(toName)) {
+  if (toName && ["USDC", "WETH"].includes(toName)) {
     return { ...tx, category: "contract", label: `${toName} token`, contractName: toName };
   }
 
