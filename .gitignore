@@ -27,6 +27,7 @@ yarn-error.log*
 
 .idea
 .env
+.vercel
 wrangler.toml
 
 /docs
