@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useOwnerGotchis } from '@/hooks/useOwnerGotchis'
 import { useWindowMode } from '@/hooks/useWindowMode'
 import useLighthavenStream, { LighthavenToolResultEvent } from '@/hooks/useLighthavenStream'
+import { useChiRegistryRead } from '@/hooks/useContract'
 
 // Internal layout breakpoint for the Lighthaven window. Driven by the
 // host window's measured width (provided via WindowModeProvider) NOT the
@@ -754,6 +755,24 @@ function BootstrapForm({
   )
   const chainFaction = chainFactionToLighthaven(selectedMeta?.faction)
   const effectiveFaction: LighthavenFaction = chainFaction ?? 'combat'
+
+  // Authoritative chi name source: ChiRegistry.reverseResolveGotchi(tokenId).
+  // The gotchipus diamond's getTokenName mirror (= selectedMeta?.name) goes
+  // stale after chi names became freely transferable; only the chi registry
+  // knows the current binding. Backend has its own chain fallback in /start,
+  // but reading here saves a round-trip and stays consistent with GotchiDetail.
+  const { data: boundChiName } = useChiRegistryRead(
+    "reverseResolveGotchi",
+    [selectedGotchi ? BigInt(selectedGotchi) : BigInt(0)],
+    { enabled: !!selectedGotchi }
+  )
+  const resolvedGotchiName: string | null = (() => {
+    const chi = typeof boundChiName === "string" ? boundChiName.trim() : ""
+    if (chi) return chi
+    const mirror = selectedMeta?.name?.trim()
+    return mirror || null
+  })()
+
   const canStart = !!selectedGotchi && !isStarting
   const isResuming = !!(selectedGotchi && loadStoredConversationId(address, selectedGotchi))
 
@@ -837,7 +856,7 @@ function BootstrapForm({
           onClick={() => selectedGotchi && onStart(
             selectedGotchi,
             effectiveFaction,
-            selectedMeta?.name?.trim() || null,
+            resolvedGotchiName,
           )}
         >
           {isStarting
