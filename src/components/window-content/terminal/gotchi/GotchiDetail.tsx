@@ -168,13 +168,25 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
     { enabled: !!tbaAddress }
   );
 
+  // Authoritative chi-name source: ChiRegistry.reverseResolveGotchi(tokenId).
+  // The gotchipus diamond's getTokenName mirror is stale after chi names became
+  // freely transferable — only the chi registry knows the current binding.
+  const { data: boundChiName } = useChiRegistryRead(
+    "reverseResolveGotchi",
+    [tokenId ? BigInt(tokenId) : BigInt(0)],
+    { enabled: !!tokenId }
+  );
+
   useEffect(() => {
-    if (detailsData?.tokenName) {
+    const chiName = typeof boundChiName === "string" ? boundChiName.trim() : "";
+    if (chiName) {
+      setPusName(chiName);
+    } else if (detailsData?.tokenName) {
       setPusName(detailsData.tokenName);
     } else if (tokenId) {
       setPusName(`Gotchipus #${tokenId}`);
     }
-  }, [detailsData?.tokenName, tokenId]);
+  }, [boundChiName, detailsData?.tokenName, tokenId]);
 
   useEffect(() => {
     if (wearableStore.isRefreshing) {
@@ -269,7 +281,21 @@ export const GotchiDetail = observer(({ tokenId, onBack, onOpenSetup, onOpenHook
   const rarityName = RARITY_NAMES[tokenInfo?.rarity ?? 0] || "Common";
   const factionName = FACTION_NAMES[tokenInfo?.faction ?? -1] ?? "—";
 
-  const totalValue = parseFloat(nativeBalance) || 0;
+  // Single source of truth for the gotchi's native ETH balance: prefer the indexer's
+  // record (portfolio.erc20s entry with token_address = 0x000...0) and fall back to the
+  // RPC fetch only when the indexer hasn't surfaced ETH yet. Public Base RPCs sometimes
+  // lag the indexer by a few blocks, which previously kept the UI stuck on stale values.
+  const indexedEthBalance = useMemo<number | null>(() => {
+    if (!portfolio?.erc20s) return null;
+    const native = portfolio.erc20s.find(e => {
+      const sym = (e.symbol || "").toUpperCase();
+      return sym === "ETH" ||
+        e.token_address?.toLowerCase() === "0x0000000000000000000000000000000000000000";
+    });
+    return native ? parseFloat(native.balance) || 0 : null;
+  }, [portfolio]);
+
+  const totalValue = indexedEthBalance ?? (parseFloat(nativeBalance) || 0);
   const totalUsd = totalValue * prosPrice;
 
   const tokens: TokenItem[] = useMemo(() => {

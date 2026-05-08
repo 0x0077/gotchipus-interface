@@ -13,8 +13,8 @@ import { UserRow } from "./UserRow";
 import { AssistantRow } from "./AssistantRow";
 import { InputArea } from "./InputArea";
 
-// Flip to false once the agent is wired up to Base.
-const AGENT_DISABLED = true;
+// Agent is wired up to Base (gotchi-rs Phase E1: Uniswap v2/v3/v4 + Moralis).
+const AGENT_DISABLED = false;
 
 // Re-export the message types so the rest of the app can import from
 // `./ChatTab` transparently (unchanged from pre-split).

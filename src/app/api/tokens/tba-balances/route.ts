@@ -3,6 +3,9 @@ import { createPublicClient, http, formatEther, isAddress } from 'viem';
 import { chain } from '@/src/app/blockchain/config';
 
 export const runtime = 'edge';
+// Balance values must NEVER be cached — every request reads fresh state from RPC.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const publicClient = createPublicClient({
   chain,
@@ -38,7 +41,11 @@ export async function GET(request: NextRequest) {
       balances[address] = formatEther(balanceResults[i]);
     });
 
-    return NextResponse.json({ balances });
+    // Defense vs. Cloudflare Pages edge cache — `dynamic = 'force-dynamic'` alone
+    // does not always prevent CF from holding the response.
+    return NextResponse.json({ balances }, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+    });
   } catch (error: any) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

@@ -40,7 +40,6 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://gotchipus.com'),
   other: {
     'base:app_id': '69f9a1b342d4fe010f1c294d',
-    'talentapp:project_verification': '6b05dec2b8439a8e37ce18cb7bbbdbdb3fbbdff14fea11e08692a7a6703b784b3924817f5997e6a3d6ce5d23ce588c20d84b0577fc7b89a164b9d6a2d2f0d0d3',
   },
 };
 

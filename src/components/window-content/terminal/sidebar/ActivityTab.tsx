@@ -13,20 +13,26 @@ import {
 
 const EXPLORER_URL = "https://basescan.org";
 
+// Lookup keys are LOWERCASE — `classifyTx` does `to.toLowerCase()` before indexing.
 const KNOWN_CONTRACTS: Record<string, string> = {
   // Diamond (Gotchipus)
-  "0x000000007B5758541e9d94a487B83e11Cd052437": "Gotchipus",
-  // DEX - DODO
-  "0x6f1142f4bf632e4877497c05818492824f540ad5": "DODO Swap",
-  "0xbf105f4ffbd3825f5433d074008b9a76237d849c": "DODO Approve",
-  "0xc3a335d1c83f9b92e36c0323c58809d19c9db63c": "DODO DSP",
-  // DEX - UniswapV2
-  "0xd285e37678f07631f33eb99927eb3ff0591a12d7": "UniV2 Router",
-  "0x18fab7d7027e9fb33fa90ca607439449209f7b09": "UniV2 Factory",
-  // DEX - UniswapV3
-  "0xf38d34c8382b9079b0f85309578b43b8479cd875": "UniV3 Router",
-  // Tokens (mainnet only — see comment above)
-  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913": "USDC",
+  "0x000000007b5758541e9d94a487b83e11cd052437": "Gotchipus",
+  // Uniswap V2 (Base mainnet)
+  "0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24": "UniV2 Router",
+  "0x8909dc15e40173ff4699343b6eb8132c65e18ec6": "UniV2 Factory",
+  // Uniswap V3 (Base mainnet)
+  "0x2626664c2603336e57b271c5c0b26f421741e481": "UniV3 SwapRouter",
+  "0x33128a8fc17869897dce68ed026d694621f6fdfd": "UniV3 Factory",
+  "0x03a520b32c04bf3beef7beb72e919cf822ed34f1": "UniV3 PositionManager",
+  // Uniswap V4 (Base mainnet)
+  "0x498581ff718922c3f8e6a244956af099b2652b2b": "UniV4 PoolManager",
+  "0x7c5f5a4bbd8fd63184577525326123b519429bdc": "UniV4 PositionManager",
+  // Universal Router — V4 swaps go through this; also supports V2/V3 routes.
+  "0x6ff5693b99212da76ad316178a184ab56d299b43": "Uniswap UniversalRouter",
+  // Permit2 — token approvals for V4 / UniversalRouter route through here.
+  "0x000000000022d473030f116ddee9f6b43ac78ba3": "Permit2",
+  // Tokens (Base mainnet)
+  "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "USDC",
   "0x4200000000000000000000000000000000000006": "WETH",
 };
 
@@ -78,8 +84,8 @@ function classifyTx(tx: Transaction, tba: string): ClassifiedTx {
   const account = tba.toLowerCase();
   const toName = KNOWN_CONTRACTS[to];
 
-  // DEX swap
-  if (toName?.includes("Swap") || toName?.includes("Router") || toName?.includes("DODO")) {
+  // DEX swap — UniV2/V3 routers, V3 SwapRouter, UniversalRouter (V4 + cross-version)
+  if (toName?.includes("Router") || toName?.includes("SwapRouter")) {
     return { ...tx, category: "swap", label: `Swap via ${toName}`, contractName: toName };
   }
 

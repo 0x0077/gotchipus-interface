@@ -7,6 +7,7 @@ import Link from "next/link";
 import ExternalLinkIcon from "@assets/icons/ExternalLinkIcon";
 import { Win98GroupBox, TokenItem, NftCollection } from "./GotchiDetailHelpers";
 import { chiNameSvgDataUri } from "@/src/utils/chiNameSvg";
+import { formatTokenAmount } from "@/src/utils/formatTokenAmount";
 
 interface TbaAssetsPanelProps {
   tokens: TokenItem[];
@@ -91,7 +92,7 @@ export function TbaAssetsPanel({ tokens, nftCollections, tbaAddress, totalUsd }:
                   </div>
                 </div>
                 <div className="text-right text-xs font-courier">
-                  {tk.amount < 1 ? tk.amount.toFixed(4) : tk.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  {formatTokenAmount(tk.amount)}
                 </div>
                 <div className="text-right text-xs font-courier">
                   ${tk.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

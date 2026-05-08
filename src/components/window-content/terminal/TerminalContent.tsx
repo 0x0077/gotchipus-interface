@@ -73,6 +73,12 @@ const listFetcher = (url: string) => fetch(url).then(res => {
   return res.json();
 });
 
+// Bypass any browser / edge cache for time-sensitive resources (balances).
+const noCacheFetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(res => {
+  if (!res.ok) throw new Error('Failed to fetch');
+  return res.json();
+});
+
 const sessionFetcher = async (url: string, gotchiIds: number[]) => {
   const res = await fetch(url, {
     method: 'POST',
@@ -160,24 +166,11 @@ const TerminalContent = observer(() => {
     ? `/api/tokens/tba-balances?tbaAddresses=${validTbaAddresses.join(',')}`
     : null;
 
-  const { data: tbaBalanceData } = useSWR<{ balances: Record<string, string> }>(
+  const { data: tbaBalanceData, mutate: mutateTbaBalance } = useSWR<{ balances: Record<string, string> }>(
     tbaBalanceSWRKey,
-    listFetcher,
-    { refreshInterval: 60000 }
+    noCacheFetcher,
+    { refreshInterval: 30000, revalidateOnFocus: true }
   );
-
-  // Remap address-keyed balances → tokenId-keyed balances
-  const nativeBalances = useMemo((): Record<string, string> | undefined => {
-    if (!tbaBalanceData?.balances || !listData) return undefined;
-    const result: Record<string, string> = {};
-    listData.ids.forEach((id, i) => {
-      const addr = tbaAddressList[i];
-      if (addr && tbaBalanceData.balances[addr] !== undefined) {
-        result[id] = tbaBalanceData.balances[addr];
-      }
-    });
-    return result;
-  }, [tbaBalanceData, listData, tbaAddressList]);
 
   // Batch fetch token balances (ERC20/ERC721/ERC1155) for all TBAs.
   // We seed `result` with every requested account up-front so a TBA that
@@ -210,11 +203,37 @@ const TerminalContent = observer(() => {
     ? `batch-balances:${validTbaAddresses.slice().sort().join(',')}`
     : null;
 
-  const { data: portfolioMap } = useSWR(
+  const { data: portfolioMap, mutate: mutatePortfolio } = useSWR(
     portfolioSWRKey,
     () => batchBalanceFetcher(validTbaAddresses),
     { refreshInterval: 60000 }
   );
+
+  // Remap address-keyed balances → tokenId-keyed native ETH balances.
+  // Source priority: indexer (portfolioMap.erc20s entry with token_address = 0x000…0)
+  // first, RPC fallback (tbaBalanceData) only if the indexer hasn't surfaced ETH yet.
+  // Public Base RPC nodes occasionally lag; the indexer follows the chain reliably.
+  const nativeBalances = useMemo((): Record<string, string> | undefined => {
+    if (!listData) return undefined;
+    const result: Record<string, string> = {};
+    listData.ids.forEach((id, i) => {
+      const addr = tbaAddressList[i];
+      if (!addr) return;
+      const portfolio = portfolioMap?.[addr.toLowerCase()];
+      const indexedEth = portfolio?.erc20s.find(e => {
+        const sym = (e.symbol || "").toUpperCase();
+        return sym === "ETH" ||
+          e.token_address?.toLowerCase() === "0x0000000000000000000000000000000000000000";
+      });
+      if (indexedEth) {
+        result[id] = indexedEth.balance;
+        return;
+      }
+      const rpc = tbaBalanceData?.balances?.[addr];
+      if (rpc !== undefined) result[id] = rpc;
+    });
+    return Object.keys(result).length > 0 ? result : undefined;
+  }, [tbaBalanceData, portfolioMap, listData, tbaAddressList]);
 
   // Resolve portfolio for the currently selected gotchi's TBA
   const selectedTbaAddress = selectedGotchi && listData
@@ -339,12 +358,14 @@ const TerminalContent = observer(() => {
     }
   }, [status]);
 
-  // Re-fetch gotchi list every time terminal becomes the active window
+  // Re-fetch gotchi list & TBA balances every time terminal becomes the active window
   useEffect(() => {
     if (activeWindow === 'terminal' && walletStore.isConnected) {
       mutateList();
       mutateSession();
       mutateBeacons();
+      mutateTbaBalance();
+      mutatePortfolio();
     }
   }, [activeWindow]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -677,8 +698,13 @@ const TerminalContent = observer(() => {
               return { ...msg, toolSteps: steps };
             }));
             // Refresh session & balance data after on-chain operations
-            if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
+            if (resultData.success && ['transfer_token', 'deploy_token', 'execute_swap', 'add_liquidity', 'remove_liquidity'].includes(resultData.tool)) {
+              setTimeout(() => {
+                mutateSession();
+                mutateBeacons();
+                mutateTbaBalance();
+                mutatePortfolio();
+              }, 2000);
             }
           },
           onTextReplace: (text) => {
@@ -848,8 +874,13 @@ const TerminalContent = observer(() => {
               }
               return { ...msg, toolSteps: steps };
             }));
-            if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
+            if (resultData.success && ['transfer_token', 'deploy_token', 'execute_swap', 'add_liquidity', 'remove_liquidity'].includes(resultData.tool)) {
+              setTimeout(() => {
+                mutateSession();
+                mutateBeacons();
+                mutateTbaBalance();
+                mutatePortfolio();
+              }, 2000);
             }
           },
           onTextReplace: (text) => {
@@ -975,8 +1006,13 @@ const TerminalContent = observer(() => {
               }
               return { ...msg, toolSteps: steps };
             }));
-            if (resultData.success && ['transfer_token', 'deploy_token'].includes(resultData.tool)) {
-              setTimeout(() => { mutateSession(); mutateBeacons(); }, 2000);
+            if (resultData.success && ['transfer_token', 'deploy_token', 'execute_swap', 'add_liquidity', 'remove_liquidity'].includes(resultData.tool)) {
+              setTimeout(() => {
+                mutateSession();
+                mutateBeacons();
+                mutateTbaBalance();
+                mutatePortfolio();
+              }, 2000);
             }
           },
           onTextReplace: (text) => {

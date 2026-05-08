@@ -13,6 +13,7 @@ import EnhancedGotchiSvg from "@/components/gotchiSvg/EnhancedGotchiSvg";
 import { getWearablePngUrl } from "@/src/utils/wearableMapping";
 import { dispatchWindowOpenEvent } from "@/lib/windowEvents";
 import { BeaconBanner } from "../beacon/BeaconBanner";
+import { formatTokenAmount } from "@/src/utils/formatTokenAmount";
 
 type SessionStatus = "none" | "active" | "expired" | null;
 
@@ -232,7 +233,7 @@ export const GotchiCollection = observer(({ onSelectGotchi, sessionMap, nativeBa
                 ? <span className="text-xs font-bold text-[#cc6600]">{t('terminal.collection.sessionExpired')}</span>
                 : <span className="text-xs text-[#808080]">{t('terminal.collection.sessionNone')}</span>
             const nativeLabel = nativeBalances?.[id] !== undefined
-              ? parseFloat(nativeBalances[id]).toFixed(4)
+              ? formatTokenAmount(parseFloat(nativeBalances[id]))
               : "--"
 
             if (compact) {

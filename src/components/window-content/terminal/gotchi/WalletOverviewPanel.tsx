@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { AreaChart, Area, ResponsiveContainer, YAxis, Tooltip } from "recharts";
 import { Win98GroupBox, TokenItem } from "./GotchiDetailHelpers";
 import { SessionWizardData } from "../session/SessionWizard";
+import { formatTokenAmount } from "@/src/utils/formatTokenAmount";
 
 type TimeRange = "24H" | "7D" | "30D";
 
@@ -48,7 +49,7 @@ function MiniChart({ baseValue = 0 }: { baseValue?: number }) {
       <div className="flex items-center justify-between px-2 pt-1.5 pb-0.5">
         {hoveredValue !== null ? (
           <span className="text-[10px] text-[#c0c0c0] font-courier">
-            {displayVal.toFixed(4)} ETH
+            {formatTokenAmount(displayVal)} ETH
           </span>
         ) : (
           <span />
@@ -334,7 +335,7 @@ export function WalletOverviewPanel({
         <div className="text-xs text-[#444444] font-medium mb-0.5">{t('terminal.detail.totalValue')}</div>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-[#000000] font-courier">
-            {totalValue.toFixed(4)}
+            {formatTokenAmount(totalValue)}
           </span>
           <span className="text-sm font-bold text-[#000080]">ETH</span>
           <span className="text-xs text-[#444444]">
