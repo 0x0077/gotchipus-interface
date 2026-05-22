@@ -14,7 +14,7 @@ interface GotchipusResponse {
 
 export const runtime = 'edge';
 
-const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://mainnet.base.org';
 const publicClient = createPublicClient({ chain, transport: http(rpcUrl) });
 
 async function getGotchipusTokens(ownerAddress: string, includeGotchipusInfo: boolean): Promise<GotchipusResponse> {

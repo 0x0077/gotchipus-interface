@@ -12,9 +12,10 @@ interface NetworkStats {
   medianGasPrice: string | null;
 }
 
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://mainnet.base.org';
 const publicClient = createPublicClient({
   chain,
-  transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!),
+  transport: http(rpcUrl),
 });
 
 async function fetchPrice(): Promise<number> {

@@ -7,9 +7,10 @@ export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://mainnet.base.org';
 const publicClient = createPublicClient({
   chain,
-  transport: http(process.env.NEXT_PUBLIC_MAINNET_RPC!),
+  transport: http(rpcUrl),
 });
 
 export async function GET(request: NextRequest) {

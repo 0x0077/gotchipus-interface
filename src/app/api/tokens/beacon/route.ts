@@ -13,7 +13,7 @@ interface BeaconResponse {
 
 export const runtime = 'edge';
 
-const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC;
+const rpcUrl = process.env.NEXT_PUBLIC_MAINNET_RPC || 'https://mainnet.base.org';
 
 const publicClient = createPublicClient({
   chain,
