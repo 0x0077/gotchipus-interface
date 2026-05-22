@@ -94,6 +94,7 @@
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "1.13.7",
+    "wrangler": "^3.114.17",
     "@svgr/webpack": "^8.1.0",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
@@ -106,7 +107,6 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "tsdef": "^0.0.14",
-    "typescript": "^5",
-    "wrangler": "^3.114.17"
+    "typescript": "^5"
   }
 }
